@@ -14,9 +14,9 @@ func default_side(f: String, ai: bool) -> Dictionary:
 		"stacks": [{"key": Units.key(f, 1, 0, ""), "count": default_count(1)}, {"key": Units.key(f, 2, 0, ""), "count": default_count(2)}, {"key": Units.key(f, 3, 0, ""), "count": default_count(3)}],
 	}
 
-## default stack size by tier: T1 6, T2 3, T3 2, T4 1
+## default stack size by tier: T1 18, T2 9, T3 6, T4 3
 func default_count(tier: int) -> int:
-	return {1: 6, 2: 3, 3: 2, 4: 1}.get(mini(4, maxi(1, tier)), 1)
+	return {1: 18, 2: 9, 3: 6, 4: 3}.get(mini(4, maxi(1, tier)), 1)
 
 func open() -> void:
 	if cfg == null:
