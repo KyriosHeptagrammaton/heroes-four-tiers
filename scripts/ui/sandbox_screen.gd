@@ -150,12 +150,16 @@ func side_editor(i: int) -> Control:
 		var d := Units.resolve(s.key)
 		var sy := UI.sym(d, 26)
 		UI.tip(sy, UI.unit_tip(d))
-		var nb := UI.button(d.name + (" ⚑" if d.placeholder else ""), func(): pick_unit(sd, s), "", "Click to change unit / mount it")
+		var parts: PackedStringArray = s.key.split("@")
+		var rp := Units.parse(parts[0])
+		var base_name: String = Units.resolve(Units.key(rp.faction, rp.tier, 0, "")).name
+		if parts.size() > 1: base_name += " on " + Units.resolve(parts[1]).name
+		var nb := UI.button(base_name + (" ⚑" if d.placeholder else ""), func(): pick_unit(sd, s), "", UI.unit_tip(d, "\n\n" + UI.col("Click to choose another creature or mount it", "muted")))
 		nb.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		nb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nb.clip_text = true
 		var cnt := UI.spin(s.count, 1, 9999, func(v): s.count = maxi(1, v), 90)
-		sp.add_child(UI.hbox([sy, nb, cnt, UI.button("✕", func(): sd.stacks.remove_at(k); render(), "Small")], 6))
+		sp.add_child(UI.hbox([sy, nb, upgrade_picker(s), cnt, UI.button("✕", func(): sd.stacks.remove_at(k); render(), "Small")], 6))
 	box.add_child(UI.panel(sp))
 	# hero
 	var hc: Dictionary = sd.hero
@@ -225,6 +229,49 @@ func side_editor(i: int) -> Control:
 		hp.add_child(arrow)
 	box.add_child(UI.panel(hp))
 	return box
+
+## the variant a path/level combination gives (null if that combination doesn't exist)
+## path: "" melee, "r" ranged, "m" magi · level: 0 base, 1 first upgrade, 2 second upgrade
+func _variant(f: String, tier: int, path: String, level: int):
+	if level == 0: return Units.key(f, tier, 0, "")
+	if tier == 4 and (path == "r" or level > 1): return null
+	if path == "m" and level > 1: return null
+	return Units.key(f, tier, level, path)
+
+## area 1: upgrade path (Melee / Ranged / Magi) · area 2: upgrade level (– / I / II)
+func upgrade_picker(s: Dictionary) -> Control:
+	var parts: PackedStringArray = s.key.split("@")
+	var mount_part := ("@" + parts[1]) if parts.size() > 1 else ""
+	var p := Units.parse(parts[0])
+	var apply := func(k: String):
+		s.key = k + mount_part
+		render()
+	var paths := UI.hbox([], 2)
+	for pp in [["", "Melee"], ["r", "Ranged"], ["m", "Magi"]]:
+		var lvl: int = maxi(1, p.up)
+		if pp[0] == "m": lvl = 1
+		var k = _variant(p.faction, p.tier, pp[0], lvl)
+		var on: bool = p.up > 0 and p.mod == pp[0]
+		var bt := UI.button(pp[1], func(): apply.call(k), "SmallSel" if on else "Small")
+		if k == null:
+			bt.disabled = true
+			UI.tip(bt, "No %s path for tier %d" % [pp[1].to_lower(), p.tier])
+		else:
+			UI.tip(bt, UI.unit_tip(Units.resolve(k + mount_part)))
+		paths.add_child(bt)
+	var levels := UI.hbox([], 2)
+	for lv in [[0, "–"], [1, "I"], [2, "II"]]:
+		var path: String = p.mod if p.up > 0 else ""
+		var k = _variant(p.faction, p.tier, path, lv[0])
+		var bt := UI.button(lv[1], func(): apply.call(k), "SmallSel" if p.up == lv[0] else "Small")
+		bt.custom_minimum_size.x = 30
+		if k == null:
+			bt.disabled = true
+			UI.tip(bt, "No second upgrade for this creature")
+		else:
+			UI.tip(bt, UI.unit_tip(Units.resolve(k + mount_part)))
+		levels.add_child(bt)
+	return UI.hbox([paths, levels], 10)
 
 ## unit picker modal: all variants, optionally mounted
 func pick_unit(sd: Dictionary, s: Dictionary) -> void:
