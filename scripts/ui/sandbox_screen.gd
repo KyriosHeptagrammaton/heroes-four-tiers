@@ -153,13 +153,13 @@ func side_editor(i: int) -> Control:
 		var parts: PackedStringArray = s.key.split("@")
 		var rp := Units.parse(parts[0])
 		var base_name: String = Units.resolve(Units.key(rp.faction, rp.tier, 0, "")).name
-		if parts.size() > 1: base_name += " on " + Units.resolve(parts[1]).name
-		var nb := UI.button(base_name + (" ⚑" if d.placeholder else ""), func(): pick_unit(sd, s), "", UI.unit_tip(d, "\n\n" + UI.col("Click to choose another creature or mount it", "muted")))
+		var nb := UI.button(base_name + (" ⚑" if d.placeholder else ""), func(): pick_unit(sd, s), "", UI.unit_tip(d, "\n\n" + UI.col("Click to choose another creature", "muted")))
 		nb.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		nb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nb.clip_text = true
 		var cnt := UI.spin(s.count, 1, 9999, func(v): s.count = maxi(1, v), 90)
 		sp.add_child(UI.hbox([sy, nb, upgrade_picker(s), cnt, UI.button("✕", func(): sd.stacks.remove_at(k); render(), "Small")], 6))
+		sp.add_child(mount_row(sd, s))
 	box.add_child(UI.panel(sp))
 	# hero
 	var hc: Dictionary = sd.hero
@@ -274,9 +274,35 @@ func upgrade_picker(s: Dictionary) -> Control:
 	return UI.hbox([paths, levels], 10)
 
 ## unit picker modal: all variants, optionally mounted
-func pick_unit(sd: Dictionary, s: Dictionary) -> void:
+## the little "↳ Riding: ..." line under a stack row
+func mount_row(sd: Dictionary, s: Dictionary) -> Control:
+	var parts: PackedStringArray = s.key.split("@")
+	var ind := Control.new()
+	ind.custom_minimum_size.x = 34
+	var lbl := UI.label("↳ Riding", "muted", 12)
+	var kids: Array = [ind, lbl]
+	if parts.size() > 1:
+		var md := Units.resolve(parts[1])
+		var mp := Units.parse(parts[1])
+		var mname: String = Units.resolve(Units.key(mp.faction, mp.tier, 0, "")).name
+		var R := Units.resolve(parts[0])
+		var per := int(ceil(float(R.w) / md.s))
+		var mb := UI.button(mname, func(): pick_unit(sd, s, "mount"), "Small", UI.unit_tip(md, "\n" + UI.col("Mounts per rider: %d · click to change" % per, "muted")))
+		mb.custom_minimum_size.x = 150
+		mb.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		kids.append(UI.sym(md, 20))
+		kids.append(mb)
+		kids.append(UI.label("%d per rider" % per, "muted", 12))
+	else:
+		var fb := UI.button("On foot", func(): pick_unit(sd, s, "mount"), "Small", "Click to put this stack on mounts (any creature can ride any creature: mounts needed = rider weight ÷ mount strength, rounded up)")
+		fb.custom_minimum_size.x = 150
+		fb.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		kids.append(fb)
+	return UI.hbox(kids, 6)
+
+func pick_unit(sd: Dictionary, s: Dictionary, step: String = "rider") -> void:
 	# state lives in a dictionary: lambdas capture locals by value
-	var st := {"rider": s.key.split("@")[0], "mount": s.key.split("@")[1] if "@" in s.key else null, "step": "rider"}
+	var st := {"rider": s.key.split("@")[0], "mount": s.key.split("@")[1] if "@" in s.key else null, "step": step}
 	var finish := func():
 		var old_tier: int = Units.resolve(s.key).tier
 		s.key = st.rider + "@" + st.mount if st.mount != null else st.rider
@@ -319,16 +345,13 @@ func pick_unit(sd: Dictionary, s: Dictionary) -> void:
 				bt.clip_text = true
 				grid.add_child(UI.hbox([UI.sym(d, 26), bt], 3))
 		box.add_child(grid)
-		box.add_child(UI.label("Pick the upgrade path and level with the buttons on the army row.", "muted", 12))
-		var bottom := UI.hbox([])
 		if st.step == "rider":
-			bottom.add_child(UI.check("Mounted (rider + mount)", st.mount != null, func(v):
-				if v:
-					st.step = "mount"
-					draw[0].call()
-				else:
-					st.mount = null
-					finish.call()))
+			box.add_child(UI.label("Pick the upgrade path and level with the buttons on the army row.", "muted", 12))
+		var bottom := UI.hbox([])
+		if st.step == "mount":
+			bottom.add_child(UI.button("On foot (no mount)", func():
+				st.mount = null
+				finish.call(), "SmallSel" if st.mount == null else "Small"))
 		bottom.add_child(UI.spacer())
 		bottom.add_child(UI.button("Close", UI.close_modal))
 		box.add_child(bottom)

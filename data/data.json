@@ -1718,7 +1718,7 @@
   {
    "id": "magi-invented",
    "area": "Units",
-   "text": "Magi effects NOT in the doc (taken from the doc's ability list): Alpha1 rally also heals physical = stack size; Alpha2 attacks all engaged units; Alpha4 double bonuses from numbers & advantage; Beta1 deals damage = its size when attacked; Beta2 deny strips (advantage+1) advantages; Beta4 lethal physical converts to morale; Gamma4 each kill recovers a deserter; Delta2 morale +50% for rallying; Delta4 clears all morale damage at turn start."
+   "text": "Magi effects NOT in the doc (taken from the doc's ability list): Alpha1 rally also heals physical = stack size; Alpha2 attacks all engaged units; Alpha4 double bonuses from numbers & advantage; Beta1 deals damage = its stack size when attacked; Beta2 deny strips (advantage+1) advantages; Beta4 lethal physical converts to morale; Gamma4 each kill recovers a deserter; Delta2 morale +50% for rallying; Delta4 clears all morale damage at turn start."
   },
   {
    "id": "magi-stats",
