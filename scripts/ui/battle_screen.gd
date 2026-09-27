@@ -837,20 +837,16 @@ func finish() -> void:
 	var o: Dictionary = b.over
 	var title: String
 	if o.winner == null: title = "Stalemate" if o.reason == "stalemate" else "Draw"
-	else: title = "%s win" % b.sides[o.winner].name
+	else:
+		var ws = b.sides[o.winner]
+		title = "Victory for %s" % (ws.hero.name if ws.hero != null else ws.name)
 	var fl = o.get("fled")
 	var reason: String = {"destroyed": "An army was destroyed or routed.", "fled": "%s retreated." % b.sides[fl if fl != null else 0].name, "stalemate": "No damage was dealt in a whole round.", "exhaustion": "Round limit reached."}.get(o.reason, "")
-	var grid := GridContainer.new()
-	grid.columns = 5
-	grid.add_theme_constant_override("h_separation", 14)
-	for hd in ["Stack", "Start", "Left", "Dead", "Deserted"]:
-		grid.add_child(UI.label(hd, "muted", 12))
-	for s in b.stacks:
-		grid.add_child(UI.label(("▲ " if s.side else "▼ ") + s.name, "", 12))
-		for v in [s.start, maxi(0, s.count), s.dead, s.deserters]:
-			grid.add_child(UI.label(str(v), "", 12))
+	var armies := UI.vbox([], 10)
+	for side in 2:
+		armies.add_child(_army_summary(side, o.winner == side))
 	var w := Waiter.new()
-	var box := UI.vbox([UI.h2(title), UI.label("%s (%d rounds)" % [reason, b.round_n], "muted"), grid,
+	var box := UI.vbox([UI.h2(title), UI.label("%s (%d rounds)" % [reason, b.round_n], "muted"), armies,
 		UI.row_end([UI.button("Continue", func(): UI.close_modal(); w.done.emit(true), "Primary")])])
 	if UI.autopilot:
 		print("[battle] ", title, " — ", reason, " (%d rounds)" % b.round_n)
@@ -859,6 +855,52 @@ func finish() -> void:
 		await w.done
 	if on_end.is_valid():
 		on_end.call(b)
+
+const SIDE_COL := [Color("#e07a5a"), Color("#6aa0e0")]
+
+## one army's block in the post-battle report: a coloured title plate, then its stacks and a total
+func _army_summary(side: int, won: bool) -> Control:
+	var sd = b.sides[side]
+	var col: Color = SIDE_COL[side]
+	var who: String = ("♛ " + sd.hero.name) if sd.hero != null else sd.name
+	var t := UI.label(("▼ " if side == 0 else "▲ ") + who, "", 16)
+	t.add_theme_font_override("font", UI.font_head)
+	t.add_theme_color_override("font_color", col)
+	var kids: Array = [t]
+	if sd.hero != null and not sd.name in ["Attacker", "Defender"]: kids.append(UI.label(sd.name, "muted", 12))
+	kids.append(UI.label("Attacker" if side == 0 else "Defender", "muted", 12))
+	kids.append(UI.spacer())
+	if won: kids.append(UI.chip("Victorious", "gold"))
+	var plate := UI.stone("plate").margins(10, 5)
+	plate.accent_w = 3
+	plate.accent_bottom = col
+	var head := UI.panel(UI.hbox(kids, 8), plate)
+	var grid := GridContainer.new()
+	grid.columns = 5
+	grid.add_theme_constant_override("h_separation", 18)
+	for hd in ["Stack", "Start", "Left", "Dead", "Deserted"]:
+		grid.add_child(UI.label(hd, "muted", 12))
+	var tot := [0, 0, 0, 0]
+	for s in b.stacks:
+		if s.side != side: continue
+		var nm := UI.label(s.name, "", 12)
+		nm.custom_minimum_size.x = 170
+		grid.add_child(nm)
+		var vals := [s.start, maxi(0, s.count), s.dead, s.deserters]
+		for i in 4:
+			tot[i] += vals[i]
+			grid.add_child(UI.label(str(vals[i]), "", 12))
+	var tl := UI.label("Total", "gold", 12)
+	tl.add_theme_font_override("font", UI.font_bold)
+	grid.add_child(tl)
+	for v in tot:
+		var l := UI.label(str(v), "gold", 12)
+		l.add_theme_font_override("font", UI.font_bold)
+		grid.add_child(l)
+	var m := MarginContainer.new()
+	m.add_theme_constant_override("margin_left", 14)
+	m.add_child(grid)
+	return UI.vbox([head, m], 4)
 
 func show_rules() -> void:
 	UI.modal(UI.rich(RULES), false, 680)
