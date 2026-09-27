@@ -168,7 +168,7 @@ func hero_screen(h_id: String) -> void:
 		for hd in ["Primary", "Level", "Experience", "Earned by"]: pt.add_child(UI.label(hd, "muted", 12))
 		for k in D.PRIMARY:
 			var sk: bool = D.CLASSES[hero.cls].skilled.has(k)
-			pt.add_child(UI.label(("★ " if sk else "") + k))
+			pt.add_child(UI.tip(UI.label(("★ " if sk else "") + k), Heroes.PRIMARY_TEXT[k]))
 			pt.add_child(UI.label(Heroes.init_str(Heroes.stat(hero, k)) if k == "initiative" else str(Heroes.stat(hero, k))))
 			pt.add_child(UI.label("%s / %d" % [U.fmt(hero.xp[k]), Heroes.primary_cost(hero, k)]))
 			pt.add_child(UI.label(how[k], "muted", 12))

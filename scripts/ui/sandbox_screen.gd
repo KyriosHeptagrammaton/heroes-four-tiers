@@ -10,7 +10,7 @@ var _body: Control
 func default_side(f: String, ai: bool) -> Dictionary:
 	return {
 		"faction": f, "ai": ai, "name": "",
-		"hero": {"enabled": true, "cls": "warlord", "name": "", "stats": (D.CFG.heroStart.warlord as Dictionary).duplicate(), "skills": {}, "artifacts": [], "equipped": ["flame", "valor"]},
+		"hero": {"enabled": true, "cls": "warlord", "name": "", "stats": (D.CFG.heroStart.warlord as Dictionary).duplicate(), "skills": {}, "artifacts": [], "equipped": ["flame"]},
 		"stacks": [{"key": Units.key(f, 1, 0, ""), "count": default_count(1)}, {"key": Units.key(f, 2, 0, ""), "count": default_count(2)}, {"key": Units.key(f, 3, 0, ""), "count": default_count(3)}],
 	}
 
@@ -45,11 +45,35 @@ func battle_opts(seed_v: int = 0, force_ai: bool = false) -> Dictionary:
 			"stacks": sd.stacks.map(func(s): return {"key": s.key, "count": s.count})})
 	return {"seed": seed_v if seed_v else (cfg.seed if cfg.seed else randi() % 1000000000 + 1), "terrain": cfg.terrain, "time": cfg.time, "weather": cfg.weather, "ignoredAttack": cfg.ignored, "sides": sides}
 
+## why this setup can't be fought yet (or "" if it can)
+func setup_problem() -> String:
+	var errs := []
+	for i in 2:
+		var hc: Dictionary = cfg.sides[i].hero
+		if not hc.enabled or hc.equipped.size() <= 1: continue
+		var fake := {"cls": hc.cls, "skills": hc.skills, "artifacts": hc.artifacts, "stats": hc.stats}
+		var cost := Heroes.equipped_cost(fake, hc.equipped)
+		var know := Heroes.stat(fake, "knowledge")
+		if cost > know:
+			errs.append("%s's commander: spells cost %d but knowledge is only %d" % [cfg.sides[i].name, cost, know])
+	for i in 2:
+		if cfg.sides[i].stacks.is_empty():
+			errs.append("%s has no army" % cfg.sides[i].name)
+	return "\n".join(errs)
+
 func fight() -> void:
+	var err := setup_problem()
+	if err != "":
+		UI.toast(err.split("\n")[0], 3.5)
+		return
 	var b := Battle.new(battle_opts())
 	UI.screen("battle").start(b, func(_b): open())
 
 func simulate(n: int) -> void:
+	var err := setup_problem()
+	if err != "":
+		UI.toast(err.split("\n")[0], 3.5)
+		return
 	var res := {"w": [0, 0, 0], "rounds": 0, "loss": [0.0, 0.0], "n": 0}
 	var out := UI.vbox([UI.h2("Simulating…")])
 	UI.modal(out, true, 440)
@@ -112,8 +136,8 @@ func render() -> void:
 	UI.tip(ig, "The defender chose to ignore the attack instead of picking ground: 1-3 random defending stacks gain one slow.")
 	var bar := UI.hbox([UI.button("◂ Menu", func(): Main.menu()), UI.h2("Combat Sandbox"), UI.spacer(),
 		UI.label("Ground", "muted"), o1, UI.label("Time", "muted"), o2, UI.label("Weather", "muted"), o3, ig,
-		UI.button("⚖ Simulate ×100", func(): simulate(100), "", "Run 100 AI-vs-AI battles with these armies"),
-		UI.button("⚔ Fight!", fight, "Primary")], 10)
+		_gated(UI.button("⚖ Simulate ×100", func(): simulate(100), "", "Run 100 AI-vs-AI battles with these armies")),
+		_gated(UI.button("⚔ Fight!", fight, "Primary"))], 10)
 	root.add_child(UI.panel(bar, UI.stone("bar")))
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -186,7 +210,12 @@ func side_editor(i: int) -> Control:
 		hp.add_child(dl)
 		var stats := UI.flow([], 10)
 		for k in D.PRIMARY:
-			stats.add_child(UI.hbox([UI.label({"attack": "Atk", "defence": "Def", "power": "Pow"}.get(k, k.capitalize()), "muted"), UI.spin(int(hc.stats[k]), 0, 99, func(v): hc.stats[k] = v; render(), 70)], 4))
+			var sl := UI.label({"attack": "Atk", "defence": "Def", "power": "Pow"}.get(k, k.capitalize()), "muted")
+			var sbx := UI.spin(int(hc.stats[k]), 0, 99, func(v): hc.stats[k] = v; render(), 70)
+			var pair := UI.hbox([sl, sbx], 4)
+			UI.tip(sl, Heroes.PRIMARY_TEXT[k])
+			UI.tip(sbx, Heroes.PRIMARY_TEXT[k])
+			stats.add_child(pair)
 		hp.add_child(stats)
 		var fake := {"cls": hc.cls, "skills": hc.skills, "artifacts": hc.artifacts, "stats": hc.stats}
 		var cost := Heroes.equipped_cost(fake, hc.equipped)
@@ -222,13 +251,22 @@ func side_editor(i: int) -> Control:
 		for a in D.ARTIFACTS:
 			var c := UI.check(D.ARTIFACTS[a].name, hc.artifacts.has(a), func(v):
 				if v: hc.artifacts.append(a)
-				else: hc.artifacts.erase(a))
+				else: hc.artifacts.erase(a)
+				render())
 			c.add_theme_font_size_override("font_size", 12)
 			UI.tip(c, D.ARTIFACTS[a].desc)
 			arrow.add_child(c)
 		hp.add_child(arrow)
 	box.add_child(UI.panel(hp))
 	return box
+
+## disable a start button while the setup is invalid, and say why on hover
+func _gated(bt: Button) -> Button:
+	var err := setup_problem()
+	if err != "":
+		bt.disabled = true
+		UI.tip(bt, UI.col("Can't start yet:", "bad") + "\n" + U.esc(err))
+	return bt
 
 ## the variant a path/level combination gives (null if that combination doesn't exist)
 ## path: "" melee, "r" ranged, "m" magi · level: 0 base, 1 first upgrade, 2 second upgrade

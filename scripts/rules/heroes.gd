@@ -4,6 +4,16 @@
 # ============================================================================
 extends Node
 
+## what each primary skill does in battle (shown as tooltips)
+const PRIMARY_TEXT := {
+	"attack": "[b]Attack (Atk)[/b]\n+1 attack to every creature in the army. Each point of attack above the target's defence adds +10% damage (up to +300%).",
+	"defence": "[b]Defence (Def)[/b]\n+1 defence to every creature in the army. Each point of defence above the attacker's attack takes 5% off the damage (up to −75%).",
+	"courage": "[b]Courage[/b]\nThe army starts battle with this much courage, minus 1 per stack and 1 per tier-4 creature. Each point of courage removes 1 extra morale damage whenever a creature deserts. The commander can spend courage to recall deserters.",
+	"initiative": "[b]Initiative[/b]\nWhere the commander acts in the turn order: every 3 points = 1 initiative (shown as 1, 1+, 1++). Each point can also be spent as a pip to Embolden a stack (+1 advantage), which lowers the commander's initiative.",
+	"power": "[b]Power (Pow)[/b]\nEvery point makes spells 10% stronger.",
+	"knowledge": "[b]Knowledge[/b]\nThe budget for equipped spells: their total cost can't be more than your knowledge (one spell on its own is always allowed). Knowledge left over can revive fallen creatures during battle.",
+}
+
 func create(cls: String, faction: String, hero_name = null, rng: Rng = null) -> Dictionary:
 	var st: Dictionary = D.CFG.heroStart[cls]
 	var r := rng if rng else Rng.new(randi())
