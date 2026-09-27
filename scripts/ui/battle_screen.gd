@@ -633,7 +633,7 @@ func stack_card(s) -> Control:
 	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if s.count > 0 else Control.CURSOR_ARROW
 	if s.count <= 0: card.modulate = Color(0.6, 0.6, 0.6, 0.3)
-	elif state == "invalid": card.modulate.a = 0.45
+	elif state == "invalid" and not active: card.modulate.a = 0.45
 	elif s.fallen_back: card.modulate.a = 0.7
 	# tooltip
 	var tp := UI.unit_tip(s.def, live_tip(s))
