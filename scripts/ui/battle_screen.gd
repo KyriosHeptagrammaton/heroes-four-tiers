@@ -426,7 +426,7 @@ func hero_card(side: int) -> Control:
 	sn.custom_minimum_size.x = 150
 	box.add_child(sn)
 	var init := Heroes.init_str(Heroes.stat(hero, "initiative") - hs.pips)
-	box.add_child(UI.label("%s · A%d D%d P%d Init %s" % [D.CLASSES[hero.cls].name, Heroes.stat(hero, "attack"), Heroes.stat(hero, "defence"), b.hero_stat(side, "power"), init], "muted", 11))
+	box.add_child(UI.label("%s · Atk %d Def %d Pow %d Init %s" % [D.CLASSES[hero.cls].name, Heroes.stat(hero, "attack"), Heroes.stat(hero, "defence"), b.hero_stat(side, "power"), init], "muted", 11))
 	if hs.gone:
 		box.add_child(UI.label("Fallen in battle" if hs.gone == "dead" else "Fled the field", "bad", 12))
 		return card
@@ -623,7 +623,7 @@ func stack_card(s) -> Control:
 		var cr := UI.label("♛", "gold2", 14)
 		UI.tip(cr, "Hero unit: +1 attack, defence, damage, morale")
 		topr.add_child(cr)
-	var stats := UI.label("A%s D%s I%d" % [U.fmt(b.attack(s)), U.fmt(b.defence(s)), b.initiative(s)], "muted", 10)
+	var stats := UI.label("Atk %s Def %s I%d" % [U.fmt(b.attack(s)), U.fmt(b.defence(s)), b.initiative(s)], "muted", 10)
 	stats.add_theme_font_override("font", UI.font_mono)
 	var body := UI.vbox([topr, stats,
 		_bar(mfrac, UI.C.morale), _barlbl("M " + U.fmt(mv), "%s/%s" % [U.fmt(maxf(0, s.mor)), U.fmt(mcap)]),
@@ -667,7 +667,7 @@ func preview_tip(a, t) -> String:
 	var e := b.expected_hit(a, t)
 	var ret: bool = (t.retaliating or t.sp("alwaysRetaliate")) and not (b.is_ranged(a) and not b.is_ranged(t))
 	var s := UI.col(UI.b("Attack preview (average roll)"), "good") + "\n"
-	s += "A %s vs D %s → %s%d%% damage\n%s morale + %s health damage\n≈ %s creature(s) removed" % [U.fmt(n.A), U.fmt(n.D), "+" if n.mult >= 1 else "", U.jr((n.mult - 1) * 100), U.fmt(n.mor), U.fmt(n.phys), str(e.removed)]
+	s += "Atk %s vs Def %s → %s%d%% damage\n%s morale + %s health damage\n≈ %s creature(s) removed" % [U.fmt(n.A), U.fmt(n.D), "+" if n.mult >= 1 else "", U.jr((n.mult - 1) * 100), U.fmt(n.mor), U.fmt(n.phys), str(e.removed)]
 	if ret: s += "\n" + UI.col("Target will retaliate", "bad")
 	return s + "\n" + UI.col("────────────", "dim") + "\n"
 

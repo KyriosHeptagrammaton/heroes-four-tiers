@@ -182,7 +182,7 @@ func side_editor(i: int) -> Control:
 		hp.add_child(dl)
 		var stats := UI.flow([], 10)
 		for k in D.PRIMARY:
-			stats.add_child(UI.hbox([UI.label(k.capitalize(), "muted"), UI.spin(int(hc.stats[k]), 0, 99, func(v): hc.stats[k] = v; render(), 70)], 4))
+			stats.add_child(UI.hbox([UI.label({"attack": "Atk", "defence": "Def", "power": "Pow"}.get(k, k.capitalize()), "muted"), UI.spin(int(hc.stats[k]), 0, 99, func(v): hc.stats[k] = v; render(), 70)], 4))
 		hp.add_child(stats)
 		var fake := {"cls": hc.cls, "skills": hc.skills, "artifacts": hc.artifacts, "stats": hc.stats}
 		var cost := Heroes.equipped_cost(fake, hc.equipped)

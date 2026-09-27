@@ -712,7 +712,7 @@ func render_side() -> void:
 			var am := UI.panel(UI.hbox([UI.sym(d, 18), UI.label(str(g.count) + ("÷%d" % g.splits if g.splits > 1 else ""), "", 12)], 3), UI.sb(UI.C.panel, UI.C.line, 6, 1, 5, 2))
 			UI.tip(am, UI.unit_tip(d))
 			mini_army.add_child(am)
-		var stat_line := "A%d D%d C%d I%s P%d K%d" % [Heroes.stat(hero, "attack"), Heroes.stat(hero, "defence"), Heroes.stat(hero, "courage"), Heroes.init_str(Heroes.stat(hero, "initiative")), Heroes.stat(hero, "power"), Heroes.stat(hero, "knowledge")]
+		var stat_line := "Atk %d  Def %d  C%d  I%s  Pow %d  K%d" % [Heroes.stat(hero, "attack"), Heroes.stat(hero, "defence"), Heroes.stat(hero, "courage"), Heroes.init_str(Heroes.stat(hero, "initiative")), Heroes.stat(hero, "power"), Heroes.stat(hero, "knowledge")]
 		var tl := UI.label("⚒ " + train_txt + (" (Logistics: not needed)" if Heroes.skill(hero, "logistics") else ""), "muted", 12)
 		for f in D.FLAGS:
 			if f.id == "trainrules": UI.tip(tl, f.text)
