@@ -121,4 +121,9 @@ func control() -> Control:
 	sl.focus_mode = Control.FOCUS_NONE
 	sl.value_changed.connect(func(v): set_vol(v / 100.0))
 	UI.tip(sl, "Music volume")
-	return UI.hbox([btn, sl], 4)
+	var sfx := UI.button("⚒" if Sfx.on else "⚒ off", func(): pass, "Small")
+	sfx.pressed.connect(func():
+		Sfx.toggle()
+		sfx.text = "⚒" if Sfx.on else "⚒ off")
+	UI.tip(sfx, "Button sounds on/off")
+	return UI.hbox([btn, sl, sfx], 4)

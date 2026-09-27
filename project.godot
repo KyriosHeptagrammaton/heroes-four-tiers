@@ -22,6 +22,7 @@ World="*res://scripts/rules/world.gd"
 Game="*res://scripts/game.gd"
 UI="*res://scripts/ui/ui.gd"
 Music="*res://scripts/ui/music.gd"
+Sfx="*res://scripts/ui/sfx.gd"
 ArmyUI="*res://scripts/ui/army_ui.gd"
 Main="*res://scripts/ui/main_menu.gd"
 

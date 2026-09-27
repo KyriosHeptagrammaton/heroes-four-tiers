@@ -289,26 +289,37 @@ func pick_unit(sd: Dictionary, s: Dictionary) -> void:
 		var box := UI.vbox([UI.h2("Choose unit" if st.step == "rider" else "Choose mount")], 6)
 		if st.step == "mount":
 			box.add_child(UI.label("Rider: %s. Mounts needed = rider weight ÷ mount strength (rounded up)." % Units.resolve(st.rider).name, "muted"))
+		var grid := GridContainer.new()
+		grid.columns = 5
+		grid.add_theme_constant_override("h_separation", 6)
+		grid.add_theme_constant_override("v_separation", 6)
+		var cur_part: String = st.rider if st.step == "rider" else (st.mount if st.mount != null else "")
+		var cp = Units.parse(cur_part) if cur_part != "" else null
 		for f in D.FACTION_IDS:
 			var fl := UI.label(D.FACTIONS[f].name)
 			fl.add_theme_color_override("font_color", Color(D.FACTIONS[f].color))
-			fl.custom_minimum_size.x = 52
-			var r := UI.flow([fl], 4)
+			fl.add_theme_font_override("font", UI.font_head)
+			fl.custom_minimum_size.x = 64
+			grid.add_child(fl)
 			for t in range(1, 5):
-				for k in Units.variants(f, t):
-					var d := Units.resolve(k)
-					var extra := ""
-					if st.step == "mount":
-						var R := Units.resolve(st.rider)
-						extra = "\nMounts per rider: %d" % int(ceil(float(R.w) / d.s))
-					var cur = st.rider if st.step == "rider" else st.mount
-					var bt := UI.button(d.name + ("⚑" if d.placeholder else ""), func():
-						if st.step == "rider": st.rider = k
-						else: st.mount = k
-						finish.call(), "SmallSel" if cur == k else "Small", UI.unit_tip(d, extra))
-					r.add_child(UI.hbox([UI.sym(d, 20), bt], 2))
-			box.add_child(r)
-			box.add_child(UI.sep_line())
+				var k: String = carry_upgrade(cur_part, f, t)
+				var d := Units.resolve(k)
+				var extra := ""
+				if st.step == "mount":
+					var R := Units.resolve(st.rider)
+					extra = "\nMounts per rider: %d" % int(ceil(float(R.w) / d.s))
+				var here: bool = cp != null and cp.faction == f and cp.tier == t
+				var base_name: String = Units.resolve(Units.key(f, t, 0, "")).name
+				var bt := UI.button(base_name, func():
+					if st.step == "rider": st.rider = k
+					else: st.mount = k
+					finish.call(), "SmallSel" if here else "Small", UI.unit_tip(d, extra))
+				bt.alignment = HORIZONTAL_ALIGNMENT_LEFT
+				bt.custom_minimum_size.x = 150
+				bt.clip_text = true
+				grid.add_child(UI.hbox([UI.sym(d, 26), bt], 3))
+		box.add_child(grid)
+		box.add_child(UI.label("Pick the upgrade path and level with the buttons on the army row.", "muted", 12))
 		var bottom := UI.hbox([])
 		if st.step == "rider":
 			bottom.add_child(UI.check("Mounted (rider + mount)", st.mount != null, func(v):
@@ -321,5 +332,15 @@ func pick_unit(sd: Dictionary, s: Dictionary) -> void:
 		bottom.add_child(UI.spacer())
 		bottom.add_child(UI.button("Close", UI.close_modal))
 		box.add_child(bottom)
-		UI.modal(box, false, 760)
+		UI.modal(box, false, 600)
 	draw[0].call()
+
+## the same upgrade (path + level) on another creature, falling back when it has no such upgrade
+func carry_upgrade(cur_part: String, f: String, tier: int) -> String:
+	if cur_part == "":
+		return Units.key(f, tier, 0, "")
+	var p := Units.parse(cur_part)
+	for opt in [[p.mod, p.up], ["", p.up], ["", mini(p.up, 1)], ["", 0]]:
+		var k = _variant(f, tier, opt[0], opt[1])
+		if k != null: return k
+	return Units.key(f, tier, 0, "")
