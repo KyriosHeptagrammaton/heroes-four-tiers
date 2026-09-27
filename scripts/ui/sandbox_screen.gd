@@ -1,0 +1,271 @@
+# ============================================================================
+# Combat sandbox: build two armies + commanders, pick the ground, fight or
+# simulate 100 AI-vs-AI battles.
+# ============================================================================
+extends Control
+
+var cfg = null
+var _body: Control
+
+func default_side(f: String, ai: bool) -> Dictionary:
+	return {
+		"faction": f, "ai": ai, "name": "",
+		"hero": {"enabled": true, "cls": "warlord", "name": "", "stats": (D.CFG.heroStart.warlord as Dictionary).duplicate(), "skills": {}, "artifacts": [], "equipped": ["flame", "valor"]},
+		"stacks": [{"key": Units.key(f, 1, 0, ""), "count": 18}, {"key": Units.key(f, 2, 0, ""), "count": 6}, {"key": Units.key(f, 3, 0, ""), "count": 4}],
+	}
+
+func open() -> void:
+	if cfg == null:
+		cfg = {"sides": [default_side("alpha", false), default_side("beta", true)], "terrain": "field", "time": "dawn", "weather": "clear", "ignored": false, "seed": 0}
+	if cfg.sides[0].name == "": cfg.sides[0].name = "Attacker"
+	if cfg.sides[1].name == "": cfg.sides[1].name = "Defender"
+	UI.show("sandbox")
+	render()
+
+func make_hero(hc: Dictionary, f: String):
+	if not hc.enabled:
+		return null
+	var hero := Heroes.create(hc.cls, f, hc.name if hc.name != "" else null, Rng.new(randi()))
+	hero.stats = hc.stats.duplicate()
+	hero.skills = hc.skills.duplicate()
+	hero.artifacts = hc.artifacts.duplicate()
+	hero.spellbook = D.SPELLS.keys()
+	hero.equipped = hc.equipped.duplicate()
+	if hc.name != "": hero.name = hc.name
+	return hero
+
+func battle_opts(seed_v: int = 0, force_ai: bool = false) -> Dictionary:
+	var sides := []
+	for sd in cfg.sides:
+		sides.append({"name": sd.name, "faction": sd.faction, "ai": force_ai or sd.ai, "hero": make_hero(sd.hero, sd.faction),
+			"stacks": sd.stacks.map(func(s): return {"key": s.key, "count": s.count})})
+	return {"seed": seed_v if seed_v else (cfg.seed if cfg.seed else randi() % 1000000000 + 1), "terrain": cfg.terrain, "time": cfg.time, "weather": cfg.weather, "ignoredAttack": cfg.ignored, "sides": sides}
+
+func fight() -> void:
+	var b := Battle.new(battle_opts())
+	UI.screen("battle").start(b, func(_b): open())
+
+func simulate(n: int) -> void:
+	var res := {"w": [0, 0, 0], "rounds": 0, "loss": [0.0, 0.0], "n": 0}
+	var out := UI.vbox([UI.h2("Simulating…")])
+	UI.modal(out, true, 440)
+	var total := [0.0, 0.0]
+	for i in 2:
+		for s in cfg.sides[i].stacks:
+			total[i] += s.count * Units.value(Units.resolve(s.key))
+	while res.n < n:
+		for k in 10:
+			if res.n >= n: break
+			var b := Battle.new(battle_opts((res.n + 1) * 7919, true))
+			var guard := 0
+			while b.over == null and guard < 20000:
+				CombatAI.step(b)
+				guard += 1
+			res.w[2 if b.over.winner == null else b.over.winner] += 1
+			res.rounds += b.round_n
+			for i in 2:
+				for s in b.stacks:
+					if s.side == i and not (s.name in ["Militia", "Mercenaries"]):
+						res.loss[i] += (s.start - maxi(0, s.count)) * Units.value(s.def)
+			res.n += 1
+		var pct := func(x) -> String: return "%d%%" % U.jr(100.0 * x / maxi(1, res.n))
+		UI.clear(out)
+		out.add_child(UI.h2("AI vs AI: %d / %d battles" % [res.n, n]))
+		var g := GridContainer.new()
+		g.columns = 3
+		g.add_theme_constant_override("h_separation", 24)
+		for x in ["", cfg.sides[0].name + " ▼", cfg.sides[1].name + " ▲", "Wins", pct.call(res.w[0]), pct.call(res.w[1]), "Avg. value lost",
+				U.fmt(res.loss[0] / maxi(1, res.n) / maxf(1, total[0]) * 100) + "%", U.fmt(res.loss[1] / maxi(1, res.n) / maxf(1, total[1]) * 100) + "%"]:
+			g.add_child(UI.label(x))
+		out.add_child(g)
+		out.add_child(UI.rich(UI.col("Stalemates/draws: %s · average %s rounds · army value %s vs %s (T1=1, T2=2, T3=3, T4=6 per creature)" % [pct.call(res.w[2]), U.fmt(float(res.rounds) / maxi(1, res.n)), U.fmt(total[0]), U.fmt(total[1])], "muted")))
+		out.add_child(UI.label("The AI is a simple one-ply heuristic, so treat these as rough signals, not verdicts.", "muted", 12))
+		await get_tree().process_frame
+		if not is_instance_valid(out): return
+	out.add_child(UI.row_end([UI.button("Close", UI.close_modal, "Primary")]))
+
+# ---------------------------------------------------------------- rendering
+func render() -> void:
+	UI.clear(self)
+	var root := UI.vbox([], 0)
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+	var T: Dictionary = D.TERRAIN[cfg.terrain]
+	var terr := []
+	for k in D.TERRAIN:
+		if k != "chasm": terr.append([k, D.TERRAIN[k].name])
+	var times := []
+	for k in D.TIMES: times.append([k, D.TIMES[k].name])
+	var weathers := []
+	for k in D.WEATHER: weathers.append([k, D.WEATHER[k].name])
+	var o1 := UI.option(terr, cfg.terrain, func(v): cfg.terrain = v; render())
+	UI.tip(o1, "[b]%s[/b]\n%s" % [T.name, T.desc])
+	var o2 := UI.option(times, cfg.time, func(v): cfg.time = v; render())
+	UI.tip(o2, D.TIMES[cfg.time].desc)
+	var o3 := UI.option(weathers, cfg.weather, func(v): cfg.weather = v; render())
+	UI.tip(o3, D.WEATHER[cfg.weather].desc)
+	var ig := UI.check("Defender ignored", cfg.ignored, func(v): cfg.ignored = v)
+	UI.tip(ig, "The defender chose to ignore the attack instead of picking ground: 1-3 random defending stacks gain one slow.")
+	var bar := UI.hbox([UI.button("◂ Menu", func(): Main.menu()), UI.h2("Combat Sandbox"), UI.spacer(),
+		UI.label("Ground", "muted"), o1, UI.label("Time", "muted"), o2, UI.label("Weather", "muted"), o3, ig,
+		UI.button("⚖ Simulate ×100", func(): simulate(100), "", "Run 100 AI-vs-AI battles with these armies"),
+		UI.button("⚔ Fight!", fight, "Primary")], 10)
+	root.add_child(UI.panel(bar, UI.sb(UI.C.bg2, UI.C.line, 0, 1, 14, 10)))
+	var sc := ScrollContainer.new()
+	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	root.add_child(sc)
+	var m := MarginContainer.new()
+	m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for k in ["left", "right", "top", "bottom"]: m.add_theme_constant_override("margin_" + k, 12)
+	sc.add_child(m)
+	var cols := UI.hbox([side_editor(0), side_editor(1)], 12)
+	m.add_child(cols)
+
+func side_editor(i: int) -> Control:
+	var sd: Dictionary = cfg.sides[i]
+	var box := UI.vbox([], 10)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm := LineEdit.new()
+	nm.text = sd.name
+	nm.custom_minimum_size.x = 130
+	nm.text_changed.connect(func(t): sd.name = t)
+	var fac := []
+	for f in D.FACTION_IDS: fac.append([f, D.FACTIONS[f].name])
+	box.add_child(UI.panel(UI.flow([UI.h2("▼ Attacker" if i == 0 else "▲ Defender"), nm, UI.label("Faction", "muted"),
+		UI.option(fac, sd.faction, func(v): sd.faction = v; render()), UI.check("AI controlled", sd.ai, func(v): sd.ai = v)], 8)))
+	# stacks
+	var sp := UI.vbox([], 4)
+	var add := UI.button("+ Add stack", func():
+		sd.stacks.append({"key": Units.key(sd.faction, 1, 0, ""), "count": 10})
+		render(), "Small")
+	add.disabled = sd.stacks.size() >= D.CFG.maxStacks
+	sp.add_child(UI.hbox([UI.h3("Army (%d/%d stacks)" % [sd.stacks.size(), D.CFG.maxStacks]), UI.spacer(), add]))
+	for k in sd.stacks.size():
+		var s: Dictionary = sd.stacks[k]
+		var d := Units.resolve(s.key)
+		var sy := UI.sym(d, 26)
+		UI.tip(sy, UI.unit_tip(d))
+		var nb := UI.button(d.name + (" ⚑" if d.placeholder else ""), func(): pick_unit(sd, s), "", "Click to change unit / mount it")
+		nb.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		nb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nb.clip_text = true
+		var cnt := UI.spin(s.count, 1, 9999, func(v): s.count = maxi(1, v), 90)
+		sp.add_child(UI.hbox([sy, nb, cnt, UI.button("✕", func(): sd.stacks.remove_at(k); render(), "Small")], 6))
+	box.add_child(UI.panel(sp))
+	# hero
+	var hc: Dictionary = sd.hero
+	var hp := UI.vbox([], 6)
+	var head := UI.flow([UI.check("", hc.enabled, func(v): hc.enabled = v; render()), UI.h3("Commander")], 8)
+	if hc.enabled:
+		var cls := []
+		for k in D.CLASSES: cls.append([k, D.CLASSES[k].name])
+		head.add_child(UI.option(cls, hc.cls, func(v):
+			hc.cls = v
+			hc.stats = (D.CFG.heroStart[v] as Dictionary).duplicate()
+			hc.skills = (D.CLASSES[v].skills as Dictionary).duplicate()
+			render()))
+		var hn := LineEdit.new()
+		hn.placeholder_text = "name"
+		hn.text = hc.name
+		hn.custom_minimum_size.x = 120
+		hn.text_changed.connect(func(t): hc.name = t)
+		head.add_child(hn)
+	hp.add_child(head)
+	if hc.enabled:
+		var dl := UI.label(D.CLASSES[hc.cls].desc, "muted", 12)
+		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hp.add_child(dl)
+		var stats := UI.flow([], 10)
+		for k in D.PRIMARY:
+			stats.add_child(UI.hbox([UI.label(k.substr(0, 4), "muted"), UI.spin(int(hc.stats[k]), 0, 99, func(v): hc.stats[k] = v; render(), 70)], 4))
+		hp.add_child(stats)
+		var fake := {"cls": hc.cls, "skills": hc.skills, "artifacts": hc.artifacts, "stats": hc.stats}
+		var cost := Heroes.equipped_cost(fake, hc.equipped)
+		var know := Heroes.stat(fake, "knowledge")
+		var sprow := UI.flow([UI.label("Spells", "muted"), UI.chip("%d/%d knowledge" % [cost, know], "warn" if (cost > know and hc.equipped.size() > 1) else "", "Knowledge used / knowledge. You may always equip any one spell.")], 6)
+		for j in hc.equipped.size():
+			var id: String = hc.equipped[j]
+			var bt := UI.button(D.SPELLS[id].name + "  ✕", func(): hc.equipped.remove_at(j); render(), "Small", D.SPELLS[id].desc)
+			sprow.add_child(bt)
+		var sp_items := [["", "+ equip…"]]
+		for k in D.SPELLS: sp_items.append([k, "%s (%d)" % [D.SPELLS[k].name, Heroes.spell_cost(fake, k)]])
+		sprow.add_child(UI.option(sp_items, "", func(v):
+			if v != "":
+				hc.equipped.append(v)
+				render()))
+		hp.add_child(sprow)
+		var skrow := UI.flow([UI.label("Skills", "muted")], 8)
+		for k in D.SKILLS:
+			var S: Dictionary = D.SKILLS[k]
+			var items := [[0, "–"]]
+			for n in S.tiers.size(): items.append([n + 1, "I".repeat(n + 1)])
+			var tp := "[b]%s[/b]" % S.name
+			for n in S.tiers.size(): tp += "\n%s: %s" % ["I".repeat(n + 1), S.tiers[n]]
+			var lb := UI.label(S.name, "", 12)
+			UI.tip(lb, tp)
+			skrow.add_child(UI.hbox([lb, UI.option(items, hc.skills.get(k, 0), func(v):
+				hc.skills[k] = int(v)
+				if k == "sorcery" and int(v) == 3 and hc.skills.get("arcana", 0) == 3: hc.skills.arcana = 2
+				if k == "arcana" and int(v) == 3 and hc.skills.get("sorcery", 0) == 3: hc.skills.sorcery = 2
+				render())], 2))
+		hp.add_child(skrow)
+		var arrow := UI.flow([UI.label("Artifacts", "muted")], 8)
+		for a in D.ARTIFACTS:
+			var c := UI.check(D.ARTIFACTS[a].name, hc.artifacts.has(a), func(v):
+				if v: hc.artifacts.append(a)
+				else: hc.artifacts.erase(a))
+			c.add_theme_font_size_override("font_size", 12)
+			UI.tip(c, D.ARTIFACTS[a].desc)
+			arrow.add_child(c)
+		hp.add_child(arrow)
+	box.add_child(UI.panel(hp))
+	return box
+
+## unit picker modal: all variants, optionally mounted
+func pick_unit(sd: Dictionary, s: Dictionary) -> void:
+	# state lives in a dictionary: lambdas capture locals by value
+	var st := {"rider": s.key.split("@")[0], "mount": s.key.split("@")[1] if "@" in s.key else null, "step": "rider"}
+	var finish := func():
+		s.key = st.rider + "@" + st.mount if st.mount != null else st.rider
+		UI.close_modal()
+		render()
+	var draw := [null]
+	draw[0] = func():
+		var box := UI.vbox([UI.h2("Choose unit" if st.step == "rider" else "Choose mount")], 6)
+		if st.step == "mount":
+			box.add_child(UI.label("Rider: %s. Mounts needed = rider weight ÷ mount strength (rounded up)." % Units.resolve(st.rider).name, "muted"))
+		for f in D.FACTION_IDS:
+			var fl := UI.label(D.FACTIONS[f].name)
+			fl.add_theme_color_override("font_color", Color(D.FACTIONS[f].color))
+			fl.custom_minimum_size.x = 52
+			var r := UI.flow([fl], 4)
+			for t in range(1, 5):
+				for k in Units.variants(f, t):
+					var d := Units.resolve(k)
+					var extra := ""
+					if st.step == "mount":
+						var R := Units.resolve(st.rider)
+						extra = "\nMounts per rider: %d" % int(ceil(float(R.w) / d.s))
+					var cur = st.rider if st.step == "rider" else st.mount
+					var bt := UI.button(d.name + ("⚑" if d.placeholder else ""), func():
+						if st.step == "rider": st.rider = k
+						else: st.mount = k
+						finish.call(), "SmallSel" if cur == k else "Small", UI.unit_tip(d, extra))
+					r.add_child(UI.hbox([UI.sym(d, 20), bt], 2))
+			box.add_child(r)
+			box.add_child(UI.sep_line())
+		var bottom := UI.hbox([])
+		if st.step == "rider":
+			bottom.add_child(UI.check("Mounted (rider + mount)", st.mount != null, func(v):
+				if v:
+					st.step = "mount"
+					draw[0].call()
+				else:
+					st.mount = null
+					finish.call()))
+		bottom.add_child(UI.spacer())
+		bottom.add_child(UI.button("Close", UI.close_modal))
+		box.add_child(bottom)
+		UI.modal(box, false, 760)
+	draw[0].call()

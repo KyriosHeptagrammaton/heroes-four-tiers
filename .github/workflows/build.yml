@@ -1,0 +1,67 @@
+# Builds the Windows .exe on every push to main and publishes it as the
+# "latest" GitHub Release (download it from the Releases page).
+name: Build Windows exe
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  export:
+    runs-on: ubuntu-22.04
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Move export templates into place
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates/ ~/.config/
+          mv /root/.config/godot ~/.config/godot || true
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+
+      - name: Import assets
+        run: godot --headless --path . --import || true
+
+      - name: Rules parity check (combat engine sanity)
+        run: godot --headless --path . -- --test=worldgen_selfcheck
+
+      - name: Export Windows build
+        run: |
+          mkdir -p build/windows
+          godot --headless --path . --export-release "Windows Desktop" build/windows/HeroesFourTiers.exe
+          ls -la build/windows
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HeroesFourTiers-windows
+          path: build/windows/HeroesFourTiers.exe
+          if-no-files-found: error
+
+  release:
+    needs: export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: HeroesFourTiers-windows
+
+      - name: Publish as the "latest" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --repo "$GITHUB_REPOSITORY" --cleanup-tag -y || true
+          git_sha="${GITHUB_SHA::7}"
+          gh release create latest HeroesFourTiers.exe \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Latest build ($git_sha)" \
+            --notes "Automatic Windows build of commit $git_sha. Download **HeroesFourTiers.exe** below and run it — no install needed. Saves go in a \`saves\` folder next to the exe." \
+            --latest

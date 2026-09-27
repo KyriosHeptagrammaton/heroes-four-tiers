@@ -1,0 +1,1883 @@
+{
+ "CFG": {
+  "perUnitAttDefBonus": 0.05,
+  "perUnitMoraleBonus": 0.1,
+  "attPerPoint": 0.1,
+  "attCap": 3,
+  "defPerPoint": 0.05,
+  "defCap": 0.75,
+  "moraleShare": 0.75,
+  "minDice": 3,
+  "maxStacks": 6,
+  "heroUnitFraction": 0.3333333333333333,
+  "heroUnitAlways": 2,
+  "heroUnitBonus": {
+   "att": 1,
+   "def": 1,
+   "dmg": 1,
+   "mor": 1
+  },
+  "spellPowerPct": 0.1,
+  "roundCap": 60,
+  "mapSize": 20,
+  "growth": {
+   "1": 6,
+   "2": 3,
+   "3": 2,
+   "4": 1
+  },
+  "speed": {
+   "cavalry": 12,
+   "normal": 6,
+   "slow": 4
+  },
+  "transcendentPerPlayer": 9,
+  "sightDefault": 3,
+  "sightScale": 1,
+  "scoutTilesPerXP": 10,
+  "unitPrice": {
+   "1": 30,
+   "2": 80,
+   "3": 200,
+   "4": 800
+  },
+  "priceEscalation": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "upgradeFee": {
+   "1": 20,
+   "2": 50,
+   "3": 120,
+   "4": 400
+  },
+  "startGold": 2500,
+  "townIncome": 500,
+  "heroCost": 1500,
+  "trainCost": 300,
+  "monsterFlee": true,
+  "essenceMinusXP": false,
+  "heroStart": {
+   "warlord": {
+    "attack": 1,
+    "defence": 1,
+    "courage": 5,
+    "initiative": 3,
+    "power": 0,
+    "knowledge": 3
+   },
+   "mage": {
+    "attack": 0,
+    "defence": 0,
+    "courage": 4,
+    "initiative": 3,
+    "power": 2,
+    "knowledge": 6
+   },
+   "paragon": {
+    "attack": 1,
+    "defence": 1,
+    "courage": 4,
+    "initiative": 3,
+    "power": 1,
+    "knowledge": 4
+   },
+   "scholar": {
+    "attack": 0,
+    "defence": 1,
+    "courage": 4,
+    "initiative": 3,
+    "power": 1,
+    "knowledge": 5
+   }
+  },
+  "villageMilitia": 6,
+  "crossroadsMercs": 4,
+  "wallPerStack": 12,
+  "beta2PerCreature": true,
+  "rainChance": 0.25
+ },
+ "FACTIONS": {
+  "alpha": {
+   "name": "Alpha",
+   "color": "#d0543f",
+   "glyph": "α"
+  },
+  "beta": {
+   "name": "Beta",
+   "color": "#3f7fd0",
+   "glyph": "β"
+  },
+  "gamma": {
+   "name": "Gamma",
+   "color": "#3fa64f",
+   "glyph": "γ"
+  },
+  "delta": {
+   "name": "Delta",
+   "color": "#9a52c9",
+   "glyph": "δ"
+  }
+ },
+ "FACTION_IDS": [
+  "alpha",
+  "beta",
+  "gamma",
+  "delta"
+ ],
+ "UNIT_BASE": {
+  "alpha": {
+   "1": {
+    "hp": 1,
+    "mor": 2,
+    "dmg": [
+     1,
+     2,
+     3
+    ],
+    "ini": 1,
+    "att": 5,
+    "def": 5,
+    "w": 1,
+    "s": 1,
+    "sp": {
+     "lossMoraleHeal": 2
+    },
+    "I": {
+     "sp": {
+      "lossMoraleHeal": 4
+     }
+    }
+   },
+   "2": {
+    "hp": 2,
+    "mor": 4,
+    "dmg": [
+     1,
+     2.5,
+     4
+    ],
+    "ini": 2,
+    "att": 7.5,
+    "def": 7.5,
+    "w": 3,
+    "s": 3,
+    "ab": {
+     "cavalry": true
+    },
+    "sp": {
+     "split5050": true
+    },
+    "I": {
+     "dmg": [
+      1,
+      3,
+      5
+     ]
+    }
+   },
+   "3": {
+    "hp": 3,
+    "mor": 4,
+    "dmg": [
+     3,
+     4,
+     5
+    ],
+    "ini": 4,
+    "att": 10,
+    "def": 10,
+    "w": 2,
+    "s": 2,
+    "sp": {
+     "lossGainMorale": true,
+     "regenPerUnit": true
+    },
+    "I": {
+     "sp": {
+      "moraleCasualtiesRejoin": true
+     }
+    }
+   },
+   "4": {
+    "hp": 6,
+    "mor": 12,
+    "dmg": [
+     6,
+     8,
+     10
+    ],
+    "ini": 4,
+    "att": 20,
+    "def": 20,
+    "w": 4,
+    "s": 4,
+    "sp": {
+     "dmgAuraMinus1": true,
+     "advPerTurn": true
+    }
+   }
+  },
+  "beta": {
+   "1": {
+    "hp": 1,
+    "mor": 2,
+    "dmg": [
+     1,
+     1,
+     3
+    ],
+    "ini": 1,
+    "att": 5,
+    "def": 5,
+    "w": 1,
+    "s": 1,
+    "sp": {
+     "crit": 2
+    },
+    "I": {
+     "dmg": [
+      1,
+      1,
+      4
+     ],
+     "sp": {
+      "crit": 4
+     }
+    }
+   },
+   "2": {
+    "hp": 2,
+    "mor": 4,
+    "dmg": [
+     2,
+     3,
+     4
+    ],
+    "ini": 2,
+    "att": 7.5,
+    "def": 7.5,
+    "w": 3,
+    "s": 3,
+    "ab": {
+     "cavalry": true
+    },
+    "sp": {
+     "extraMoraleDmg": true
+    },
+    "I": {
+     "mor": 5
+    }
+   },
+   "3": {
+    "hp": 4,
+    "mor": 6,
+    "dmg": [
+     4,
+     4,
+     5
+    ],
+    "ini": 3,
+    "att": 12,
+    "def": 12,
+    "w": 2,
+    "s": 2,
+    "sp": {},
+    "I": {
+     "hp": 5,
+     "mor": 9,
+     "dmg": [
+      4,
+      5,
+      5
+     ],
+     "att": 13,
+     "def": 13
+    }
+   },
+   "4": {
+    "hp": 6,
+    "mor": 12,
+    "dmg": [
+     6,
+     8,
+     10
+    ],
+    "ini": 4,
+    "att": 20,
+    "def": 20,
+    "w": 4,
+    "s": 4,
+    "sp": {
+     "scatterOnStart": true,
+     "fleeOnAttack": true
+    }
+   }
+  },
+  "gamma": {
+   "1": {
+    "hp": 1,
+    "mor": 2,
+    "dmg": [
+     1,
+     2,
+     3
+    ],
+    "ini": 1,
+    "att": 5,
+    "def": 5,
+    "w": 1,
+    "s": 1,
+    "ab": {
+     "slow": 1
+    },
+    "sp": {
+     "advAfterGuard": true,
+     "firstOnTie": true
+    },
+    "I": {
+     "ini": 2,
+     "sp": {
+      "firstStrikeRetaliate": true
+     }
+    }
+   },
+   "2": {
+    "hp": 3,
+    "mor": 4,
+    "dmg": [
+     2,
+     3,
+     4
+    ],
+    "ini": 2,
+    "att": 7.5,
+    "def": 7.5,
+    "w": 3,
+    "s": 3,
+    "ab": {
+     "cavalry": true,
+     "mountKeepsSlow": true
+    },
+    "sp": {
+     "engageAfterAttack": true,
+     "extraDamageTaken": true,
+     "killMoraleHeal": true,
+     "bigKillMorale": true,
+     "keepAdvOnAttack": true
+    },
+    "I": {
+     "sp": {
+      "negMoraleOverflow": true,
+      "extraDamageOnlyIfAttLE": true
+     }
+    }
+   },
+   "3": {
+    "hp": 0,
+    "mor": 1,
+    "dmg": [
+     4,
+     5,
+     6
+    ],
+    "ini": 1,
+    "att": 8,
+    "def": 12,
+    "w": 4,
+    "s": 1,
+    "ab": {
+     "slow": 1
+    },
+    "sp": {
+     "gainHealthOnKill": "gt",
+     "moralePerTurn": 1,
+     "counterEngage": "melee",
+     "fallbackRecover": true,
+     "doubleGrowth": true
+    },
+    "I": {
+     "dmg": [
+      4,
+      6,
+      6
+     ],
+     "sp": {
+      "gainHealthOnKill": "ge",
+      "counterEngage": "any"
+     }
+    }
+   },
+   "4": {
+    "hp": 6,
+    "mor": 12,
+    "dmg": [
+     6,
+     8,
+     10
+    ],
+    "ini": 4,
+    "att": 20,
+    "def": 20,
+    "w": 4,
+    "s": 4,
+    "sp": {
+     "ignoreNegSpecials": true,
+     "moraleAura": 1
+    }
+   }
+  },
+  "delta": {
+   "1": {
+    "hp": 1,
+    "mor": 2,
+    "dmg": [
+     1,
+     1.5,
+     2
+    ],
+    "ini": 1,
+    "att": 5,
+    "def": 5,
+    "w": 1,
+    "s": 1,
+    "sp": {
+     "necroPhys": "base"
+    },
+    "I": {
+     "sp": {
+      "necroPhys": "melee"
+     }
+    }
+   },
+   "2": {
+    "hp": 2,
+    "mor": 4,
+    "dmg": [
+     2,
+     3,
+     4
+    ],
+    "ini": 2,
+    "att": 7.5,
+    "def": 7.5,
+    "w": 3,
+    "s": 3,
+    "sp": {
+     "alwaysRetaliate": true
+    },
+    "I": {
+     "dmg": [
+      2,
+      3.5,
+      5
+     ]
+    }
+   },
+   "3": {
+    "hp": 3,
+    "mor": 6,
+    "dmg": [
+     3,
+     4,
+     5
+    ],
+    "ini": 3,
+    "att": 10,
+    "def": 10,
+    "w": 2,
+    "s": 2,
+    "sp": {
+     "rallyConvert": true
+    },
+    "I": {
+     "mor": 8
+    }
+   },
+   "4": {
+    "hp": 6,
+    "mor": 12,
+    "dmg": [
+     6,
+     8,
+     10
+    ],
+    "ini": 4,
+    "att": 20,
+    "def": 20,
+    "w": 4,
+    "s": 4,
+    "sp": {
+     "courageHealth": true,
+     "rallyEnemy": true
+    }
+   }
+  }
+ },
+ "MAGI": {
+  "alpha": {
+   "1": {
+    "rallyHealsPhys": true
+   },
+   "2": {
+    "attackAllEngaged": true
+   },
+   "3": {
+    "extraTurnNonAttack": true
+   },
+   "4": {
+    "doubleBonuses": true
+   }
+  },
+  "beta": {
+   "1": {
+    "thorns": true
+   },
+   "2": {
+    "denyMulti": true
+   },
+   "3": {
+    "twoTurns": true
+   },
+   "4": {
+    "lastStandConvert": true
+   }
+  },
+  "gamma": {
+   "1": {
+    "guardVsRanged": true
+   },
+   "2": {
+    "lifesteal": true
+   },
+   "3": {
+    "dmgAuraMinus1": true
+   },
+   "4": {
+    "killRecoverDeserter": true
+   }
+  },
+  "delta": {
+   "1": {
+    "necroAny": true
+   },
+   "2": {
+    "rallyBoost": true
+   },
+   "3": {
+    "allPhysical": true
+   },
+   "4": {
+    "purgeMoraleOnTurn": true
+   }
+  }
+ },
+ "SECOND_UPGRADE": {
+  "alpha": {
+   "1": "",
+   "2": "",
+   "3": "r"
+  },
+  "beta": {
+   "1": "r",
+   "2": "",
+   "3": ""
+  },
+  "gamma": {
+   "1": "",
+   "2": "",
+   "3": "r"
+  },
+  "delta": {
+   "1": "r",
+   "2": "",
+   "3": "r"
+  }
+ },
+ "ABILITY_TEXT": {
+  "ranged": "Ranged: may hit guarded units without losing guard/advantage; cannot be attacked or engaged in round 1 except by cavalry",
+  "cavalry": "Cavalry: only cavalry may engage it; may engage guarded units unless guarded by cavalry",
+  "fly": "Flying: may attack guarded units",
+  "teleport": "Teleport: may attack guarded units",
+  "slow": "Slow: may not attack in the first round(s) unless engaged with the target"
+ },
+ "UNIT_NAMES": {
+  "alpha.1": "Berserker",
+  "alpha.2": "Dire Wolf",
+  "alpha.3": "Troll",
+  "beta.1": "Martial Saint",
+  "beta.2": "Lion",
+  "beta.3": "Archon",
+  "gamma.1": "Pikeman",
+  "gamma.2": "War Horse",
+  "gamma.4": "Angel",
+  "delta.1": "Skeleton",
+  "delta.2": "Giant Scorpion"
+ },
+ "SPELLS": {
+  "quicken": {
+   "name": "Quicken",
+   "cost": 2,
+   "kind": "utility",
+   "stack": true,
+   "target": "stack",
+   "desc": "Target loses one slow."
+  },
+  "valor": {
+   "name": "Valor",
+   "cost": 4,
+   "kind": "utility",
+   "stack": true,
+   "target": "stack",
+   "desc": "+1 morale."
+  },
+  "sharpen": {
+   "name": "Sharpen",
+   "cost": 3,
+   "kind": "utility",
+   "stack": "copies",
+   "target": "stack",
+   "desc": "+1 damage. Max levels = copies of this spell you have equipped."
+  },
+  "blunt": {
+   "name": "Blunt",
+   "cost": 3,
+   "kind": "utility",
+   "stack": "copies",
+   "target": "stack",
+   "desc": "-1 damage. Max levels = copies equipped."
+  },
+  "fortune": {
+   "name": "Fortune",
+   "cost": 6,
+   "kind": "utility",
+   "stack": false,
+   "target": "stack",
+   "desc": "Always does maximum damage."
+  },
+  "misfortune": {
+   "name": "Misfortune",
+   "cost": 6,
+   "kind": "utility",
+   "stack": false,
+   "target": "stack",
+   "desc": "Always does minimum damage."
+  },
+  "transfer": {
+   "name": "Transference",
+   "cost": 4,
+   "kind": "utility",
+   "instant": true,
+   "target": "pair",
+   "desc": "Move ALL morale damage from one stack onto another."
+  },
+  "flame": {
+   "name": "Flame",
+   "cost": 2,
+   "kind": "damage",
+   "instant": true,
+   "target": "stack",
+   "amount": 5,
+   "desc": "5 physical damage (x power)."
+  },
+  "dread": {
+   "name": "Dread",
+   "cost": 2,
+   "kind": "damage",
+   "instant": true,
+   "target": "stack",
+   "amount": 10,
+   "desc": "10 damage, split 75% morale / 25% health (x power)."
+  },
+  "haste": {
+   "name": "Haste",
+   "cost": 4,
+   "kind": "utility",
+   "stack": true,
+   "target": "stackOrHero",
+   "desc": "+1 initiative. May be cast on heroes."
+  },
+  "ward": {
+   "name": "Ward",
+   "cost": 3,
+   "kind": "damage",
+   "instant": true,
+   "target": "stack",
+   "amount": 3,
+   "desc": "3 negative physical damage (a buffer, x power)."
+  },
+  "mend": {
+   "name": "Mend",
+   "cost": 1,
+   "kind": "damage",
+   "instant": true,
+   "target": "stack",
+   "amount": 5,
+   "desc": "Remove 5 physical damage (x power)."
+  },
+  "dispel": {
+   "name": "Dispel",
+   "cost": 4,
+   "kind": "utility",
+   "instant": true,
+   "target": "stack",
+   "desc": "Remove all spell effects on target."
+  },
+  "equalize": {
+   "name": "Equalize",
+   "cost": 5,
+   "kind": "utility",
+   "stack": false,
+   "target": "stack",
+   "desc": "Attack and defence become 10."
+  },
+  "diminish": {
+   "name": "Diminish",
+   "cost": 2,
+   "kind": "utility",
+   "stack": true,
+   "target": "stack",
+   "desc": "Stack counts as having one less creature."
+  },
+  "halve": {
+   "name": "Halve",
+   "cost": 6,
+   "kind": "utility",
+   "stack": false,
+   "target": "stack",
+   "desc": "Stack counts as having half as many creatures."
+  }
+ },
+ "TERRAIN": {
+  "plains": {
+   "name": "Plains",
+   "size": 1,
+   "sight": 1,
+   "vis": 3,
+   "color": "#c9d48a",
+   "fx": {
+    "slowMod": -1
+   },
+   "desc": "All units lose one slow."
+  },
+  "field": {
+   "name": "Field",
+   "size": 2,
+   "sight": 0,
+   "vis": 3,
+   "color": "#b2c56e",
+   "fx": {},
+   "desc": "No effect."
+  },
+  "forest": {
+   "name": "Forest",
+   "size": 3,
+   "sight": -1,
+   "vis": 3,
+   "color": "#4f8a45",
+   "fx": {
+    "noRanged": 1,
+    "noCavalry": 1
+   },
+   "desc": "All units lose ranged and cavalry."
+  },
+  "hill": {
+   "name": "Hills",
+   "size": 2,
+   "sight": 2,
+   "vis": 5,
+   "color": "#a9a26a",
+   "fx": {
+    "defAdv": 1,
+    "attNoCavR1": 1
+   },
+   "desc": "Defenders start with 1 advantage; attackers lose cavalry in round 1."
+  },
+  "canyon": {
+   "name": "Box Canyon",
+   "size": 2,
+   "sight": -1,
+   "vis": 3,
+   "color": "#b87a4b",
+   "fx": {
+    "defMoraleX": 4,
+    "desertersDie": 1
+   },
+   "desc": "Defenders get quadruple morale; morale casualties become physical casualties."
+  },
+  "ashlands": {
+   "name": "Ashlands",
+   "size": 2,
+   "sight": 0,
+   "vis": 3,
+   "color": "#6d5f5a",
+   "fx": {
+    "physPerRound": 3
+   },
+   "desc": "All units take 3 / tier physical damage each round."
+  },
+  "moor": {
+   "name": "Haunted Moor",
+   "size": 3,
+   "sight": -1,
+   "vis": 3,
+   "color": "#7a8a8a",
+   "fx": {
+    "moraleDmgPerRound": 9
+   },
+   "desc": "All units take 9 / tier morale damage each round."
+  },
+  "steppe": {
+   "name": "Steppe",
+   "size": 1,
+   "sight": 1,
+   "vis": 4,
+   "color": "#d8c98a",
+   "fx": {
+    "allCavalry": 1
+   },
+   "desc": "All units count as cavalry."
+  },
+  "badlands": {
+   "name": "Badlands",
+   "size": 2,
+   "sight": 1,
+   "vis": 3,
+   "color": "#c29a6b",
+   "fx": {
+    "allRanged": 1
+   },
+   "desc": "All units count as ranged."
+  },
+  "escarpment": {
+   "name": "Escarpment",
+   "size": 2,
+   "sight": 2,
+   "vis": 5,
+   "color": "#9c8f70",
+   "fx": {
+    "defRanged": 1
+   },
+   "desc": "All defenders count as ranged."
+  },
+  "bluffs": {
+   "name": "Bluffs",
+   "size": 2,
+   "sight": 1,
+   "vis": 4,
+   "color": "#b3a07d",
+   "fx": {
+    "defRanged": 1,
+    "attCavalry": 1
+   },
+   "desc": "Defenders count as ranged, attackers count as cavalry."
+  },
+  "swamp": {
+   "name": "Swamp",
+   "size": 4,
+   "sight": -1,
+   "vis": 2,
+   "color": "#5d7a55",
+   "fx": {
+    "slowMod": 1
+   },
+   "desc": "All units gain one slow."
+  },
+  "tundra": {
+   "name": "Tundra",
+   "size": 3,
+   "sight": 0,
+   "vis": 3,
+   "color": "#dfe8ec",
+   "fx": {
+    "slowModNonRanged": 1
+   },
+   "desc": "All units except ranged gain one slow."
+  },
+  "dreamwood": {
+   "name": "Dreamwood",
+   "size": 3,
+   "sight": -1,
+   "vis": 3,
+   "color": "#6f5d95",
+   "fx": {
+    "swapDamage": 1
+   },
+   "desc": "Physical and morale damage are reversed."
+  },
+  "stones": {
+   "name": "Standing Stones",
+   "size": 1,
+   "sight": 0,
+   "vis": 3,
+   "color": "#a3a3b3",
+   "fx": {
+    "keepAdv": 1
+   },
+   "desc": "Units do not lose advantages."
+  },
+  "village": {
+   "name": "Village",
+   "size": 2,
+   "sight": 0,
+   "vis": 3,
+   "color": "#c8b27a",
+   "fx": {
+    "defMilitia": 1
+   },
+   "desc": "Defender gains a stack of militia."
+  },
+  "watchfort": {
+   "name": "Watchfort",
+   "size": 1,
+   "sight": 3,
+   "vis": 5,
+   "color": "#9a8a6a",
+   "fx": {
+    "defHalfRanged": 1
+   },
+   "desc": "Defenders all gain a ranged attack at half damage."
+  },
+  "crossroads": {
+   "name": "Crossroads",
+   "size": 1,
+   "sight": 0,
+   "vis": 3,
+   "color": "#cdbb8e",
+   "fx": {
+    "bothMercs": 1
+   },
+   "desc": "Defender and attacker each gain a stack of mercenaries."
+  },
+  "grove": {
+   "name": "Sacred Grove",
+   "size": 2,
+   "sight": -1,
+   "vis": 3,
+   "color": "#79b36a",
+   "fx": {
+    "noPhysical": 1
+   },
+   "desc": "Units cannot take physical damage."
+  },
+  "arena": {
+   "name": "Old Arena",
+   "size": 1,
+   "sight": 0,
+   "vis": 3,
+   "color": "#c9a58a",
+   "fx": {
+    "attDef10": 1
+   },
+   "desc": "Attack and defence are 10 for all units."
+  },
+  "nexus": {
+   "name": "Ley Nexus",
+   "size": 1,
+   "sight": 0,
+   "vis": 4,
+   "color": "#8fb4d9",
+   "fx": {
+    "doublePower": 1
+   },
+   "desc": "Double the commanders' power."
+  },
+  "mountain": {
+   "name": "Mountains",
+   "size": 3,
+   "sight": 6,
+   "vis": 9,
+   "color": "#8a8580",
+   "occlude": true,
+   "fx": {
+    "defRanged": 1
+   },
+   "desc": "Blocks sight behind it. Defenders count as ranged."
+  },
+  "chasm": {
+   "name": "Chasm",
+   "size": 1,
+   "sight": 0,
+   "vis": 3,
+   "color": "#2b2622",
+   "impassable": true,
+   "fx": {},
+   "desc": "Impassable (Logistics II lets an army cross)."
+  },
+  "town": {
+   "name": "Town",
+   "size": 2,
+   "sight": 1,
+   "vis": 4,
+   "color": "#c9b79a",
+   "fx": {
+    "walls": 1
+   },
+   "desc": "Walls protect the defenders."
+  }
+ },
+ "TIMES": {
+  "dawn": {
+   "name": "Dawn",
+   "fx": {},
+   "desc": "No change."
+  },
+  "midday": {
+   "name": "Midday",
+   "fx": {
+    "slowMod": -1
+   },
+   "desc": "All units lose one slow."
+  },
+  "dusk": {
+   "name": "Dusk",
+   "fx": {
+    "attackerInit": 1
+   },
+   "desc": "All attacking units (and commander) +1 initiative."
+  },
+  "night": {
+   "name": "Night",
+   "fx": {
+    "moraleHalf": 1,
+    "noRanged": 1
+   },
+   "desc": "Morale is halved; all units lose ranged."
+  }
+ },
+ "WEATHER": {
+  "clear": {
+   "name": "Clear",
+   "fx": {},
+   "desc": "No effect."
+  },
+  "rain": {
+   "name": "Rain",
+   "fx": {
+    "rangedSlow": 1
+   },
+   "desc": "All ranged units are slow."
+  }
+ },
+ "SKILLS": {
+  "sorcery": {
+   "name": "Spellweaving",
+   "cat": "magic",
+   "tiers": [
+    "Cast 2 spells per round",
+    "Cast 4 spells per round",
+    "Cast unlimited spells per round"
+   ]
+  },
+  "arcana": {
+   "name": "Deep Memory",
+   "cat": "magic",
+   "tiers": [
+    "Each equipped spell usable 2x per battle",
+    "4x per battle",
+    "Unlimited uses (knowledge cost doubles)"
+   ]
+  },
+  "heroics": {
+   "name": "Heroics",
+   "cat": "martial",
+   "tiers": [
+    "Stacks become heroes below 50%; 3 or fewer is always a hero",
+    "6 or fewer is always a hero",
+    "12 or fewer is always a hero"
+   ]
+  },
+  "warding": {
+   "name": "Warding",
+   "cat": "martial",
+   "tiers": [
+    "All creatures start combat with 3 negative physical damage",
+    "6",
+    "12"
+   ]
+  },
+  "inspiration": {
+   "name": "Inspiration",
+   "cat": "martial",
+   "tiers": [
+    "All creatures +1 morale",
+    "+2 morale",
+    "+4 morale"
+   ]
+  },
+  "horsemanship": {
+   "name": "Horsemanship",
+   "cat": "martial",
+   "tiers": [
+    "Mounted creatures +1 attack & defence",
+    "+2 / +2",
+    "+2 / +2 and -1 slow"
+   ]
+  },
+  "pikemanship": {
+   "name": "Pikemanship",
+   "cat": "martial",
+   "tiers": [
+    "Your guards also stop cavalry",
+    "Your guards cannot be denied while the guard has advantage",
+    "Guarding grants +1 advantage"
+   ]
+  },
+  "tactics": {
+   "name": "Tactics",
+   "cat": "martial",
+   "tiers": [
+    "Stacks may Wait (act later this round)",
+    "Commander +1 initiative pip",
+    "All stacks start combat with 1 advantage"
+   ]
+  },
+  "evocation": {
+   "name": "Evocation",
+   "cat": "magic",
+   "tiers": [
+    "Damage spells +10% stronger every round",
+    "+25% every round",
+    "+50% every round"
+   ]
+  },
+  "layering": {
+   "name": "Layering",
+   "cat": "magic",
+   "tiers": [
+    "Non-stacking spells may stack 1 extra time",
+    "2 extra times",
+    "Unlimited"
+   ]
+  },
+  "spellthief": {
+   "name": "Spellthief",
+   "cat": "magic",
+   "tiers": [
+    "Get a copy of an escaping enemy hero's spellbook",
+    "When an enemy casts a spell you know, your copy gains +1 power"
+   ]
+  },
+  "logistics": {
+   "name": "Logistics",
+   "cat": "logistics",
+   "tiers": [
+    "No supply train needed and no train penalties",
+    "May cross chasms",
+    "Double movement"
+   ]
+  },
+  "scouting": {
+   "name": "Scouting",
+   "cat": "scouting",
+   "tiers": [
+    "+1 sight (tiles)",
+    "+2 sight (tiles)",
+    "+4 sight (tiles)"
+   ]
+  },
+  "fieldcraft": {
+   "name": "Fieldcraft",
+   "cat": "craft",
+   "tiers": [
+    "Upgrade creatures away from town (if your town has the building)",
+    "Creatures auto-upgrade at the start of battle if you have the essence"
+   ]
+  },
+  "ascension": {
+   "name": "Ascension",
+   "cat": "craft",
+   "tiers": [
+    "Tier 1 may take the 2nd upgrade your town does not offer",
+    "Tier 2 too",
+    "Tier 3 too"
+   ]
+  }
+ },
+ "ARTIFACTS": {
+  "banner": {
+   "name": "Banner of Equals",
+   "desc": "Unit numbers do not affect attack or defence (both sides).",
+   "value": 3
+  },
+  "stoic": {
+   "name": "Stoic Standard",
+   "desc": "Unit numbers do not affect morale (both sides).",
+   "value": 3
+  },
+  "horseshoe": {
+   "name": "Horseshoe of Haste",
+   "desc": "All your creatures -1 slow.",
+   "value": 2
+  },
+  "herald": {
+   "name": "Herald's Scroll",
+   "desc": "Cast one spell before combat begins.",
+   "value": 2
+  },
+  "heart": {
+   "name": "Heartstone",
+   "desc": "All your creatures +1 health.",
+   "value": 5
+  },
+  "blade": {
+   "name": "Keen Blade",
+   "desc": "+1 attack.",
+   "value": 1,
+   "stat": {
+    "attack": 1
+   }
+  },
+  "aegis": {
+   "name": "Aegis",
+   "desc": "+1 defence.",
+   "value": 1,
+   "stat": {
+    "defence": 1
+   }
+  },
+  "lion": {
+   "name": "Lion Badge",
+   "desc": "+2 courage.",
+   "value": 1,
+   "stat": {
+    "courage": 2
+   }
+  },
+  "tome": {
+   "name": "Old Tome",
+   "desc": "+2 knowledge.",
+   "value": 1,
+   "stat": {
+    "knowledge": 2
+   }
+  },
+  "orb": {
+   "name": "Power Orb",
+   "desc": "+1 power.",
+   "value": 1,
+   "stat": {
+    "power": 1
+   }
+  },
+  "hourglass": {
+   "name": "Hourglass",
+   "desc": "+1 initiative (one pip).",
+   "value": 1,
+   "stat": {
+    "initiative": 1
+   }
+  },
+  "boots": {
+   "name": "Road Boots",
+   "desc": "+2 movement per day.",
+   "value": 2
+  }
+ },
+ "PRIMARY": [
+  "attack",
+  "defence",
+  "courage",
+  "initiative",
+  "power",
+  "knowledge"
+ ],
+ "CLASSES": {
+  "warlord": {
+   "name": "Warlord",
+   "skilled": [
+    "attack",
+    "defence",
+    "courage"
+   ],
+   "skills": {},
+   "desc": "Might hero. Skilled in attack, defence, courage."
+  },
+  "mage": {
+   "name": "Mage",
+   "skilled": [
+    "power",
+    "knowledge",
+    "initiative"
+   ],
+   "skills": {
+    "sorcery": 1,
+    "arcana": 1
+   },
+   "desc": "Starts with Spellweaving I and Deep Memory I."
+  },
+  "paragon": {
+   "name": "Paragon",
+   "skilled": [
+    "attack",
+    "defence",
+    "courage",
+    "initiative",
+    "power",
+    "knowledge"
+   ],
+   "skills": {},
+   "noSecondary": true,
+   "flatPrimary": true,
+   "desc": "All primary skills cost 3 XP/level and never lose XP, but cannot learn secondary skills."
+  },
+  "scholar": {
+   "name": "Scholar",
+   "skilled": [
+    "knowledge",
+    "courage",
+    "defence"
+   ],
+   "skills": {},
+   "learner": true,
+   "desc": "Its skills raise the cost of other skills by only (tier x 2 - 2)."
+  }
+ },
+ "HERO_NAMES": [
+  "Aldric",
+  "Brenna",
+  "Corvin",
+  "Dagny",
+  "Edda",
+  "Faolan",
+  "Gisela",
+  "Hakon",
+  "Isolde",
+  "Joran",
+  "Kestrel",
+  "Lysa",
+  "Morwen",
+  "Niall",
+  "Oriel",
+  "Perrin",
+  "Quill",
+  "Rowan",
+  "Sabine",
+  "Tamsin",
+  "Ulric",
+  "Vesna",
+  "Wystan",
+  "Yrsa"
+ ],
+ "OBJ": {
+  "town": {
+   "name": "Town",
+   "glyph": "♜",
+   "color": "#e8dcc0",
+   "desc": "Recruit, build, upgrade. Capture enemy towns; lose your capital and you lose the game."
+  },
+  "mine": {
+   "name": "Resource site",
+   "glyph": "$",
+   "color": "#f0d060",
+   "desc": "Pay the survey cost while standing here to claim it for daily gold."
+  },
+  "monster": {
+   "name": "Monsters",
+   "glyph": "!",
+   "color": "#ff7a6a",
+   "desc": "Neutral creatures. Step on them to fight."
+  },
+  "chest": {
+   "name": "Treasure trove",
+   "glyph": "◆",
+   "color": "#ffd76a",
+   "desc": "Gold, or experience for the hero."
+  },
+  "buried": {
+   "name": "Buried treasure",
+   "glyph": "✕",
+   "color": "#ffe9a0",
+   "desc": "A hidden cache."
+  },
+  "artifact": {
+   "name": "Artifact",
+   "glyph": "✧",
+   "color": "#ffb0f0",
+   "desc": "A magical item for your hero."
+  },
+  "shrine": {
+   "name": "Spell shrine",
+   "glyph": "✦",
+   "color": "#c7a6ff",
+   "desc": "Learn a spell into your spellbook."
+  },
+  "hermit": {
+   "name": "Wise hermit",
+   "glyph": "☥",
+   "color": "#b8e0a0",
+   "desc": "Primary skill experience."
+  },
+  "academy": {
+   "name": "Academy",
+   "glyph": "⌂",
+   "color": "#9ad0ff",
+   "desc": "Secondary skill experience."
+  },
+  "tower": {
+   "name": "Watchtower",
+   "glyph": "⟰",
+   "color": "#e0e0e0",
+   "desc": "Reveals the land around it."
+  },
+  "fairy": {
+   "name": "Fairy ring",
+   "glyph": "❀",
+   "color": "#ff9ad8",
+   "desc": "Magi creatures may join you."
+  },
+  "mercs": {
+   "name": "Mercenary camp",
+   "glyph": "♞",
+   "color": "#e0b080",
+   "desc": "Hire a random mounted unit combination."
+  },
+  "knight": {
+   "name": "Lost knights",
+   "glyph": "⚔",
+   "color": "#e0e0ff",
+   "desc": "Stranded soldiers who may join you."
+  },
+  "post": {
+   "name": "Recruiting post",
+   "glyph": "⚑",
+   "color": "#f0c070",
+   "desc": "Buy units from your towns while abroad (+25% price)."
+  },
+  "font": {
+   "name": "Arcane font",
+   "glyph": "◎",
+   "color": "#a0f0ff",
+   "desc": "Upgrade first-upgrade creatures into Magi (essence + gold)."
+  },
+  "cache": {
+   "name": "Essence cache",
+   "glyph": "⬡",
+   "color": "#8af0c8",
+   "desc": "Upgrade essence."
+  },
+  "forget": {
+   "name": "Forest of Forgetting",
+   "glyph": "☁",
+   "color": "#c0b0e0",
+   "desc": "Dangerous: lose all secondary skill experience, gain +2 knowledge."
+  },
+  "grail": {
+   "name": "The Holy Grail",
+   "glyph": "♆",
+   "color": "#fff2a0",
+   "desc": "Whoever claims it gains +1 to every primary skill and +1000 gold per week."
+  }
+ },
+ "MINES": {
+  "timber": {
+   "name": "Timber Stand",
+   "income": 60,
+   "cost": 300
+  },
+  "quarry": {
+   "name": "Limestone Quarry",
+   "income": 90,
+   "cost": 450
+  },
+  "vein": {
+   "name": "Gold Vein",
+   "income": 150,
+   "cost": 750
+  }
+ },
+ "BUILDINGS": {
+  "dwell2": {
+   "name": "Tier 2 dwelling",
+   "cost": 1000,
+   "req": [],
+   "desc": "Recruit tier 2 creatures."
+  },
+  "dwell3": {
+   "name": "Tier 3 dwelling",
+   "cost": 2000,
+   "req": [
+    "dwell2"
+   ],
+   "desc": "Recruit tier 3 creatures."
+  },
+  "dwell4": {
+   "name": "Tier 4 lair",
+   "cost": 4000,
+   "req": [
+    "dwell3"
+   ],
+   "desc": "Recruit tier 4 creatures (each costs 1 courage in battle; your hero must fight beside them)."
+  },
+  "up1_1": {
+   "name": "T1 drill yard",
+   "cost": 500,
+   "req": [],
+   "desc": "First upgrade (melee or ranged) for tier 1."
+  },
+  "up1_2": {
+   "name": "T2 drill yard",
+   "cost": 900,
+   "req": [
+    "dwell2"
+   ],
+   "desc": "First upgrade (melee or ranged) for tier 2."
+  },
+  "up1_3": {
+   "name": "T3 drill yard",
+   "cost": 1500,
+   "req": [
+    "dwell3"
+   ],
+   "desc": "First upgrade (melee or ranged) for tier 3."
+  },
+  "up1_4": {
+   "name": "T4 drill yard",
+   "cost": 3000,
+   "req": [
+    "dwell4"
+   ],
+   "desc": "Normal upgrade for tier 4 ⚑."
+  },
+  "up2_1": {
+   "name": "T1 war college",
+   "cost": 800,
+   "req": [
+    "up1_1"
+   ],
+   "desc": "Second upgrade for tier 1 ⚑."
+  },
+  "up2_2": {
+   "name": "T2 war college",
+   "cost": 1400,
+   "req": [
+    "up1_2"
+   ],
+   "desc": "Second upgrade for tier 2 ⚑."
+  },
+  "up2_3": {
+   "name": "T3 war college",
+   "cost": 2200,
+   "req": [
+    "up1_3"
+   ],
+   "desc": "Second upgrade for tier 3 ⚑."
+  },
+  "sanctum": {
+   "name": "Arcane sanctum",
+   "cost": 3500,
+   "req": [],
+   "desc": "Turn base creatures (any tier) into Magi."
+  },
+  "walls": {
+   "name": "Walls",
+   "cost": 1500,
+   "req": [],
+   "desc": "Sieges of this town are fought behind walls."
+  }
+ },
+ "MUSIC": {
+  "TRACKS": {
+   "path": {
+    "file": "music/the-path-winds-true.mp3",
+    "name": "The Path Winds True"
+   },
+   "woods": {
+    "file": "music/the-woods-weep.mp3",
+    "name": "The Woods Weep"
+   },
+   "water": {
+    "file": "music/water-familiar-song.mp3",
+    "name": "Water Familiar Song"
+   },
+   "sad": {
+    "file": "music/sad-ages.mp3",
+    "name": "Sad Ages"
+   },
+   "sad2": {
+    "file": "music/sad-ages-2.mp3",
+    "name": "Sad Ages (second version)"
+   },
+   "town": {
+    "file": "music/we-stand.mp3",
+    "name": "We Stand"
+   }
+  },
+  "TERRAIN": {
+   "plains": "path",
+   "field": "path",
+   "steppe": "path",
+   "hill": "path",
+   "crossroads": "path",
+   "village": "path",
+   "stones": "path",
+   "arena": "path",
+   "nexus": "path",
+   "watchfort": "path",
+   "forest": "woods",
+   "dreamwood": "woods",
+   "grove": "woods",
+   "tundra": "woods",
+   "swamp": "water",
+   "moor": "water",
+   "ashlands": "sad",
+   "badlands": "sad",
+   "canyon": "sad",
+   "chasm": "sad",
+   "mountain": "sad2",
+   "escarpment": "sad2",
+   "bluffs": "sad2",
+   "town": "town"
+  }
+ },
+ "FLAGS": [
+  {
+   "id": "price",
+   "area": "Economy",
+   "text": "Unit gold prices (T1 30, T2 80, T3 200, T4 800) are placeholders."
+  },
+  {
+   "id": "escalation",
+   "area": "Economy",
+   "text": "Buying past the weekly growth: each further \"week-sized batch\" costs x2, x3, x4... Doc only says \"doubles then triples or whatever\"."
+  },
+  {
+   "id": "upgradefee",
+   "area": "Economy",
+   "text": "Upgrade gold fee per creature (T1 20, T2 50, T3 120, T4 400) plus 1 essence of that tier per creature."
+  },
+  {
+   "id": "income",
+   "area": "Economy",
+   "text": "Town base income 500 gold/day, start with 2500 gold."
+  },
+  {
+   "id": "trainrules",
+   "area": "Overworld",
+   "text": "Supply train: with train you may only walk on roads and have -1 movement. Parking the train lets you go off-road (still -1 movement) but your units get -1 morale and lose 1 creature from the largest stack per day (attrition) until you return to it. Wounded ride in the train; if an enemy walks over a parked train it is destroyed with its wounded. A new train costs 300 gold in town."
+  },
+  {
+   "id": "essence",
+   "area": "Economy",
+   "text": "Upgrade essence: +1 essence of tier N per tier-N enemy creature killed. The doc also says \"-1 per primary skill experience gained\" but attack XP alone equals kills x tier, which would cancel essence completely, so that subtraction is OFF (toggle G.CFG.essenceMinusXP)."
+  },
+  {
+   "id": "herostart",
+   "area": "Heroes",
+   "text": "Starting primary stats per class are placeholders (courage ~5 because every stack costs 1 courage in battle)."
+  },
+  {
+   "id": "neutralcourage",
+   "area": "Combat",
+   "text": "Neutral armies (no hero) fight with courage 0 and do not pay the -1 courage per stack."
+  },
+  {
+   "id": "villageX",
+   "area": "Terrain",
+   "text": "Village: defender gains a militia stack of 6 tier-1s of its faction. Crossroads: both sides gain 4 tier-1 mercenaries. (\"X\" was open in the doc.)"
+  },
+  {
+   "id": "wallX",
+   "area": "Terrain",
+   "text": "Town walls: wall has 12 HP per defending stack; every 12 damage it protects one fewer defender (bottom first)."
+  },
+  {
+   "id": "gamma3dmg",
+   "area": "Units",
+   "text": "Gamma T3 damage written \"546\" / Melee I \"646\": read as min-mid-max 4-5-6 and 4-6-6."
+  },
+  {
+   "id": "delta2mi",
+   "area": "Units",
+   "text": "Delta T2 Melee I damage \"23.55\" read as 2 / 3.5 / 5."
+  },
+  {
+   "id": "delta4rally",
+   "area": "Units",
+   "text": "Delta T4 \"rallying applies negative morale instead of positive\": its Rally may target an ENEMY stack, dealing 2x its morale as morale damage (it can still rally friends normally)."
+  },
+  {
+   "id": "delta1",
+   "area": "Units",
+   "text": "Delta T1: whenever ANY other stack loses creatures to physical damage and that stack's tier >= this tier, gain 1 creature (Melee I: gain floor(lost tier / this tier)). Magi: gain 1 creature per creature that dies anywhere."
+  },
+  {
+   "id": "beta2",
+   "area": "Units",
+   "text": "Beta T2 \"additional morale damage equal to its current morale\" is applied per creature (x stack size). In AI-vs-AI sims this makes Beta win almost every matchup. Toggle G.CFG.beta2PerCreature = false to add it once per attack instead."
+  },
+  {
+   "id": "alpha3regen",
+   "area": "Units",
+   "text": "Alpha T3 \"remove damage equal to number of units at start of turn\" removes PHYSICAL damage."
+  },
+  {
+   "id": "magi-invented",
+   "area": "Units",
+   "text": "Magi effects NOT in the doc (taken from the doc's ability list): Alpha1 rally also heals physical = stack size; Alpha2 attacks all engaged units; Alpha4 double bonuses from numbers & advantage; Beta1 deals damage = its size when attacked; Beta2 deny strips (advantage+1) advantages; Beta4 lethal physical converts to morale; Gamma4 each kill recovers a deserter; Delta2 morale +50% for rallying; Delta4 clears all morale damage at turn start."
+  },
+  {
+   "id": "magi-stats",
+   "area": "Units",
+   "text": "Magi (and Ranged) versions use the Melee I stats + their modifier. T4 Magi uses T4 base stats + effect."
+  },
+  {
+   "id": "secondup-choice",
+   "area": "Units",
+   "text": "Which 2nd upgrade (melee II or ranged II) each town offers per tier was chosen arbitrarily."
+  },
+  {
+   "id": "upgrade2",
+   "area": "Units",
+   "text": "PLACEHOLDER ⚑: second upgrades (and the T4 normal upgrade) just add \"+1\" bonuses (attack 5+1, defence 5+1, morale +1). Needs real design."
+  },
+  {
+   "id": "rider-specials",
+   "area": "Units",
+   "text": "Riders: combined unit keeps the specials of both rider and mount; ranged/teleport come from the rider, cavalry/fly from the mount. Combined tier = rider + mounts. Cost = 1 rider + N mounts from your army."
+  },
+  {
+   "id": "spellcosts",
+   "area": "Spells",
+   "text": "Knowledge costs for Equalize (5), Diminish (2) and Halve (6) were not in the doc. Spell names are invented."
+  },
+  {
+   "id": "spellscale",
+   "area": "Spells",
+   "text": "Only \"damage\" spells (Flame, Dread, Ward, Mend) scale with Power (+10%/pt). Everything else scales with creature numbers."
+  },
+  {
+   "id": "commander",
+   "area": "Combat",
+   "text": "Commander actions (instead of a spell): Recall (spend courage = tier to return 1 deserter), Revive (spend spare knowledge = tier to revive 1 dead), Embolden (spend an initiative pip for +1 advantage), Steel (+1 courage; the doc asked about +0.5, raised to 1 so all numbers stay whole)."
+  },
+  {
+   "id": "terrain-names",
+   "area": "Terrain",
+   "text": "Terrain names for the unnamed doc effects are invented (Ashlands, Haunted Moor, Steppe, Badlands, Escarpment, Bluffs, Tundra, Dreamwood, Standing Stones, Village, Watchfort, Crossroads, Sacred Grove, Old Arena, Ley Nexus). Card sizes/sight numbers are placeholders except mountain (+6 / seen from 9) and forest (-1)."
+  },
+  {
+   "id": "mountain-fx",
+   "area": "Terrain",
+   "text": "Mountain battles use \"defenders count as ranged\"; Tundra = \"all except archers gain one slow\"; Swamp = \"all units gain one slow\"."
+  },
+  {
+   "id": "dusk",
+   "area": "Terrain",
+   "text": "The unnamed attacker time effect \"+1 initiative to own units incl. commander\" is called Dusk."
+  },
+  {
+   "id": "skill-invented",
+   "area": "Skills",
+   "text": "Skill names are invented. Tier texts marked with no doc source: Pikemanship III, Tactics II & III, Spellthief has 2 tiers, Fieldcraft 2 tiers. The doc's logistics clause \"may only add an even number of troops...\" was unclear and is omitted."
+  },
+  {
+   "id": "skill-xp",
+   "area": "Skills",
+   "text": "Secondary XP sources beyond the doc: magic skills +1 per spell cast; craft skills +1 per upgrade and per battle won; logistics +1 per card entered."
+  },
+  {
+   "id": "artifacts",
+   "area": "Artifacts",
+   "text": "The five doc artifacts are in (Banner of Equals, Stoic Standard, Horseshoe, Herald's Scroll, Heartstone). The stat trinkets and Road Boots are filler."
+  },
+  {
+   "id": "classes",
+   "area": "Heroes",
+   "text": "Class names & skilled sets are invented. Paragon = doc \"Beta hero specialty\"; Scholar = doc \"Hero specialty learning\"."
+  },
+  {
+   "id": "todo-captains",
+   "area": "Not yet implemented",
+   "text": "Captains (town guards that level 3x faster; hero + captain splitting tactics/spells in sieges)."
+  },
+  {
+   "id": "todo-refugees",
+   "area": "Not yet implemented",
+   "text": "Refugee camp for deserters whose home town lacks the building; buying them back until week end."
+  },
+  {
+   "id": "todo-disguise",
+   "area": "Not yet implemented",
+   "text": "Disguise skill (creatures appear strongest / weakest / random)."
+  },
+  {
+   "id": "todo-roads",
+   "area": "Not yet implemented",
+   "text": "Building new roads; surveyors building mines with time + wages instead of materials."
+  },
+  {
+   "id": "todo-portals",
+   "area": "Not yet implemented",
+   "text": "Portals on transcendent edges that reconnect the map \"the way it is supposed to be\". Moons / astrological events."
+  },
+  {
+   "id": "todo-alt",
+   "area": "Not yet implemented",
+   "text": "Alternatives the doc floated but did not settle, left out: spells upgrading after battles won; attributes increasing by use Bethesda-style for attack/defence totals; sacrificing units to upgrade; moving after exchanging troops; hero specialty with unlimited +1/-1 damage stacks; Entrenchment (doc: only if necessary)."
+  },
+  {
+   "id": "todo-ai",
+   "area": "Not yet implemented",
+   "text": "A computer-controlled rival hero on the overworld (hotseat only for now; neutral monsters are AI in battle)."
+  },
+  {
+   "id": "whole",
+   "area": "Combat",
+   "text": "All calculated values are rounded to whole numbers (half rounds up): attack, defence, morale per creature, every hit (morale share rounded, health gets the rest), spells, rally, terrain damage. Base stats from the doc that are halves (7.5 attack, 2.5 / 1.5 / 3.5 damage, ranged minimum halved) are kept as written and only rounded after they are scaled."
+  },
+  {
+   "id": "sight",
+   "area": "Overworld",
+   "text": "Sight is measured in tiles and cards are revealed tile by tile: a tile is seen if its walking distance in tiles from the hero (diagonals allowed inside a card) is within that card's visibility + your standing bonus + Scouting; the 8 tiles around you are always seen. Mountains still hide the cards just behind them. Towns see 2 whole cards around, watchtowers reveal 5 whole cards around. Scouting XP: 1 per 10 tiles revealed. Hidden treasures are still only found right next to the hero."
+  },
+  {
+   "id": "primary-category",
+   "area": "Heroes",
+   "text": "\"Randomly add experience to a skill in the same category\" read as: same category = the hero's skilled group or unskilled group."
+  },
+  {
+   "id": "music",
+   "area": "Audio",
+   "text": "Music by terrain (your tracks): open land & roads = The Path Winds True; forest, dreamwood, sacred grove, tundra = The Woods Weep; swamp & haunted moor = Water Familiar Song; ashlands, badlands, box canyon, chasm = Sad Ages; mountains, escarpment, bluffs = Sad Ages (second version); towns = We Stand. Battles play the battlefield terrain's track (sieges play We Stand). Menus play The Path Winds True."
+  },
+  {
+   "id": "sites",
+   "area": "Overworld",
+   "text": "Map sites are from the doc's discovery list (troves, artifacts, spells, hermits, academies, watchtowers, fairy rings, mercenaries with random mounted combos, lost knights, forest of forgetting, the Grail). Their exact rewards are invented."
+  },
+  {
+   "id": "mines",
+   "area": "Economy",
+   "text": "Resource sites: Timber Stand +60/day (cost 300), Limestone Quarry +90/day (cost 450), Gold Vein +150/day (cost 750). Claiming = paying the survey cost while your army stands there (doc). Enemies take them by stepping on them."
+  },
+  {
+   "id": "buildings",
+   "area": "Towns",
+   "text": "Building list and costs are placeholders. One building per town per day. Magi upgrades need an Arcane Sanctum or an Arcane Font on the map; Magi replaces the first upgrade (base → Magi)."
+  },
+  {
+   "id": "invest",
+   "area": "Economy",
+   "text": "Treasury: \"3 gold now for 1 gold forever\" implemented as: invest 300 gold for +100 gold every week, forever (repeatable)."
+  },
+  {
+   "id": "casualties",
+   "area": "Overworld",
+   "text": "After battle (doc): half of deserters (rounded down) rejoin the army, the rest rejoin the nearest own town's recruit pool; half of the dead (rounded down) become wounded and ride in the supply train until you visit a town, the rest die. Without a train, the wounded die too."
+  },
+  {
+   "id": "feint",
+   "area": "Overworld",
+   "text": "Attacker may feint (not attack) after the defender picks ground; a defender who picked ground but was not attacked loses its movement next turn. Defender may instead \"ignore\" the attack: 1-3 random stacks start slow."
+  },
+  {
+   "id": "herodeath",
+   "area": "Overworld",
+   "text": "A defeated hero is removed; the winner takes their spell book (doc) and artifacts (assumed). If a commander dies with its tier-4 stack but its army wins, the survivors walk to the nearest own town garrison."
+  }
+ ]
+}
