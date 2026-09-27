@@ -91,7 +91,7 @@ func _build() -> void:
 	qs.custom_minimum_size.y = 46
 	qs.add_child(_queue)
 	var top := UI.hbox([_chips, _top_status, qs, Music.control(), UI.button("? Rules", show_rules, "Small", "Quick rules reference")], 10)
-	root.add_child(UI.panel(top, UI.sb(UI.C.bg2, UI.C.line, 0, 1, 12, 6)))
+	root.add_child(UI.panel(top, UI.stone("bar").margins(12, 6)))
 	# main
 	var main := UI.hbox([], 0)
 	main.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -140,7 +140,7 @@ func _build() -> void:
 	fm.add_child(fv)
 	_rows = [UI.hbox([], 12), UI.hbox([], 12)]
 	_mid = PanelContainer.new()
-	_mid.add_theme_stylebox_override("panel", UI.sb(Color(0.05, 0.055, 0.067, 0.75), Color(1, 1, 1, 0.13), 99, 1, 16, 5))
+	_mid.add_theme_stylebox_override("panel", UI.stone("tip").margins(16, 5))
 	_mid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var s1 := Control.new(); s1.size_flags_vertical = Control.SIZE_EXPAND_FILL; s1.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var s2 := Control.new(); s2.size_flags_vertical = Control.SIZE_EXPAND_FILL; s2.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -153,9 +153,9 @@ func _build() -> void:
 	# side panel
 	var side := UI.vbox([], 0)
 	side.custom_minimum_size.x = 360
-	main.add_child(UI.panel(side, UI.sb(UI.C.bg2, UI.C.line, 0, 1, 0)))
+	main.add_child(UI.panel(side, UI.stone("panel").margins(4)))
 	_act = UI.vbox([], 6)
-	side.add_child(UI.panel(_act, UI.sb(UI.C.bg2, UI.C.line, 0, 0, 10)))
+	side.add_child(UI.panel(_act, UI.sb(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 0, 0, 10)))
 	side.add_child(UI.sep_line())
 	var isc := ScrollContainer.new()
 	isc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -163,7 +163,7 @@ func _build() -> void:
 	isc.size_flags_stretch_ratio = 1.0
 	_info = UI.vbox([], 4)
 	_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	isc.add_child(UI.panel(_info, UI.sb(UI.C.bg2, UI.C.line, 0, 0, 10)))
+	isc.add_child(UI.panel(_info, UI.sb(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 0, 0, 10)))
 	isc.get_child(0).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	side.add_child(isc)
 	side.add_child(UI.sep_line())
@@ -173,7 +173,7 @@ func _build() -> void:
 	_log.size_flags_stretch_ratio = 1.2
 	_log.add_theme_font_override("normal_font", UI.font_mono)
 	_log.add_theme_color_override("default_color", Color("#cfcabd"))
-	side.add_child(UI.panel(_log, UI.sb(UI.C.bg2, UI.C.line, 0, 0, 8)))
+	side.add_child(UI.panel(_log, UI.stone("inset").margins(8)))
 	_log.get_parent().size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_log.get_parent().size_flags_stretch_ratio = 1.2
 
@@ -394,10 +394,10 @@ func render() -> void:
 		await get_tree().create_timer(0.02 if UI.autopilot else 0.45).timeout
 		finish()
 
-func _hero_sb(cur: bool) -> StyleBoxFlat:
-	var s := UI.sb(Color(0.11, 0.12, 0.15, 0.93), UI.C.gold if cur else UI.C.line2, 10, 1, 8)
+func _hero_sb(cur: bool) -> StoneBox:
+	var s := UI.stone("panel").margins(9)
 	if cur:
-		s.shadow_color = Color(0.85, 0.7, 0.35, 0.33); s.shadow_size = 8
+		s.halo = UI.C.gold; s.trim = UI.C.gold2
 	return s
 
 func hero_card(side: int) -> Control:
@@ -572,16 +572,18 @@ func stack_card(s) -> Control:
 	var border: Color = UI.C.line2
 	if state == "valid": border = UI.C.good
 	if active: border = UI.C.gold
-	var st := UI.sb(Color(0.11, 0.12, 0.15, 0.91), border, 10, 2, 7, 6)
-	if s.side == 0: st.border_width_bottom = 4
-	else: st.border_width_top = 4
+	var st := UI.stone("panel").margins(8, 7)
+	st.fill = Color("#26211b")
+	st.trim = Color(0, 0, 0, 0)
+	var band := Color("#9a4a34") if s.side == 0 else Color("#3f6a9a")
+	if s.side == 0: st.accent_bottom = band
+	else: st.accent_top = band
 	if active:
-		st.shadow_color = Color(0.85, 0.7, 0.35, 0.45); st.shadow_size = 10
+		st.halo = UI.C.gold; st.trim = UI.C.gold2
 	elif state == "valid":
-		st.shadow_color = Color(0.42, 0.75, 0.48, 0.4); st.shadow_size = 3
-	if sel == s.id:
-		st.border_color = border.lightened(0.35) if not active and state == "" else border
-		st.expand_margin_left = 2; st.expand_margin_right = 2; st.expand_margin_top = 2; st.expand_margin_bottom = 2
+		st.halo = UI.C.good; st.halo_w = 2
+	if sel == s.id and not active:
+		st.trim = Color(1, 1, 1, 0.75)
 	var mv: int = s.morale_val
 	var hp := b.health(s)
 	var mcap := maxi(0, s.count * (mv - 1))

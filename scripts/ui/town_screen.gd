@@ -16,7 +16,10 @@ func close() -> void:
 	UI.screen("world").enter(false)
 
 func _card(kids: Array, built: bool = false) -> PanelContainer:
-	var p := UI.panel(UI.vbox(kids, 4), UI.sb(UI.C.panel, Color("#4f7a4a") if built else UI.C.line, 8, 1, 10))
+	var st := UI.stone("panel").margins(10)
+	st.fill = Color("#342e26")
+	st.trim = Color("#6cc07a", 0.7) if built else Color("#5c4a2a")
+	var p := UI.panel(UI.vbox(kids, 4), st)
 	p.custom_minimum_size.x = 260
 	return p
 
@@ -54,7 +57,7 @@ func render() -> void:
 	var bar := UI.hbox([UI.button("◂ Map", close), title, fchip, UI.chip("Capital", "warn", "If this town falls, you lose the game.") if t.capital else null, UI.spacer(),
 		UI.rich("● [b][color=#f0d68e]%s[/color][/b]   %s" % [U.fmt(P.gold), UI.col("   ".join([1, 2, 3, 4].map(func(k): return "⬡%d %s" % [k, P.essence[str(k)]])), "muted")], 14)], 10)
 	bar.get_child(bar.get_child_count() - 1).custom_minimum_size.x = 300
-	root.add_child(UI.panel(bar, UI.sb(UI.C.bg2, UI.C.line, 0, 1, 14, 10)))
+	root.add_child(UI.panel(bar, UI.stone("bar")))
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED

@@ -35,3 +35,4 @@ window/subwindows/embed_subwindows=true
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/canvas_textures/default_texture_filter=1
+textures/canvas_textures/default_texture_repeat=1

@@ -11,8 +11,12 @@ func default_side(f: String, ai: bool) -> Dictionary:
 	return {
 		"faction": f, "ai": ai, "name": "",
 		"hero": {"enabled": true, "cls": "warlord", "name": "", "stats": (D.CFG.heroStart.warlord as Dictionary).duplicate(), "skills": {}, "artifacts": [], "equipped": ["flame", "valor"]},
-		"stacks": [{"key": Units.key(f, 1, 0, ""), "count": 18}, {"key": Units.key(f, 2, 0, ""), "count": 6}, {"key": Units.key(f, 3, 0, ""), "count": 4}],
+		"stacks": [{"key": Units.key(f, 1, 0, ""), "count": default_count(1)}, {"key": Units.key(f, 2, 0, ""), "count": default_count(2)}, {"key": Units.key(f, 3, 0, ""), "count": default_count(3)}],
 	}
+
+## default stack size by tier: T1 6, T2 3, T3 2, T4 1
+func default_count(tier: int) -> int:
+	return {1: 6, 2: 3, 3: 2, 4: 1}.get(mini(4, maxi(1, tier)), 1)
 
 func open() -> void:
 	if cfg == null:
@@ -110,7 +114,7 @@ func render() -> void:
 		UI.label("Ground", "muted"), o1, UI.label("Time", "muted"), o2, UI.label("Weather", "muted"), o3, ig,
 		UI.button("⚖ Simulate ×100", func(): simulate(100), "", "Run 100 AI-vs-AI battles with these armies"),
 		UI.button("⚔ Fight!", fight, "Primary")], 10)
-	root.add_child(UI.panel(bar, UI.sb(UI.C.bg2, UI.C.line, 0, 1, 14, 10)))
+	root.add_child(UI.panel(bar, UI.stone("bar")))
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -137,7 +141,7 @@ func side_editor(i: int) -> Control:
 	# stacks
 	var sp := UI.vbox([], 4)
 	var add := UI.button("+ Add stack", func():
-		sd.stacks.append({"key": Units.key(sd.faction, 1, 0, ""), "count": 10})
+		sd.stacks.append({"key": Units.key(sd.faction, 1, 0, ""), "count": default_count(1)})
 		render(), "Small")
 	add.disabled = sd.stacks.size() >= D.CFG.maxStacks
 	sp.add_child(UI.hbox([UI.h3("Army (%d/%d stacks)" % [sd.stacks.size(), D.CFG.maxStacks]), UI.spacer(), add]))
@@ -178,7 +182,7 @@ func side_editor(i: int) -> Control:
 		hp.add_child(dl)
 		var stats := UI.flow([], 10)
 		for k in D.PRIMARY:
-			stats.add_child(UI.hbox([UI.label(k.substr(0, 4), "muted"), UI.spin(int(hc.stats[k]), 0, 99, func(v): hc.stats[k] = v; render(), 70)], 4))
+			stats.add_child(UI.hbox([UI.label(k.capitalize(), "muted"), UI.spin(int(hc.stats[k]), 0, 99, func(v): hc.stats[k] = v; render(), 70)], 4))
 		hp.add_child(stats)
 		var fake := {"cls": hc.cls, "skills": hc.skills, "artifacts": hc.artifacts, "stats": hc.stats}
 		var cost := Heroes.equipped_cost(fake, hc.equipped)
@@ -227,7 +231,10 @@ func pick_unit(sd: Dictionary, s: Dictionary) -> void:
 	# state lives in a dictionary: lambdas capture locals by value
 	var st := {"rider": s.key.split("@")[0], "mount": s.key.split("@")[1] if "@" in s.key else null, "step": "rider"}
 	var finish := func():
+		var old_tier: int = Units.resolve(s.key).tier
 		s.key = st.rider + "@" + st.mount if st.mount != null else st.rider
+		var new_tier: int = Units.resolve(s.key).tier
+		if new_tier != old_tier: s.count = default_count(new_tier)
 		UI.close_modal()
 		render()
 	var draw := [null]

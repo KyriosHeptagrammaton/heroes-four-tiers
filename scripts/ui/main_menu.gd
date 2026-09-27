@@ -23,8 +23,8 @@ func menu() -> void:
 	gt.fill_from = Vector2(0.5, 0.5)
 	gt.fill_to = Vector2(1.0, 1.0)
 	var gr := Gradient.new()
-	gr.set_color(0, Color("#262a33"))
-	gr.set_color(1, Color("#121317"))
+	gr.set_color(0, Color(0, 0, 0, 0.0))
+	gr.set_color(1, Color(0, 0, 0, 0.75))
 	gt.gradient = gr
 	bg.texture = gt
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -34,19 +34,26 @@ func menu() -> void:
 	var cc := CenterContainer.new()
 	cc.set_anchors_preset(Control.PRESET_FULL_RECT)
 	el.add_child(cc)
+	var outer := UI.vbox([], 14)
+	cc.add_child(outer)
 	var box := UI.vbox([], 10)
-	box.custom_minimum_size.x = 420
-	cc.add_child(box)
+	box.custom_minimum_size.x = 400
 	var sig := UI.label("α β γ δ", "gold", 64)
+	sig.add_theme_font_override("font", UI.font_head)
+	sig.add_theme_color_override("font_outline_color", Color("#140e08"))
+	sig.add_theme_constant_override("outline_size", 8)
 	sig.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(sig)
 	var t := UI.h1("Heroes of the Four Tiers")
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(t)
-	var v := UI.label("An abstract prototype · v" + VERSION, "muted")
+	var v := UI.label("An abstract prototype · v" + VERSION, "gold")
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(v)
-	box.add_child(Control.new())
+	for c in box.get_children():
+		box.remove_child(c)
+		outer.add_child(c)
+	outer.add_child(UI.panel(box, UI.stone("frame").margins(30, 26)))
 	var has_game: bool = Game.state != null
 	if has_game:
 		box.add_child(UI.button("Continue game", Game.resume, "BigPrimary"))
@@ -71,9 +78,9 @@ func flags() -> void:
 		for f in D.FLAGS:
 			if f.area == a:
 				var r := UI.rich(U.esc(f.text), 13)
-				var st := UI.sb(UI.C.panel2, Color(0, 0, 0, 0), 6, 0, 10, 6)
-				st.border_width_left = 3
-				st.border_color = Color("#ff9f43")
+				var st := UI.stone("plate").margins(10, 6)
+				st.accent_w = 3
+				st.trim = Color("#ff9f43", 0.6)
 				box.add_child(UI.panel(r, st))
 	box.add_child(UI.row_end([UI.button("Close", UI.close_modal, "Primary")]))
 	UI.modal(box, false, 720)

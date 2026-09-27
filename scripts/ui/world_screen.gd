@@ -42,6 +42,7 @@ func _build() -> void:
 	map.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	map.clip_contents = true
 	map.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	map.texture_repeat = CanvasItem.TEXTURE_REPEAT_DISABLED
 	map.mouse_filter = Control.MOUSE_FILTER_STOP
 	map.draw.connect(_draw_map)
 	map.gui_input.connect(_map_input)
@@ -65,7 +66,7 @@ func _build() -> void:
 	hover_rtl = UI.rich("", 12)
 	hover_rtl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hover_rtl.custom_minimum_size.x = 340
-	hover_panel = UI.panel(hover_rtl, UI.sb(Color(0.055, 0.06, 0.07, 0.91), UI.C.line2, 8, 1, 10, 8))
+	hover_panel = UI.panel(hover_rtl, UI.stone("tip"))
 	hover_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hover_panel.visible = false
 	map.add_child(hover_panel)
@@ -85,7 +86,7 @@ func _build() -> void:
 	map.add_child(tb)
 	side = UI.vbox([], 0)
 	side.custom_minimum_size.x = 330
-	root.add_child(UI.panel(side, UI.sb(UI.C.bg2, UI.C.line, 0, 1, 0)))
+	root.add_child(UI.panel(side, UI.stone("panel").margins(4)))
 
 func enter(recenter: bool = true) -> void:
 	if not _built:
@@ -664,7 +665,7 @@ func next_hero() -> void:
 # ------------------------------------------------------------------ side panel
 func _sec(kids: Array, expand: bool = false) -> Control:
 	var v := UI.vbox(kids, 6)
-	var p := UI.panel(v, UI.sb(UI.C.bg2, Color(0, 0, 0, 0), 0, 0, 12, 10))
+	var p := UI.panel(v, UI.sb(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 0, 0, 12, 10))
 	if expand: p.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	return p
 
