@@ -615,7 +615,8 @@
   "gamma.2": "War Horse",
   "gamma.4": "Angel",
   "delta.1": "Skeleton",
-  "delta.2": "Giant Scorpion"
+  "delta.2": "Giant Scorpion",
+  "beta.4": "Titan"
  },
  "SPELLS": {
   "quicken": {

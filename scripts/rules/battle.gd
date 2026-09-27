@@ -171,10 +171,10 @@ func setup_sides() -> void:
 		if s.count <= always_hero_n(s.side):
 			s.hero = true
 		recalc_morale(s)
-	# Beta T4: at start of combat 1 creature flees from every other stack
+	# Beta T4 (Titan): at start of combat 1 creature flees from every other tier 1-3 stack
 	for b in stacks.filter(func(x): return x.sp("scatterOnStart")):
 		for o in stacks:
-			if o != b and o.count > 0 and not o.sp("ignoreNegSpecials"):
+			if o != b and o.count > 0 and o.def.tier <= 3 and not o.sp("ignoreNegSpecials"):
 				o.count -= 1; o.deserters += 1
 				say("%s loses 1 creature fleeing from %s." % [o.name, b.name])
 				if o.count <= 0:
@@ -995,7 +995,7 @@ func do_attack(a: Stk, t: Stk) -> void:
 	var ranged := is_ranged(a)
 	var half: bool = ranged and half_ranged_only(a) and not engaged
 	attacked_this_round[a.side] = true
-	if a.sp("fleeOnAttack") and not ign(t) and t.count > 0:
+	if a.sp("fleeOnAttack") and not ign(t) and t.count > 0 and t.def.tier <= 3:
 		t.count -= 1; t.deserters += 1
 		say("1 of %s flees before %s!" % [t.name, a.name], "loss")
 		if t.count <= 0:
