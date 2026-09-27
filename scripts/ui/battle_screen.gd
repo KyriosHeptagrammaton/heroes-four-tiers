@@ -56,7 +56,7 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Courage[/b] = hero courage − 1 per stack − 1 per tier-4 creature. Each point removes 1 extra morale damage when a creature deserts.
 
-[b]Mouse.[/b] Left-click an action then a target. Right-click cancels targeting, or shows a stack's details. Double-click a stack to rename it. Keys: A E G D R S T F W, Esc cancels.
+[b]Mouse.[/b] On your stack's turn, click an enemy to attack it. For other actions, click the action then a target. Right-click cancels targeting, or shows a stack's details. Double-click one of your stacks to rename it. Keys: A E G D R S T F W, Esc cancels.
 
 [b]Actions.[/b] Attack · Engage · Guard · Deny · Rally · Seek Advantage · Retaliate · Fall Back (· Wait with Tactics). Hover each button for exact rules. Red arrows = engagements, blue dashed = guards.
 
@@ -277,6 +277,11 @@ func click_stack(s) -> void:
 				do_act("deny", s.id, i)
 			return
 		do_act(mode, s.id)
+		return
+	# no action picked: clicking an enemy during your stack's turn attacks it
+	var cur_s := b.turn_stack()
+	if cur_s != null and human_turn() and s.side != cur_s.side and s.count > 0:
+		do_act("attack", s.id)
 		return
 	sel = s.id
 	render()
@@ -643,6 +648,12 @@ func stack_card(s) -> Control:
 		tp = UI.col("✗ " + U.esc(reason), "bad") + "\n" + tp
 	elif mode == "attack" and cur != null and s.count > 0 and reason == null:
 		tp = preview_tip(cur, s) + tp
+	elif mode == null and spell == null and cmd == null and cur != null and s.count > 0 and s.side != cur.side and human_turn():
+		var why = b.check_attack(cur, s)
+		if why != null:
+			tp = UI.col("Click: can't attack — " + U.esc(why), "bad") + "\n" + tp
+		else:
+			tp = UI.col("Click to attack", "gold2") + "\n" + preview_tip(cur, s) + tp
 	UI.tip(card, tp)
 	card.gui_input.connect(func(e):
 		if not (e is InputEventMouseButton) or not e.pressed: return
