@@ -646,7 +646,7 @@ func stack_card(s) -> Control:
 	elif state == "invalid" and not active: card.modulate.a = 0.45
 	elif s.fallen_back: card.modulate.a = 0.7
 	# tooltip
-	var tp := UI.unit_tip(s.def, live_tip(s))
+	var tp := UI.unit_tip(s.def, live_tip(s), b.eff_stats(s))
 	if reason != null and reason != "first target":
 		tp = UI.col("✗ " + U.esc(reason), "bad") + "\n" + tp
 	elif mode == "attack" and cur != null and s.count > 0 and reason == null:
@@ -695,9 +695,8 @@ func live_tip(s) -> String:
 	var ec := b.eff_count(s)
 	var created := "%d / %d (%d dead, %d deserted%s)" % [s.count, s.start, s.dead, s.deserters, (", %d gained" % s.gained) if s.gained else ""]
 	return "\n\n" + UI.b("In this battle") + "\n" + UI.kv([
-		["Creatures", created], ["Attack", U.fmt(b.attack(s))], ["Defence", U.fmt(b.defence(s))],
-		["Morale", "%s each · dmg %s" % [U.fmt(s.morale_val), U.fmt(s.mor)]], ["Health", "%s each · dmg %s" % [U.fmt(b.health(s)), U.fmt(s.phys)]],
-		["Damage", "%s × %s (d%d)" % [" / ".join(tri.map(func(x): return U.fmt(x))), U.fmt(ec), maxi(3, U.jr(ec))]], ["Initiative", str(b.initiative(s))]])
+		["Creatures", created], ["Morale damage", "%s taken" % U.fmt(s.mor)], ["Health damage", "%s taken" % U.fmt(s.phys)],
+		["Damage roll", "%s × %s (d%d)" % [" / ".join(tri.map(func(x): return U.fmt(x))), U.fmt(ec), maxi(3, U.jr(ec))]]])
 
 func _hint(text: String) -> Control:
 	var l := UI.label(text, "gold2", 12)
@@ -752,7 +751,7 @@ func render_info() -> void:
 		if v != null and v != "":
 			s.name = v
 			render(), "Small")]))
-	_info.add_child(UI.rich(UI.unit_tip(s.def, live_tip(s)), 12))
+	_info.add_child(UI.rich(UI.unit_tip(s.def, live_tip(s), b.eff_stats(s)), 12))
 
 const LOG_COL := {"round": "#d9b45a", "dmg": "#e8c9a8", "loss": "#f08a7a", "good": "#6cc07a", "hero": "#f0d68e", "spell": "#b58cf0", "big": "#ffffff"}
 

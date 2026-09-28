@@ -70,6 +70,7 @@ var next_id := 1
 var sides: Array = []
 var wall = null
 var pre_combat := false
+var probe := false   # stats-only battle for the UI: no start-of-battle effects, no rounds
 var turn_acted := false
 var C: Dictionary
 
@@ -108,7 +109,8 @@ func _init(o: Dictionary) -> void:
 	if fx.get("walls", 0):
 		var n := stacks_of(1).size()
 		wall = {"hp": n * C.wallPerStack, "max": n * C.wallPerStack}
-	if o.get("ignoredAttack", false):
+	probe = o.get("probe", false)
+	if o.get("ignoredAttack", false) and not probe:
 		var own := rng.shuffle(stacks_of(1).duplicate())
 		var n := rng.rint(1, 3)
 		for s in own.slice(0, n):
@@ -116,6 +118,8 @@ func _init(o: Dictionary) -> void:
 			say("%s was caught unprepared (+1 slow)." % s.name)
 	setup_sides()
 	pre_combat = false
+	if probe:
+		return
 	for i in 2:
 		if sides[i].hs != null and sides[i].hs.freeCast > 0 and not sides[i].ai:
 			pre_combat = true
@@ -173,7 +177,7 @@ func setup_sides() -> void:
 			s.hero = true
 		recalc_morale(s)
 	# Beta T4 (Titan): at start of combat 1 creature flees from every other tier 1-3 stack
-	for b in stacks.filter(func(x): return x.sp("scatterOnStart")):
+	for b in stacks.filter(func(x): return x.sp("scatterOnStart") and not probe):
 		for o in stacks:
 			if o != b and o.count > 0 and o.def.tier <= 3 and not o.sp("ignoreNegSpecials"):
 				o.count -= 1; o.deserters += 1
@@ -303,6 +307,29 @@ func health(s: Stk) -> int:
 
 ## health without the hero's heart; 0 health still counts as 1 (only gaining health
 ## starts from the true 0, via extra_hp)
+## effective numbers shown in brackets next to the base stats (HoMM style)
+func eff_stats(s: Stk) -> Dictionary:
+	return {"hp": health(s), "mor": s.morale_val, "dmg": dmg_triple(s), "ini": initiative(s), "att": attack(s), "def": defence(s)}
+
+## effective stats of armies before any fighting. `o` is a Battle.new options dict
+## (a missing second side gets a token enemy). Returns, per side, one eff dict per
+## input stack, in order.
+static func probe_stats(o: Dictionary) -> Array:
+	var opts := o.duplicate()
+	opts.probe = true
+	opts.seed = 1
+	var sides_in: Array = opts.sides.duplicate()
+	while sides_in.size() < 2:
+		sides_in.append({"name": "-", "stacks": [{"key": Units.key("alpha", 1, 0, ""), "count": 1}]})
+	opts.sides = sides_in
+	var b := Battle.new(opts)
+	var out := []
+	for i in 2:
+		var st := b.stacks.filter(func(x): return x.side == i)
+		var n: int = sides_in[i].stacks.size()
+		out.append(st.slice(0, n).map(func(x): return b.eff_stats(x)))
+	return out
+
 func raw_health(s: Stk) -> int:
 	return maxi(1, int(s.def.hp) + s.extra_hp)
 

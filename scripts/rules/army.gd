@@ -56,6 +56,21 @@ func battle_stacks(groups: Array, prefix: String = "") -> Array:
 			out.append({"key": g.key, "count": per, "name": nm, "uid": "%s%d:%d" % [prefix, gi, k]})
 	return out
 
+## effective stats (hero, count bonuses, …) of each group, as its first stack
+## would start a battle on neutral ground. Returns one eff dict per group.
+func eff_by_group(groups: Array, hero = null, trainless: bool = false) -> Array:
+	if groups.is_empty():
+		return []
+	var st := battle_stacks(groups)
+	var fac: String = hero.faction if hero != null else ""
+	var res: Array = Battle.probe_stats({"sides": [{"name": "-", "hero": hero, "stacks": st, "faction": fac, "trainless": trainless}]})[0]
+	var out := []
+	var i := 0
+	for g in groups:
+		out.append(res[i] if i < res.size() else {})
+		i += int(g.splits)
+	return out
+
 func value(groups: Array) -> float:
 	var t := 0.0
 	for g in groups:

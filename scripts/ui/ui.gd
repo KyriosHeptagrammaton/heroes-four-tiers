@@ -720,14 +720,30 @@ func kv(pairs: Array) -> String:
 		s += "[cell][color=%s]%s[/color][/cell][cell]%s[/cell]" % [HEX.muted, p[0], p[1]]
 	return s + "[/table]"
 
-func unit_tip(d: Dictionary, extra: String = "") -> String:
+## unit card. `eff` (optional) holds effective values {hp, mor, dmg, ini, att, def};
+## any that differ from the base are shown in brackets, HoMM style: "8 (12)".
+func unit_tip(d: Dictionary, extra: String = "", eff: Dictionary = {}) -> String:
 	var F: Dictionary = D.FACTIONS[d.faction]
 	var s := "[b][color=%s]%s[/color][/b] %s" % [F.color, U.esc(d.name), col("%s · tier %d%s" % [F.name, d.tier, " (mounted)" if d.mounted else ""], "muted")]
 	if d.placeholder: s += " " + col("⚑", "flag")
 	var dm := []
 	for x in d.dmg: dm.append(U.fmt(x))
-	s += "\n" + kv([["Health", U.fmt(d.hp) + (" (counts as 1)" if d.hp == 0 else "")], ["Morale", Units.stat_str(d, "mor")], ["Damage", " / ".join(dm)], ["Initiative", str(d.ini)],
-		["Attack", Units.stat_str(d, "att")], ["Defence", Units.stat_str(d, "def")], ["Weight/Str", "%s / %s" % [d.w, d.s]]])
+	var withe := func(base_txt: String, stat: String, base_val) -> String:
+		if not eff.has(stat): return base_txt
+		var e = eff[stat]
+		if stat == "dmg":
+			var same := true
+			for i in e.size(): same = same and float(e[i]) == float(base_val[i])
+			if same: return base_txt
+			return base_txt + " " + col("(%s)" % " / ".join(e.map(func(x): return U.fmt(x))), "good" if float(e[1]) >= float(base_val[1]) else "bad")
+		if float(e) == float(base_val): return base_txt
+		return base_txt + " " + col("(%s)" % U.fmt(e), "good" if float(e) > float(base_val) else "bad")
+	var hp_txt: String = U.fmt(d.hp) + (" (counts as 1)" if d.hp == 0 and not eff.has("hp") else "")
+	s += "\n" + kv([["Health", withe.call(hp_txt, "hp", d.hp)], ["Morale", withe.call(Units.stat_str(d, "mor"), "mor", d.mor + d.flatMor)],
+		["Damage", withe.call(" / ".join(dm), "dmg", d.dmg)], ["Initiative", withe.call(str(d.ini), "ini", d.ini)],
+		["Attack", withe.call(Units.stat_str(d, "att"), "att", d.att + d.flatAtt)], ["Defence", withe.call(Units.stat_str(d, "def"), "def", d.def + d.flatDef)],
+		["Weight/Str", "%s / %s" % [d.w, d.s]]])
+	if eff.size(): s += "\n" + col("(brackets: effective, with hero, stack size & battlefield)", "dim")
 	var ab := []
 	for k in d.ab:
 		if d.ab[k] and D.ABILITY_TEXT.has(k):

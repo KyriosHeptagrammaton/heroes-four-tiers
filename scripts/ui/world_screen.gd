@@ -708,10 +708,12 @@ func render_side() -> void:
 			train_txt = "supply train with army" + (" (%d wounded)" % wn if wn else "")
 		else: train_txt = "supply train parked"
 		var mini_army := UI.flow([], 4)
-		for g in hero.army:
+		var eff := Army.eff_by_group(hero.army, hero, World.trainless(hero))
+		for gi in hero.army.size():
+			var g: Dictionary = hero.army[gi]
 			var d := Units.resolve(g.key)
 			var am := UI.panel(UI.hbox([UI.sym(d, 18), UI.label(str(g.count) + ("÷%d" % g.splits if g.splits > 1 else ""), "", 12)], 3), UI.sb(UI.C.panel, UI.C.line, 6, 1, 5, 2))
-			UI.tip(am, UI.unit_tip(d))
+			UI.tip(am, UI.unit_tip(d, "", eff[gi] if gi < eff.size() else {}))
 			mini_army.add_child(am)
 		var stat_line := "Atk %d  Def %d  C%d  I%s  Pow %d  K%d" % [Heroes.stat(hero, "attack"), Heroes.stat(hero, "defence"), Heroes.stat(hero, "courage"), Heroes.init_str(Heroes.stat(hero, "initiative")), Heroes.stat(hero, "power"), Heroes.stat(hero, "knowledge")]
 		var tl := UI.label("⚒ " + train_txt + (" (Logistics: not needed)" if Heroes.skill(hero, "logistics") else ""), "muted", 12)

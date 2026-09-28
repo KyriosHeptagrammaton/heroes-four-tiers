@@ -55,6 +55,20 @@ func battle_opts(seed_v: int = 0, force_ai: bool = false) -> Dictionary:
 		h1.name = others[randi() % others.size()]
 	return {"seed": seed_v if seed_v else (cfg.seed if cfg.seed else randi() % 1000000000 + 1), "terrain": cfg.terrain, "time": cfg.time, "weather": cfg.weather, "ignoredAttack": cfg.ignored, "sides": sides}
 
+## effective stats of both armies with the current heroes and battlefield
+var _eff_cache := {"k": "", "v": []}
+func _eff() -> Array:
+	var ck := JSON.stringify(cfg)
+	if ck == _eff_cache.k:
+		return _eff_cache.v
+	var o := battle_opts(1)
+	for sd in o.sides:
+		if sd.stacks.is_empty():
+			sd.stacks = [{"key": Units.key(sd.faction, 1, 0, ""), "count": 1}]
+	_eff_cache.k = ck
+	_eff_cache.v = Battle.probe_stats(o)
+	return _eff_cache.v
+
 ## why this setup can't be fought yet (or "" if it can)
 func setup_problem() -> String:
 	var errs := []
@@ -183,11 +197,15 @@ func side_editor(i: int) -> Control:
 		var s: Dictionary = sd.stacks[k]
 		var d := Units.resolve(s.key)
 		var sy := UI.sym(d, 26)
-		UI.tip(sy, UI.unit_tip(d))
+		# computed on hover so it follows count / hero / battlefield edits
+		var e := func() -> Dictionary:
+			var all: Array = _eff()[i]
+			return all[k] if k < all.size() else {}
+		UI.tip(sy, func(): return UI.unit_tip(d, "", e.call()))
 		var parts: PackedStringArray = s.key.split("@")
 		var rp := Units.parse(parts[0])
 		var base_name: String = Units.resolve(Units.key(rp.faction, rp.tier, 0, "")).name
-		var nb := UI.button(base_name + (" ⚑" if d.placeholder else ""), func(): pick_unit(sd, s), "", UI.unit_tip(d, "\n\n" + UI.col("Click to choose another creature", "muted")))
+		var nb := UI.button(base_name + (" ⚑" if d.placeholder else ""), func(): pick_unit(sd, s), "", func(): return UI.unit_tip(d, "\n\n" + UI.col("Click to choose another creature", "muted"), e.call()))
 		nb.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		nb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nb.clip_text = true

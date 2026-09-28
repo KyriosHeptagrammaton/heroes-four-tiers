@@ -14,7 +14,7 @@ func group_row(groups: Array, gi: int, opts: Dictionary) -> Control:
 		opts.redraw.call())
 	UI.tip(sel, "Doc: all stacks of the same creature must be the same size, so a group can only split into equal stacks.")
 	var sy := UI.sym(d, 30)
-	UI.tip(sy, UI.unit_tip(d))
+	UI.tip(sy, UI.unit_tip(d, "", opts.get("eff", {})))
 	var nm := UI.rich("[b]%d[/b] %s%s\n%s" % [g.count, U.esc(g.name if g.get("name", "") != "" else d.name), UI.col(" ⚑", "flag") if d.placeholder else "", UI.col("%s T%d%s" % [D.FACTIONS[d.faction].name, d.tier, " · mounted" if d.mounted else ""], "muted")], 13)
 	nm.custom_minimum_size.x = 170
 	var row := UI.hbox([sy, nm, sel], 6)
@@ -84,7 +84,8 @@ func move_units(from: Array, to: Array, gi: int) -> bool:
 	else: Army.normalize(g)
 	return true
 
-func _column(title: String, groups: Array, other, dir_label: String, redraw: Callable, on_move: Callable, can_dismiss: bool = true) -> Control:
+func _column(title: String, groups: Array, other, dir_label: String, redraw: Callable, on_move: Callable, can_dismiss: bool = true, hero = null) -> Control:
+	var eff := Army.eff_by_group(groups, hero, World.trainless(hero) if hero != null else false)
 	var c := UI.vbox([UI.hbox([UI.h3(title), UI.spacer(), UI.label("%d/%d stacks" % [Army.stacks(groups), D.CFG.maxStacks], "muted")])], 4)
 	for gi in groups.size():
 		var tr = null
@@ -93,7 +94,7 @@ func _column(title: String, groups: Array, other, dir_label: String, redraw: Cal
 				if await on_move.call():
 					if await move_units(groups, other, i): pass
 				redraw.call()
-		c.add_child(group_row(groups, gi, {"redraw": redraw, "can_dismiss": can_dismiss, "transfer": tr, "transfer_label": dir_label}))
+		c.add_child(group_row(groups, gi, {"redraw": redraw, "can_dismiss": can_dismiss, "transfer": tr, "transfer_label": dir_label, "eff": eff[gi] if gi < eff.size() else {}}))
 		c.add_child(UI.sep_line())
 	if groups.is_empty(): c.add_child(UI.label("Empty", "muted"))
 	c.add_child(mount_panel(groups, redraw))
@@ -116,7 +117,7 @@ func army_screen(h_id: String, t_id: String, on_close: Callable) -> void:
 		return true
 	draw[0] = func():
 		var cols := UI.hbox([], 16)
-		if hero != null: cols.add_child(_column("♛ " + hero.name, hero.army, t.garrison if t != null else null, "→ town", draw[0], ask))
+		if hero != null: cols.add_child(_column("♛ " + hero.name, hero.army, t.garrison if t != null else null, "→ town", draw[0], ask, true, hero))
 		if t != null: cols.add_child(_column("♜ %s garrison" % t.name, t.garrison, hero.army if hero != null else null, "→ hero", draw[0], ask))
 		var box := UI.vbox([UI.h2("Armies"), cols])
 		if hero != null and Heroes.skill(hero, "fieldcraft") >= 1 and t == null:
@@ -138,8 +139,8 @@ func exchange(h1: String, h2: String) -> void:
 		return true
 	draw[0] = func():
 		var cols := UI.hbox([], 16)
-		cols.add_child(_column("♛ " + A.name, A.army, B.army, "→ " + B.name, draw[0], ask, false))
-		cols.add_child(_column("♛ " + B.name, B.army, A.army, "→ " + A.name, draw[0], ask, false))
+		cols.add_child(_column("♛ " + A.name, A.army, B.army, "→ " + B.name, draw[0], ask, false, A))
+		cols.add_child(_column("♛ " + B.name, B.army, A.army, "→ " + A.name, draw[0], ask, false, B))
 		UI.modal(UI.vbox([UI.h2("Exchange"), UI.label("Doc rule: both heroes lose all movement when they exchange units.", "muted"), cols,
 			UI.row_end([UI.button("Done", func():
 				UI.close_modal()
