@@ -756,13 +756,16 @@ func render_info() -> void:
 
 const LOG_COL := {"round": "#d9b45a", "dmg": "#e8c9a8", "loss": "#f08a7a", "good": "#6cc07a", "hero": "#f0d68e", "spell": "#b58cf0", "big": "#ffffff"}
 
+## one cheer per critical hit, a hair apart so a flurry is heard as a flurry
 func _play_events() -> void:
-	var crit := false
+	var crits := 0
 	while _ev_n < b.events.size():
-		if b.events[_ev_n].type == "crit": crit = true
+		if b.events[_ev_n].type == "crit": crits += 1
 		_ev_n += 1
-	if crit and not UI.autopilot:
-		Sfx.play_cheer()
+	if UI.autopilot: return
+	for i in crits:
+		if i == 0: Sfx.play_cheer()
+		else: get_tree().create_timer(0.12 * i).timeout.connect(Sfx.play_cheer)
 
 func render_log() -> void:
 	if _log_n > b.log.size():
