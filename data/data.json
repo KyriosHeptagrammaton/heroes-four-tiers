@@ -618,7 +618,8 @@
   "delta.2": "Giant Scorpion",
   "beta.4": "Titan",
   "delta.3": "Draugr",
-  "delta.4": "Wight"
+  "delta.4": "Wight",
+  "gamma.3": "Leshi"
  },
  "SPELLS": {
   "quicken": {
