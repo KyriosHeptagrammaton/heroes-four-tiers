@@ -12,6 +12,8 @@ permissions:
 
 env:
   GODOT_VERSION: "4.3"
+  WINEPREFIX: /tmp/wineprefix
+  WINEDEBUG: "-all"
 
 jobs:
   export:
@@ -34,8 +36,12 @@ jobs:
           wget -q https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -O /opt/rcedit.exe
           WINE_BIN=$(command -v wine64 || command -v wine || echo /usr/lib/wine/wine64)
           echo "wine: $WINE_BIN"
-          export WINEDEBUG=-all
-          "$WINE_BIN" wineboot --init >/dev/null 2>&1 || true
+          ls -la "$WINE_BIN" /usr/lib/wine/ 2>&1 | head -5
+          mkdir -p "$WINEPREFIX"
+          "$WINE_BIN" wineboot --init 2>&1 | tail -5 || true
+          # smoke test: rcedit must run under wine
+          cp icon.ico /tmp/t.ico
+          "$WINE_BIN" /opt/rcedit.exe --help 2>&1 | head -3 || true
           ED=$(ls ~/.config/godot/editor_settings-*.tres | head -1)
           echo "export/windows/rcedit = \"/opt/rcedit.exe\"" >> "$ED"
           echo "export/windows/wine = \"$WINE_BIN\"" >> "$ED"
@@ -52,9 +58,11 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p build/windows
-          export WINEDEBUG=-all
           godot --headless --path . --export-release "Windows Desktop" build/windows/HeroesOfFourSeasons.exe 2>&1 | tee export.log
-          if grep -qi "rcedit\|resources modification" export.log; then echo "::error::exe icon embedding failed"; exit 1; fi
+          if grep -qi "rcedit\|resources modification" export.log; then
+            grep -i -A2 "rcedit\|resources modification" export.log | while read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
           ls -la build/windows
 
       - uses: actions/upload-artifact@v4
