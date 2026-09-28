@@ -30,6 +30,14 @@ var _field_paint: Control
 var _cards := {}   # stack id -> card Control
 var _built := false
 var _chips: HBoxContainer
+# replay: a frozen copy of the board after every action; ◀ ▶ under the log step through them
+var _hist: Array = []      # [{b: Battle (frozen), k: [log size, round, turn, …]}]
+var _live: Battle = null   # the real battle while a past board is shown
+var _rev := -1             # index into _hist being viewed, -1 = live
+var _nav_lbl: Label
+var _nav_prev: Button
+var _nav_next: Button
+var _nav_live: Button
 
 const ACTIONS := [
 	{"id": "attack", "key": "A", "label": "Attack", "tip": "Hit a target. Must target an assaulter if you are under assault. Attacking something you are NOT engaged with costs your guard, protector status, advantages and engagements (ranged units keep them)."},
@@ -71,6 +79,7 @@ func start(battle: Battle, end_cb: Callable) -> void:
 	mode = null; sel = null; spell = null; cmd = null; ended = false; busy = false
 	_log_n = 0
 	_ev_n = b.events.size()
+	_hist = []; _rev = -1; _live = null
 	if not _built:
 		_build()
 	_setup_field()
@@ -144,6 +153,7 @@ func _build() -> void:
 	_mid = PanelContainer.new()
 	_mid.add_theme_stylebox_override("panel", UI.stone("tip").margins(16, 5))
 	_mid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_mid.z_index = 2   # the turn banner stays readable above the arrows
 	var s1 := Control.new(); s1.size_flags_vertical = Control.SIZE_EXPAND_FILL; s1.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var s2 := Control.new(); s2.size_flags_vertical = Control.SIZE_EXPAND_FILL; s2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fv.add_child(_rows[1]); fv.add_child(s1); fv.add_child(_mid); fv.add_child(s2); fv.add_child(_rows[0])
@@ -175,9 +185,17 @@ func _build() -> void:
 	_log.size_flags_stretch_ratio = 1.2
 	_log.add_theme_font_override("normal_font", UI.font_mono)
 	_log.add_theme_color_override("default_color", Color("#cfcabd"))
-	side.add_child(UI.panel(_log, UI.stone("inset").margins(8)))
-	_log.get_parent().size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_log.get_parent().size_flags_stretch_ratio = 1.2
+	_nav_lbl = UI.label("", "muted", 11)
+	_nav_prev = UI.button("◀", func(): review_step(-1), "Small", "Step back one action to re-view the board as it was (← key). View only — nothing can be played from past boards.")
+	_nav_next = UI.button("▶", func(): review_step(1), "Small", "Step forward one action (→ key)")
+	_nav_live = UI.button("Live ⏭", go_live, "SmallPrimary", "Back to the current board (End / Esc)")
+	var nav := UI.hbox([UI.spacer(), _nav_lbl, _nav_prev, _nav_next, _nav_live], 4)
+	var lv := UI.vbox([_log, nav], 4)
+	lv.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var lp := UI.panel(lv, UI.stone("inset").margins(8))
+	side.add_child(lp)
+	lp.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	lp.size_flags_stretch_ratio = 1.2
 
 func _setup_field() -> void:
 	var T: Dictionary = D.TERRAIN[b.terrain_id]
@@ -211,6 +229,12 @@ func _cancel_targeting() -> bool:
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not visible or b == null or UI.modal_open() or not (e is InputEventKey) or not e.pressed or e.echo:
 		return
+	if e.keycode in [KEY_LEFT, KEY_RIGHT, KEY_END] or (e.keycode == KEY_ESCAPE and reviewing()):
+		if e.keycode == KEY_LEFT: review_step(-1)
+		elif e.keycode == KEY_RIGHT: review_step(1)
+		else: go_live()
+		get_viewport().set_input_as_handled()
+		return
 	if e.keycode == KEY_ESCAPE:
 		_cancel_targeting()
 		get_viewport().set_input_as_handled()
@@ -223,7 +247,7 @@ func _unhandled_key_input(e: InputEvent) -> void:
 			return
 
 func human_turn() -> bool:
-	if b.over:
+	if reviewing() or b.over:
 		return false
 	if b.pre_combat:
 		return true
@@ -251,6 +275,10 @@ func pick_action(id: String) -> void:
 	render()
 
 func click_stack(s) -> void:
+	if reviewing():
+		sel = s.id
+		render()
+		return
 	if b.over:
 		return
 	if spell != null:
@@ -289,6 +317,7 @@ func click_stack(s) -> void:
 	render()
 
 func do_act(action: String, target, opt = null) -> void:
+	if reviewing(): return
 	var err = b.act(action, target, opt)
 	if err != null:
 		UI.toast(err)
@@ -297,13 +326,14 @@ func do_act(action: String, target, opt = null) -> void:
 	render()
 
 func pick_spell(side: int, id: String) -> void:
-	if not b.hero_can_act(side):
+	if reviewing() or not b.hero_can_act(side):
 		return
 	mode = null; cmd = null
 	spell = null if (spell != null and spell.id == id) else {"side": side, "id": id, "t1": null}
 	render()
 
 func spell_target(tid) -> void:
+	if reviewing(): return
 	var S: Dictionary = D.SPELLS[spell.id]
 	if S.target == "pair" and spell.t1 == null:
 		spell.t1 = tid
@@ -315,10 +345,53 @@ func spell_target(tid) -> void:
 	spell = null
 	render()
 
+# ------------------------------------------------------------------ replay
+func reviewing() -> bool:
+	return _rev >= 0
+
+## freeze the board after every action (the log grows with each one)
+func _snapshot() -> void:
+	var key := [b.log.size(), b.round_n, b.qi, b.pre_combat, b.over != null]
+	if _hist.is_empty() or _hist[_hist.size() - 1].k != key:
+		_hist.append({"b": b.clone_view(), "k": key})
+
+func review_step(d: int) -> void:
+	if b == null or _hist.size() < 2: return
+	if not reviewing():
+		if d > 0: return
+		_live = b
+		_rev = _hist.size() - 1     # the newest frozen board is the live one
+	_rev += d
+	if _rev >= _hist.size() - 1:
+		go_live()
+		return
+	_rev = maxi(0, _rev)
+	mode = null; spell = null; cmd = null
+	b = _hist[_rev].b
+	render()
+
+func go_live() -> void:
+	if not reviewing(): return
+	_rev = -1
+	b = _live
+	_live = null
+	render()
+
+func _render_nav() -> void:
+	if _nav_lbl == null: return
+	var n := _hist.size() - 1
+	_nav_lbl.text = ("Action %d / %d" % [_rev, n] if _rev > 0 else "Start / %d" % n) if reviewing() else ("%d actions" % n if n > 0 else "")
+	_nav_prev.disabled = _hist.size() < 2 or _rev == 0
+	_nav_next.disabled = not reviewing()
+	_nav_live.visible = reviewing()
+
 # ------------------------------------------------------------------ rendering
 func render() -> void:
 	if b == null:
 		return
+	if not reviewing():
+		_snapshot()
+	_render_nav()
 	# status chips
 	UI.clear(_top_status)
 	_top_status.add_child(UI.chip("Round %d" % maxi(1, b.round_n)))
@@ -376,7 +449,15 @@ func render() -> void:
 	# middle banner
 	var mid := UI.hbox([], 6)
 	var cur = b.current()
-	if b.over != null:
+	if reviewing():
+		var last := ""
+		for li in range(b.log.size() - 1, -1, -1):
+			if b.log[li].get("cls", "") != "round":
+				last = b.log[li].t
+				break
+		mid.add_child(UI.label("⏪ Replay — %s" % ("start of battle" if _rev == 0 else "after action %d of %d" % [_rev, _hist.size() - 1]), "gold2"))
+		if last != "" and _rev > 0: mid.add_child(UI.label("· " + last.left(70), "muted"))
+	elif b.over != null:
 		mid.add_child(UI.label("Battle over"))
 	elif b.pre_combat:
 		mid.add_child(UI.label("Pre-combat spells — then"))
@@ -397,7 +478,7 @@ func render() -> void:
 	render_log()
 	_play_events()
 	maybe_ai()
-	if b.over != null and not ended:
+	if b.over != null and not ended and not reviewing():
 		ended = true
 		await get_tree().create_timer(0.02 if UI.autopilot else 0.45).timeout
 		finish()
@@ -423,7 +504,7 @@ func hero_card(side: int) -> Control:
 		return card
 	var hs = sd.hs
 	var hero = sd.hero
-	var can_act: bool = b.hero_can_act(side) and not sd.ai
+	var can_act: bool = b.hero_can_act(side) and not sd.ai and not reviewing()
 	card.add_theme_stylebox_override("panel", _hero_sb(b.hero_turn_now(side) or (b.pre_combat and hs.freeCast > 0)))
 	var nm := UI.label("♛ " + hero.name, "gold2", 13)
 	nm.add_theme_font_override("font", UI.font_bold)
@@ -463,7 +544,7 @@ func hero_card(side: int) -> Control:
 			tp += "\nRight now: %d (power +%d%%)" % [U.jr(S.amount * pm), U.jr((pm - 1) * 100)]
 		UI.tip(bt, tp)
 		box.add_child(bt)
-	if not sd.ai and not b.pre_combat:
+	if not sd.ai and not b.pre_combat and not reviewing():
 		var cmds := UI.flow([], 4)
 		for c in b.command_options(side):
 			var cb := UI.button(c.label, func():
@@ -705,6 +786,9 @@ func _hint(text: String) -> Control:
 
 func render_actions() -> void:
 	UI.clear(_act)
+	if reviewing():
+		_act.add_child(_hint("Re-viewing a past board (view only). ◀ ▶ or the arrow keys step through actions; Live ⏭ (or End / Esc) returns to the battle. Click stacks to see their details as they were."))
+		return
 	var a := b.turn_stack()
 	if b.over != null:
 		_act.add_child(_hint("The battle is over."))
@@ -757,6 +841,7 @@ const LOG_COL := {"round": "#d9b45a", "dmg": "#e8c9a8", "loss": "#f08a7a", "good
 
 ## one cheer per critical hit, a hair apart so a flurry is heard as a flurry
 func _play_events() -> void:
+	if reviewing(): return
 	var crits := 0
 	while _ev_n < b.events.size():
 		if b.events[_ev_n].type == "crit": crits += 1
@@ -798,6 +883,10 @@ func _bez(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, n: int = 24) -> Pa
 func _draw_lines() -> void:
 	if b == null: return
 	_draw_last_attack()
+	if reviewing():
+		var r := Rect2(Vector2.ZERO, _lines.size).grow(-3)
+		_lines.draw_rect(r, Color("#f3d98e", 0.85), false, 4.0)
+		_lines.draw_string(UI.font_bold, Vector2(r.position.x + 10, r.end.y - 10), "⏪ REPLAY — view only", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#f3d98e"))
 	var red := Color("#e0604a")
 	var blue := Color("#5aa0e0")
 	for s in b.stacks:
@@ -936,7 +1025,7 @@ func _draw_blam(c: Vector2, rad: Vector2, lines: Array, fs: int, seed_v: int) ->
 
 # ------------------------------------------------------------------ AI & end
 func maybe_ai() -> void:
-	if b.over != null or busy: return
+	if reviewing() or b.over != null or busy: return
 	var e = b.current()
 	var ai_now: bool
 	if b.pre_combat:

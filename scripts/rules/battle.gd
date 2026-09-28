@@ -1295,6 +1295,35 @@ func command(side: int, cmd: String, t_id = null):
 	hs.castsLeft -= 1
 	return null
 
+## A frozen copy of the whole board for the replay viewer (◀ ▶ under the log).
+## It can be rendered and queried like the live battle but is never played on.
+func clone_view() -> Battle:
+	var c := Battle.new({"probe": true, "sides": [{"stacks": []}, {"stacks": []}]})
+	for p in get_property_list():
+		if not (p.usage & PROPERTY_USAGE_SCRIPT_VARIABLE): continue
+		var n: String = p.name
+		if n.begins_with("_") or n in ["rng", "stacks", "sides", "log", "events", "C", "probe"]: continue
+		var v = get(n)
+		c.set(n, v.duplicate(true) if (v is Array or v is Dictionary) else v)
+	c.C = C
+	c.rng = Rng.new(1)
+	c.stacks = stacks.map(func(x): return _copy_obj(x, Stk.new()))
+	c.sides = sides.map(func(x): return _copy_obj(x, BSide.new()))
+	c.log = log.duplicate()   # entries are never edited, a shallow copy is enough
+	c.events = []
+	return c
+
+static func _copy_obj(src: Object, dst: Object) -> Object:
+	for p in src.get_property_list():
+		if not (p.usage & PROPERTY_USAGE_SCRIPT_VARIABLE): continue
+		var v = src.get(p.name)
+		# unit definitions and hero records are shared read-only data
+		if p.name in ["def", "hero"] or not (v is Array or v is Dictionary):
+			dst.set(p.name, v)
+		else:
+			dst.set(p.name, v.duplicate(true))
+	return dst
+
 ## Horn of Returning: Recall deserter may target a wiped-out stack (Revive always can)
 func can_return_wiped(side: int) -> bool:
 	var h = sides[side].hero
