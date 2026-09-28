@@ -856,12 +856,10 @@ func finish() -> void:
 	if on_end.is_valid():
 		on_end.call(b)
 
-const SIDE_COL := [Color("#e07a5a"), Color("#6aa0e0")]
-
 ## one army's block in the post-battle report: a coloured title plate, then its stacks and a total
 func _army_summary(side: int, won: bool) -> Control:
 	var sd = b.sides[side]
-	var col: Color = SIDE_COL[side]
+	var col: Color = Color(D.FACTIONS[sd.faction].color).lightened(0.2)
 	var who: String = ("♛ " + sd.hero.name) if sd.hero != null else sd.name
 	var t := UI.label(("▼ " if side == 0 else "▲ ") + who, "", 16)
 	t.add_theme_font_override("font", UI.font_head)

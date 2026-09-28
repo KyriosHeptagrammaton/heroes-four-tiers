@@ -43,6 +43,12 @@ func battle_opts(seed_v: int = 0, force_ai: bool = false) -> Dictionary:
 	for sd in cfg.sides:
 		sides.append({"name": sd.name, "faction": sd.faction, "ai": force_ai or sd.ai, "hero": make_hero(sd.hero, sd.faction),
 			"stacks": sd.stacks.map(func(s): return {"key": s.key, "count": s.count})})
+	# two random commanders shouldn't share a name
+	var h0 = sides[0].hero
+	var h1 = sides[1].hero
+	if h0 != null and h1 != null and h0.name == h1.name and cfg.sides[1].hero.name == "":
+		var others: Array = D.HERO_NAMES.filter(func(n): return n != h0.name)
+		h1.name = others[randi() % others.size()]
 	return {"seed": seed_v if seed_v else (cfg.seed if cfg.seed else randi() % 1000000000 + 1), "terrain": cfg.terrain, "time": cfg.time, "weather": cfg.weather, "ignoredAttack": cfg.ignored, "sides": sides}
 
 ## why this setup can't be fought yet (or "" if it can)

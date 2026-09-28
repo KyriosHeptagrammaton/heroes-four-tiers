@@ -4,7 +4,8 @@ func run(root) -> void:
 	var sb = UI.screen("sandbox")
 	sb.open()
 	sb.cfg.sides[0].ai = true
-	sb.cfg.sides[1].stacks.append({"key": "beta.4.0.", "count": 1})
+	sb.cfg.sides[1].faction = "gamma"
+	sb.cfg.sides[1].stacks = [{"key": "gamma.1.0.", "count": 18}, {"key": "gamma.2.0.", "count": 9}]
 	sb.fight()
 	var bs = UI.screen("battle")
 	bs.ai_delay = 0.0
