@@ -314,7 +314,7 @@ func _draw_obj(o: Dictionary, c: int) -> void:
 			if Units.resolve(s.key).tier > Units.resolve(st.key).tier: st = s
 		var d := Units.resolve(st.key)
 		map.draw_circle(ctr, R * 1.05, Color(0, 0, 0, 0.66))
-		UnitSym.draw_shape(map, mini(4, d.tier), ctr, R * 0.75, Color(D.FACTIONS[d.faction].color), Color.BLACK, 1.5)
+		UnitSym.draw_unit(map, d, Rect2(ctr - Vector2(R, R) * 0.95, Vector2(R, R) * 1.9))
 		var n := 0
 		for s in o.army.stacks: n += s.count
 		_text_c(map, UI.font_bold, ctr + Vector2(0, R * 1.05), count_word(n), int(maxf(9, R * 0.62)), Color.WHITE, 3)

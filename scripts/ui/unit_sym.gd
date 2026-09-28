@@ -1,14 +1,123 @@
-# Abstract unit symbol: tier shape (1 circle, 2 triangle, 3 square, 4 star) in
-# faction colour, faction glyph, and marks for ranged / magi / upgrades / cavalry.
+# Unit portrait: the hand-drawn creature (art/units/<faction>_<tier>.png), with
+# its weapon in hand showing the upgrade path (sword = melee, bow = ranged,
+# wand = magi; cavalry get a banner / spiked ball / serpent wand tinted in the
+# unit's own colour), gold pips for the upgrade level, and riders drawn sitting
+# on the right number of mounts.
 class_name UnitSym
 extends Control
 
 var def: Dictionary = {}
 var dim := false
 
+static var _meta = null
+static var _tex := {}
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
 
+static func meta() -> Dictionary:
+	if _meta == null:
+		var f := FileAccess.open("res://art/units.json", FileAccess.READ)
+		_meta = JSON.parse_string(f.get_as_text()) if f else {"units": {}, "weapons": {}}
+	return _meta
+
+static func tex(path: String) -> Texture2D:
+	if not _tex.has(path):
+		_tex[path] = load(path) if ResourceLoader.exists(path) else null
+	return _tex[path]
+
+## portrait extent (px) for a unit drawn in a box of size `box`: tier 1 art is
+## small and tier 4 big, so keep that difference but compress it to stay legible
+static func _extent(m: Dictionary, box: float) -> float:
+	var ext: float = maxf(m.w, m.h)
+	var k := clampf((ext - 26.0) / 70.0, 0.0, 1.0)
+	return box * (0.58 + 0.42 * k)
+
+## weapon for a unit definition: "" (base creature), "melee", "ranged" or "magi"
+static func _path(d: Dictionary) -> String:
+	if d.up < 1: return ""
+	return {"": "melee", "r": "ranged", "m": "magi"}.get(d.mod, "melee")
+
+## draw one creature (no rider logic) centred at `c` with portrait extent `ext`
+static func _draw_creature(ci: CanvasItem, d: Dictionary, c: Vector2, ext: float, mod: Color, cav: bool, show_weapon: bool = true) -> void:
+	var key := "%s_%d" % [d.faction, mini(4, d.tier)]
+	var M: Dictionary = meta().units.get(key, {})
+	var t := tex("res://art/units/%s.png" % key)
+	if t == null or M.is_empty():
+		ci.draw_circle(c, ext * 0.4, Color(D.FACTIONS[d.faction].color) * mod)
+		return
+	var s: float = ext / maxf(M.w, M.h)
+	var size := Vector2(M.w, M.h) * s
+	var o := c - size / 2
+	ci.draw_texture_rect(t, Rect2(o, size), false, mod)
+	var p := _path(d)
+	if not show_weapon or p == "":
+		return
+	var wkey := p + ("_cav" if cav else "_inf")
+	var W: Dictionary = meta().weapons.get(wkey, {})
+	var wt := tex("res://art/weapons/%s.png" % wkey)
+	if wt == null or W.is_empty():
+		return
+	var tint := tex("res://art/weapons/%s_tint.png" % wkey) if W.get("tint", false) else null
+	var ucol := Color(M.get("color", "#ffffff"))
+	for h in M.get("hands", []):
+		var target: float = clampf(h.d * 1.4 * s, ext * 0.32, ext * 0.55)
+		var ws: float = target / maxf(W.w, W.h)
+		var wsize := Vector2(W.w, W.h) * ws
+		var wc := o + Vector2(h.x, h.y) * s
+		var r := Rect2(wc - wsize / 2, wsize)
+		ci.draw_texture_rect(wt, r, false, mod)
+		if tint:
+			ci.draw_texture_rect(tint, r, false, ucol * mod)
+
+## draw a unit (including riders on their mounts) inside `rect`
+static func draw_unit(ci: CanvasItem, d: Dictionary, rect: Rect2, dim_it: bool = false) -> void:
+	var mod := Color(1, 1, 1, 0.3) if dim_it else Color.WHITE
+	var box := minf(rect.size.x, rect.size.y)
+	var c := rect.get_center()
+	if d.get("mounted", false):
+		var R := Units.resolve(d.riderKey)
+		var Mo := Units.resolve(d.mountKey)
+		var n: int = maxi(1, int(d.get("mountsPer", 1)))
+		var shown := mini(n, 4)
+		# mounts side by side along the bottom, overlapping a little
+		var mext := box * (0.62 if shown == 1 else (0.5 if shown == 2 else 0.4))
+		var step := mext * 0.72
+		var row_w := mext + step * (shown - 1)
+		var my := rect.position.y + (rect.size.y + box) / 2 - mext * 0.5
+		for i in shown:
+			var mx := c.x - row_w / 2 + mext / 2 + i * step
+			_draw_creature(ci, Mo, Vector2(mx, my), mext, mod, false, false)
+		# rider on top
+		var rext := box * 0.52
+		_draw_creature(ci, R, Vector2(c.x, my - mext * 0.42 - rext * 0.28), rext, mod, true)
+		if n > shown:
+			var f: Font = UI.font_bold
+			var fs := int(maxf(8, box * 0.26))
+			var txt := "×%d" % n
+			var pos := Vector2(rect.end.x - f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x, rect.end.y)
+			ci.draw_string_outline(f, pos, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 3, Color(0, 0, 0, 0.8) * mod)
+			ci.draw_string(f, pos, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE * mod)
+		d = R
+	else:
+		var key := "%s_%d" % [d.faction, mini(4, d.tier)]
+		var M: Dictionary = meta().units.get(key, {"w": 40, "h": 40})
+		_draw_creature(ci, d, c, _extent(M, box), mod, d.ab.get("cavalry", false))
+	# upgrade level pips
+	if d.up >= 1:
+		var k := box / 40.0
+		var base := rect.position + Vector2((rect.size.x + box) / 2, (rect.size.y + box) / 2)
+		for i in mini(2, int(d.up)):
+			var p := base - Vector2(4 + i * 6, 3) * k
+			ci.draw_circle(p, 2.6 * k, Color(0, 0, 0, 0.7) * mod)
+			ci.draw_circle(p, 2.0 * k, Color("#f0d68e") * mod)
+
+func _draw() -> void:
+	if def.is_empty():
+		return
+	draw_unit(self, def, Rect2(Vector2.ZERO, size), dim)
+
+# ---- simple tier shapes (kept for anything that still wants an abstract mark)
 static func shape_points(tier: int, cx: float, cy: float, r: float) -> PackedVector2Array:
 	var p := PackedVector2Array()
 	match tier:
@@ -28,11 +137,9 @@ static func shape_points(tier: int, cx: float, cy: float, r: float) -> PackedVec
 				p.append(Vector2(cx + cos(a) * rr, cy + sin(a) * rr))
 	return p
 
-## draw a filled, outlined tier shape on any CanvasItem
 static func draw_shape(ci: CanvasItem, tier: int, c: Vector2, r: float, fill: Color, stroke: Color, w: float) -> void:
 	var p := shape_points(tier, c.x, c.y, r)
 	if tier == 4:
-		# concave star: fan triangles from the centre
 		for i in 10:
 			ci.draw_colored_polygon(PackedVector2Array([c, p[i], p[(i + 1) % 10]]), fill)
 	else:
@@ -40,37 +147,3 @@ static func draw_shape(ci: CanvasItem, tier: int, c: Vector2, r: float, fill: Co
 	var q := p.duplicate()
 	q.append(p[0])
 	ci.draw_polyline(q, stroke, w, true)
-
-func _draw() -> void:
-	if def.is_empty():
-		return
-	var k := minf(size.x, size.y) / 40.0
-	var o := Vector2((size.x - 40 * k) / 2, (size.y - 40 * k) / 2)
-	var P := func(x: float, y: float) -> Vector2: return o + Vector2(x, y) * k
-	var mod := Color(1, 1, 1, 0.3) if dim else Color(1, 1, 1, 1)
-	var fcol: Color = Color(D.FACTIONS[def.faction].color) * mod
-	var font: Font = UI.font_bold
-	if def.mounted:
-		var R := Units.resolve(def.riderKey)
-		var M := Units.resolve(def.mountKey)
-		draw_shape(self, mini(4, M.tier), P.call(20, 26), 11 * k, Color(Color(D.FACTIONS[M.faction].color), 0.9) * mod, Color.BLACK * mod, 1.5 * k)
-		draw_shape(self, mini(4, R.tier), P.call(20, 13), 8 * k, Color(D.FACTIONS[R.faction].color) * mod, Color.WHITE * mod, 1.5 * k)
-	else:
-		draw_shape(self, mini(4, def.tier), P.call(20, 20), 14 * k, fcol, Color.BLACK * mod, 1.5 * k)
-		var g: String = D.FACTIONS[def.faction].glyph
-		var fs := int(maxf(6, 12 * k))
-		var tw := font.get_string_size(g, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		var pos: Vector2 = P.call(20, 24.5) - Vector2(tw / 2, 0)
-		draw_string_outline(font, pos, g, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, int(2 * k), Color(0, 0, 0, 0.55) * mod)
-		draw_string(font, pos, g, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE * mod)
-	if def.ab.get("ranged", false):
-		draw_line(P.call(30, 10), P.call(39, 1), Color.WHITE * mod, 2 * k)
-		draw_polyline(PackedVector2Array([P.call(34, 1), P.call(39, 1), P.call(39, 6)]), Color.WHITE * mod, 2 * k)
-	if def.mod == "m":
-		draw_string(UI.font, P.call(1, 11), "✦", HORIZONTAL_ALIGNMENT_LEFT, -1, int(maxf(6, 12 * k)), Color("#e9d0ff") * mod)
-	if def.up >= 1:
-		draw_circle(P.call(36, 37), 2.2 * k, Color("#f0d68e") * mod)
-		if def.up >= 2:
-			draw_circle(P.call(30, 37), 2.2 * k, Color("#f0d68e") * mod)
-	if def.ab.get("cavalry", false):
-		draw_string(UI.font_bold, P.call(0, 39), "»", HORIZONTAL_ALIGNMENT_LEFT, -1, int(maxf(6, 12 * k)), Color.WHITE * mod)

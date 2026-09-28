@@ -45,6 +45,9 @@ produces exactly the same battles as the JS prototype (300/300 identical), and
 
 ## Credits
 
+Unit portraits and weapon marks: hand-drawn for the game (source sheets cut up by
+`tools/extract_icons.py` into `art/`).
+
 Button sound effects are built from Kenney's [Impact Sounds](https://kenney.nl/assets/impact-sounds) and
 [RPG Audio](https://kenney.nl/assets/rpg-audio) packs (CC0, see `sfx/KENNEY_LICENSE.txt`).
 

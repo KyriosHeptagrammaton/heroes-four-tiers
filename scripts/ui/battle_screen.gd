@@ -623,7 +623,7 @@ func stack_card(s) -> Control:
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nm.max_lines_visible = 2
 	nm.custom_minimum_size.x = 76
-	var topr := UI.hbox([UI.sym(s.def, 38), UI.vbox([cnt, nm], 0)], 6)
+	var topr := UI.hbox([UI.sym(s.def, 44), UI.vbox([cnt, nm], 0)], 6)
 	if s.hero and s.count > 0:
 		var cr := UI.label("♛", "gold2", 14)
 		UI.tip(cr, "Hero unit: +1 attack, defence, damage, morale")
