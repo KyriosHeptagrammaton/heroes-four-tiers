@@ -44,7 +44,7 @@ func menu() -> void:
 	sig.add_theme_constant_override("outline_size", 8)
 	sig.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(sig)
-	var t := UI.h1("Heroes of the Four Tiers")
+	var t := UI.h1("Heroes of Four Seasons")
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(t)
 	var v := UI.label("An abstract prototype · v" + VERSION, "gold")

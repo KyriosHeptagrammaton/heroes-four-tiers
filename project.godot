@@ -1,8 +1,8 @@
-; Heroes of the Four Tiers — Godot 4 project
+; Heroes of Four Seasons — Godot 4 project
 config_version=5
 
 [application]
-config/name="Heroes of the Four Tiers"
+config/name="Heroes of Four Seasons"
 config/description="An abstract Heroes-of-Might-and-Magic-style strategy prototype"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")

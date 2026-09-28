@@ -1,4 +1,4 @@
-# Heroes of the Four Tiers
+# Heroes of Four Seasons
 
 An abstract, Heroes-of-Might-and-Magic-style strategy game built from a design
 document: four factions (Alpha, Beta, Gamma, Delta) with four tiers each, an
@@ -10,7 +10,7 @@ Made with **Godot 4.3** (GDScript, GL Compatibility renderer).
 ## Download & play (Windows)
 
 Every push to `main` builds a fresh Windows executable automatically.
-Go to **Releases → Latest build** and download `HeroesFourTiers.exe`.
+Go to **Releases → Latest build** and download `HeroesOfFourSeasons.exe`.
 Just run it — nothing to install. Saved games go into a `saves` folder next
 to the exe.
 

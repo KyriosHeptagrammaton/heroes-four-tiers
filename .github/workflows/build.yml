@@ -36,13 +36,13 @@ jobs:
       - name: Export Windows build
         run: |
           mkdir -p build/windows
-          godot --headless --path . --export-release "Windows Desktop" build/windows/HeroesFourTiers.exe
+          godot --headless --path . --export-release "Windows Desktop" build/windows/HeroesOfFourSeasons.exe
           ls -la build/windows
 
       - uses: actions/upload-artifact@v4
         with:
-          name: HeroesFourTiers-windows
-          path: build/windows/HeroesFourTiers.exe
+          name: HeroesOfFourSeasons-windows
+          path: build/windows/HeroesOfFourSeasons.exe
           if-no-files-found: error
 
   release:
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: HeroesFourTiers-windows
+          name: HeroesOfFourSeasons-windows
 
       - name: Publish as the "latest" release
         env:
@@ -59,9 +59,9 @@ jobs:
         run: |
           gh release delete latest --repo "$GITHUB_REPOSITORY" --cleanup-tag -y || true
           git_sha="${GITHUB_SHA::7}"
-          gh release create latest HeroesFourTiers.exe \
+          gh release create latest HeroesOfFourSeasons.exe \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Latest build ($git_sha)" \
-            --notes "Automatic Windows build of commit $git_sha. Download **HeroesFourTiers.exe** below and run it — no install needed. Saves go in a \`saves\` folder next to the exe." \
+            --notes "Automatic Windows build of commit $git_sha. Download **HeroesOfFourSeasons.exe** below and run it — no install needed. Saves go in a \`saves\` folder next to the exe." \
             --latest
