@@ -27,6 +27,20 @@ jobs:
           mv /root/.config/godot ~/.config/godot || true
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
 
+      - name: Install wine + rcedit (embeds the logo into the exe)
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends wine64 >/dev/null
+          wget -q https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -O /opt/rcedit.exe
+          WINE_BIN=$(command -v wine64 || command -v wine || echo /usr/lib/wine/wine64)
+          echo "wine: $WINE_BIN"
+          export WINEDEBUG=-all
+          "$WINE_BIN" wineboot --init >/dev/null 2>&1 || true
+          ED=$(ls ~/.config/godot/editor_settings-*.tres | head -1)
+          echo "export/windows/rcedit = \"/opt/rcedit.exe\"" >> "$ED"
+          echo "export/windows/wine = \"$WINE_BIN\"" >> "$ED"
+          tail -3 "$ED"
+
       - name: Import assets
         run: godot --headless --path . --import || true
 
@@ -34,9 +48,13 @@ jobs:
         run: godot --headless --path . -- --test=worldgen_selfcheck
 
       - name: Export Windows build
+        shell: bash
         run: |
+          set -o pipefail
           mkdir -p build/windows
-          godot --headless --path . --export-release "Windows Desktop" build/windows/HeroesOfFourSeasons.exe
+          export WINEDEBUG=-all
+          godot --headless --path . --export-release "Windows Desktop" build/windows/HeroesOfFourSeasons.exe 2>&1 | tee export.log
+          if grep -qi "rcedit\|resources modification" export.log; then echo "::error::exe icon embedding failed"; exit 1; fi
           ls -la build/windows
 
       - uses: actions/upload-artifact@v4

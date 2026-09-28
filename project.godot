@@ -8,7 +8,8 @@ run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/use_custom_user_dir=true
 config/custom_user_dir_name="HeroesFourTiers"
-config/icon="res://icon.svg"
+config/icon="res://icon.png"
+config/windows_native_icon="res://icon.ico"
 
 [autoload]
 D="*res://scripts/core/data.gd"
