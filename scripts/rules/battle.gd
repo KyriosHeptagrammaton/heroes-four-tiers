@@ -301,8 +301,10 @@ func health(s: Stk) -> int:
 	var h = sides[s.side].hero
 	return maxi(1, int(s.def.hp) + s.extra_hp + (1 if h and Heroes.has(h, "heart") else 0))
 
+## health without the hero's heart; 0 health still counts as 1 (only gaining health
+## starts from the true 0, via extra_hp)
 func raw_health(s: Stk) -> int:
-	return int(s.def.hp) + s.extra_hp
+	return maxi(1, int(s.def.hp) + s.extra_hp)
 
 func count_bonus(s: Stk, per: String) -> float:
 	if per == "ad" and any_has("banner"):
@@ -390,7 +392,7 @@ func hero_frac(side: int) -> float:
 func strength(side: int) -> float:
 	var t := 0.0
 	for s in stacks_of(side):
-		t += s.count * Units.value(s.def) * (1.0 + s.def.hp / 4.0)
+		t += s.count * Units.value(s.def) * (1.0 + maxf(1.0, s.def.hp) / 4.0)
 	return t
 
 # ------------------------------------------------------------------ rounds & turns

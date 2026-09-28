@@ -31,7 +31,7 @@ func step(b: Battle) -> bool:
 	return true
 
 func value_of(s) -> float:
-	return Units.value(s.def) * (1.0 + s.def.hp / 4.0)
+	return Units.value(s.def) * (1.0 + maxf(1.0, s.def.hp) / 4.0)
 
 func decide(b: Battle, a) -> Dictionary:
 	var cands := []

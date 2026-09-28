@@ -726,7 +726,7 @@ func unit_tip(d: Dictionary, extra: String = "") -> String:
 	if d.placeholder: s += " " + col("⚑", "flag")
 	var dm := []
 	for x in d.dmg: dm.append(U.fmt(x))
-	s += "\n" + kv([["Health", U.fmt(d.hp)], ["Morale", Units.stat_str(d, "mor")], ["Damage", " / ".join(dm)], ["Initiative", str(d.ini)],
+	s += "\n" + kv([["Health", U.fmt(d.hp) + (" (counts as 1)" if d.hp == 0 else "")], ["Morale", Units.stat_str(d, "mor")], ["Damage", " / ".join(dm)], ["Initiative", str(d.ini)],
 		["Attack", Units.stat_str(d, "att")], ["Defence", Units.stat_str(d, "def")], ["Weight/Str", "%s / %s" % [d.w, d.s]]])
 	var ab := []
 	for k in d.ab:

@@ -108,7 +108,7 @@ func resolve_rider(k: String) -> Dictionary:
 	sp.merge(R.sp, true)
 	var d := {
 		"key": k, "faction": R.faction, "tier": R.tier + mounts * M.tier, "up": R.up, "mod": R.mod,
-		"hp": max(M.hp * mounts, R.hp),
+		"hp": max(maxi(1, int(M.hp)) * mounts, R.hp),   # 0 health counts as 1 per mount
 		"mor": U.jr(avg.call("mor")),
 		"dmg": [mins.min(), mid, maxs.max()],
 		"ini": M.ini,

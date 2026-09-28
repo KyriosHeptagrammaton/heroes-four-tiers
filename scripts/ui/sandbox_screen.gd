@@ -11,12 +11,16 @@ func default_side(f: String, ai: bool) -> Dictionary:
 	return {
 		"faction": f, "ai": ai, "name": "",
 		"hero": {"enabled": true, "cls": "warlord", "name": "", "stats": (D.CFG.heroStart.warlord as Dictionary).duplicate(), "skills": {}, "artifacts": [], "equipped": ["flame"]},
-		"stacks": [{"key": Units.key(f, 1, 0, ""), "count": default_count(1)}, {"key": Units.key(f, 2, 0, ""), "count": default_count(2)}, {"key": Units.key(f, 3, 0, ""), "count": default_count(3)}],
+		"stacks": [1, 2, 3].map(func(t): return {"key": Units.key(f, t, 0, ""), "count": default_count(Units.key(f, t, 0, ""))}),
 	}
 
-## default stack size by tier: T1 18, T2 9, T3 6, T4 3
-func default_count(tier: int) -> int:
-	return {1: 18, 2: 9, 3: 6, 4: 3}.get(mini(4, maxi(1, tier)), 1)
+## default stack size by tier: T1 18, T2 9, T3 6, T4 3;
+## riders with twice the weekly growth (the Leshi) start with twice as many
+func default_count(k: String) -> int:
+	var n: int = {1: 18, 2: 9, 3: 6, 4: 3}.get(mini(4, maxi(1, int(Units.resolve(k).tier))), 1)
+	if Units.resolve_single(k.split("@")[0]).get("sp", {}).get("doubleGrowth", false):
+		n *= 2
+	return n
 
 func open() -> void:
 	if cfg == null:
@@ -171,7 +175,7 @@ func side_editor(i: int) -> Control:
 	# stacks
 	var sp := UI.vbox([], 4)
 	var add := UI.button("+ Add stack", func():
-		sd.stacks.append({"key": Units.key(sd.faction, 1, 0, ""), "count": default_count(1)})
+		sd.stacks.append({"key": Units.key(sd.faction, 1, 0, ""), "count": default_count(Units.key(sd.faction, 1, 0, ""))})
 		render(), "Small")
 	add.disabled = sd.stacks.size() >= D.CFG.maxStacks
 	sp.add_child(UI.hbox([UI.h3("Army (%d/%d stacks)" % [sd.stacks.size(), D.CFG.maxStacks]), UI.spacer(), add]))
@@ -352,10 +356,10 @@ func pick_unit(sd: Dictionary, s: Dictionary, step: String = "rider") -> void:
 	# state lives in a dictionary: lambdas capture locals by value
 	var st := {"rider": s.key.split("@")[0], "mount": s.key.split("@")[1] if "@" in s.key else null, "step": step}
 	var finish := func():
-		var old_tier: int = Units.resolve(s.key).tier
+		var old_n := default_count(s.key)
 		s.key = st.rider + "@" + st.mount if st.mount != null else st.rider
-		var new_tier: int = Units.resolve(s.key).tier
-		if new_tier != old_tier: s.count = default_count(new_tier)
+		var new_n := default_count(s.key)
+		if new_n != old_n: s.count = new_n
 		UI.close_modal()
 		render()
 	var draw := [null]
