@@ -51,7 +51,7 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Critical.[/b] Adds to your roll while you are trying to roll the top face (maximum damage), so with 3 or fewer creatures a +2 critical always hits maximum — there are no natural 1s.
 
-[b]Casualties.[/b] When damage exceeds creatures × (value − 1), one creature is removed and damage drops by twice its value (+courage for morale). Morale casualties desert, health casualties die. Deserters also remove (health − 1) physical damage. Every turn a stack recovers morale damage equal to its morale.
+[b]Casualties.[/b] When damage exceeds creatures × (value − 1), one creature is removed and damage drops by twice its value (+courage for morale). Morale casualties desert, health casualties die. Deserters also remove (health − 1) physical damage. (Options → Casualty rule can test creatures × value instead.) Every turn a stack recovers morale damage equal to its morale.
 
 [b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks at ≤ ⅓ of their start (or ≤ 2) become [b]heroes[/b]: +1 attack, defence, damage, morale; they rally; +1 courage (−1 when a hero stack is lost).
 
@@ -594,8 +594,8 @@ func stack_card(s) -> Control:
 		st.trim = Color(1, 1, 1, 0.75)
 	var mv: int = s.morale_val
 	var hp := b.health(s)
-	var mcap := maxi(0, s.count * (mv - 1))
-	var hcap := maxi(0, s.count * (hp - 1))
+	var mcap := maxi(0, s.count * Battle.cap(mv))
+	var hcap := maxi(0, s.count * Battle.cap(hp))
 	var mfrac: float = minf(1, maxf(0, s.mor) / mcap) if mcap > 0 else (1.0 if s.mor > 0 else 0.0)
 	var hfrac: float = minf(1, maxf(0, s.phys) / hcap) if hcap > 0 else (1.0 if s.phys > 0 else 0.0)
 	var slow := b.slow_level(s)
@@ -634,8 +634,8 @@ func stack_card(s) -> Control:
 	var stats := UI.label("Atk %s Def %s I%d" % [U.fmt(b.attack(s)), U.fmt(b.defence(s)), b.initiative(s)], "muted", 10)
 	stats.add_theme_font_override("font", UI.font_mono)
 	var body := UI.vbox([topr, stats,
-		_bar(mfrac, UI.C.morale), _barlbl("M " + U.fmt(mv), "%s/%s" % [U.fmt(maxf(0, s.mor)), U.fmt(mcap)]),
 		_bar(1.0 if s.phys < 0 else hfrac, UI.C.adv if s.phys < 0 else UI.C.health), _barlbl("H " + U.fmt(hp), "%s/%s" % [U.fmt(maxf(0, s.phys)), U.fmt(hcap)]),
+		_bar(mfrac, UI.C.morale), _barlbl("M " + U.fmt(mv), "%s/%s" % [U.fmt(maxf(0, s.mor)), U.fmt(mcap)]),
 		badges], 2)
 	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var card := UI.panel(body, st)
@@ -797,6 +797,7 @@ func _bez(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, n: int = 24) -> Pa
 
 func _draw_lines() -> void:
 	if b == null: return
+	_draw_last_attack()
 	var red := Color("#e0604a")
 	var blue := Color("#5aa0e0")
 	for s in b.stacks:
@@ -828,6 +829,110 @@ func _draw_lines() -> void:
 				_lines.draw_line(pts[i], pts[i + 1], blue, 3, true)
 			var mid := Vector2((x1 + x2) / 2, y + dy * 0.8 + 5)
 			_lines.draw_string(UI.font, mid - Vector2(6, 0), "◈", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#9cc8f0"))
+
+## the latest attack: an arrow along the line of attack, crossed swords at its middle
+## and a jagged "blam" burst with the health / morale damage dealt.
+## A retaliation gets its own thinner arrow and burst, offset to one side.
+func _draw_last_attack() -> void:
+	if b.last_attack.is_empty(): return
+	var avoid: Array = [_mid.get_global_rect()] if _mid else []
+	if avoid.size(): avoid[0].position -= _lines.get_global_rect().position
+	var k := 0
+	for h in b.last_attack:
+		var A := _box(h.a)
+		var B := _box(h.t)
+		if A.size == Vector2.ZERO or B.size == Vector2.ZERO: continue
+		var sa = b.stack(h.a)
+		var st = b.stack(h.t)
+		var main: bool = not h.ret
+		var off := 0.0 if main else 18.0
+		var p1 := Vector2(A.get_center().x, A.position.y if sa.side == 0 else A.end.y)
+		var p2 := Vector2(B.get_center().x, B.end.y if st.side == 1 else B.position.y)
+		var dir := (p2 - p1).normalized()
+		var nrm := Vector2(-dir.y, dir.x)
+		p1 += nrm * off; p2 += nrm * off
+		var col := Color("#f6c34a") if main else Color("#c9b98a")
+		var w := 5.0 if main else 3.0
+		_lines.draw_line(p1, p2 - dir * 12, Color(0, 0, 0, 0.55), w + 3, true)
+		_lines.draw_line(p1, p2 - dir * 12, col, w, true)
+		var hw := 9.0 if main else 7.0
+		var tip := PackedVector2Array([p2, p2 - dir * 18 + nrm * hw, p2 - dir * 18 - nrm * hw])
+		_lines.draw_colored_polygon(tip, col)
+		_lines.draw_polyline(PackedVector2Array([tip[0], tip[1], tip[2], tip[0]]), Color(0, 0, 0, 0.6), 1.5, true)
+		# text for the burst
+		var lines := []
+		if h.phys: lines.append(["%d health" % h.phys, Color("#9e1f14")])
+		if h.mor: lines.append(["%d morale" % h.mor, Color("#8a5200")])
+		if not h.phys and not h.mor: lines.append(["no damage", Color("#4a3f30")])
+		var loss := []
+		if h.killed: loss.append("%d slain" % h.killed)
+		if h.deserted: loss.append("%d fled" % h.deserted)
+		if loss.size(): lines.append([" · ".join(loss), Color("#2b2418")])
+		if h.crit: lines.push_front(["MAX!", Color("#c0200c")])
+		# place swords along the line, burst beside them, clear of the turn banner
+		var fs := 15 if main else 12
+		var tw := 0.0
+		for l in lines: tw = maxf(tw, UI.font_bold.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x)
+		var th: float = lines.size() * (fs + 2)
+		var rad := Vector2(tw / 2 + 16, th / 2 + 12)
+		var side_sign := 1.0 if nrm.x >= 0 else -1.0
+		if not main: side_sign = -side_sign
+		var best := Vector2.ZERO
+		var best_c := Vector2.ZERO
+		var best_o := INF
+		for t in [0.5, 0.44, 0.56, 0.38, 0.62, 0.32, 0.68, 0.26, 0.74, 0.2, 0.8]:
+			for sgn in [side_sign, -side_sign]:
+				var c: Vector2 = p1.lerp(p2, t)
+				var bc: Vector2 = c + Vector2(sgn * (rad.x * 1.42 + (22.0 if main else 16.0)), 0)
+				var r := Rect2(bc - rad * 1.45, rad * 2.9)
+				var o := 0.0
+				for av in avoid: o += r.intersection(av).get_area() * 4.0
+				for id in _cards: o += r.intersection(_box(id)).get_area()
+				if not Rect2(Vector2.ZERO, _lines.size).encloses(r): o += 1e6
+				o += (0.0 if sgn == side_sign else 50.0) + absf(t - 0.5) * 100.0
+				if o < best_o:
+					best_o = o; best = c; best_c = bc
+		avoid.append(Rect2(best_c - rad * 1.45, rad * 2.9))
+		avoid.append(Rect2(best - Vector2(18, 18), Vector2(36, 36)))
+		_draw_swords(best, 17.0 if main else 12.0)
+		_draw_blam(best_c, rad, lines, fs, int(h.a) * 31 + int(h.t) * 7 + k)
+		k += 1
+
+func _draw_swords(c: Vector2, L: float) -> void:
+	_lines.draw_circle(c, L * 1.05, Color("#2a2119"))
+	_lines.draw_arc(c, L * 1.05, 0, TAU, 28, Color("#d4a94a"), 2, true)
+	for sgn in [-1.0, 1.0]:
+		var d := Vector2(sgn * 0.7071, -0.7071)
+		var q := Vector2(-d.y, d.x)
+		var tipp := c + d * L * 0.85
+		var guard := c - d * L * 0.35
+		var pommel := c - d * L * 0.8
+		_lines.draw_line(guard, tipp, Color("#e8ecf0"), 3.2, true)
+		_lines.draw_line(guard + q * L * 0.3, guard - q * L * 0.3, Color("#d4a94a"), 2.6, true)
+		_lines.draw_line(guard, pommel, Color("#7a4a26"), 2.6, true)
+		_lines.draw_circle(pommel, 1.8, Color("#d4a94a"))
+
+func _draw_blam(c: Vector2, rad: Vector2, lines: Array, fs: int, seed_v: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v
+	var n := 16
+	var pts := PackedVector2Array()
+	for i in n * 2:
+		var a := TAU * i / (n * 2) + rng.randf_range(-0.08, 0.08)
+		var out := i % 2 == 0
+		var f := rng.randf_range(1.22, 1.42) if out else rng.randf_range(0.92, 1.0)
+		pts.append(c + Vector2(cos(a) * rad.x, sin(a) * rad.y) * f)
+	var shadow := PackedVector2Array()
+	for p in pts: shadow.append(p + Vector2(3, 3))
+	_lines.draw_colored_polygon(shadow, Color(0, 0, 0, 0.45))
+	_lines.draw_colored_polygon(pts, Color("#fbe48c"))
+	var ring := pts.duplicate(); ring.append(pts[0])
+	_lines.draw_polyline(ring, Color("#d8321e"), 2.5, true)
+	var y := c.y - lines.size() * (fs + 2) / 2.0 + fs * 0.85
+	for l in lines:
+		var w := UI.font_bold.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		_lines.draw_string(UI.font_bold, Vector2(c.x - w / 2, y), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, fs, l[1])
+		y += fs + 2
 
 # ------------------------------------------------------------------ AI & end
 func maybe_ai() -> void:

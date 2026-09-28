@@ -107,5 +107,9 @@ func options() -> void:
 		Sfx.cheers = v
 		Sfx.save()
 		if v: Sfx.play_cheer()))
+	grid.add_child(UI.label("Casualty rule"))
+	var th := UI.check("Test: stack × full value threshold (health and morale)", Battle.full_threshold(), func(v): Battle.set_full_threshold(v))
+	UI.tip(th, "[b]Off (doc rule):[/b] a stack starts losing creatures once its damage exceeds count × (health − 1), and likewise count × (morale − 1).\n[b]On (test):[/b] the thresholds are count × health and count × morale, and each deserter sheds a full health of damage. Each creature lost still removes twice its value.\nTakes effect immediately, including mid-battle.")
+	grid.add_child(th)
 	var box := UI.vbox([UI.h2("Options"), grid, UI.row_end([UI.button("Close", UI.close_modal, "Primary")])], 12)
 	UI.modal(box, false, 460)

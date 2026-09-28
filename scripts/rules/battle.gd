@@ -70,6 +70,7 @@ var next_id := 1
 var sides: Array = []
 var wall = null
 var pre_combat := false
+var last_attack: Array = []   # strikes of the latest attack, for the UI marker
 var probe := false   # stats-only battle for the UI: no start-of-battle effects, no rounds
 var turn_acted := false
 var C: Dictionary
@@ -329,6 +330,27 @@ static func probe_stats(o: Dictionary) -> Array:
 		var n: int = sides_in[i].stacks.size()
 		out.append(st.slice(0, n).map(func(x): return b.eff_stats(x)))
 	return out
+
+## How much damage one creature soaks before the stack starts losing creatures.
+## Doc rule: value − 1 (count × (health − 1)). The "full threshold" test option in
+## Options → Battle uses the whole value (count × health) for both health and morale;
+## deserters then also shed a full health of damage.
+static var _full = null
+static func full_threshold() -> bool:
+	if _full == null:
+		var cf := ConfigFile.new()
+		_full = cf.get_value("rules", "full_threshold", false) if cf.load("user://settings.cfg") == OK else false
+	return _full
+
+static func set_full_threshold(on: bool) -> void:
+	_full = on
+	var cf := ConfigFile.new()
+	cf.load("user://settings.cfg")
+	cf.set_value("rules", "full_threshold", on)
+	cf.save("user://settings.cfg")
+
+static func cap(v: int) -> int:
+	return v if full_threshold() else v - 1
 
 func raw_health(s: Stk) -> int:
 	return maxi(1, int(s.def.hp) + s.extra_hp)
@@ -618,7 +640,7 @@ func hit_numbers(a: Stk, t: Stk, opts: Dictionary = {}) -> Dictionary:
 
 func deal_damage(t: Stk, phys: int, mor: int, ctx: Dictionary = {}) -> Dictionary:
 	if t.count <= 0:
-		return {"killed": 0, "deserted": 0}
+		return {"killed": 0, "deserted": 0, "phys": 0, "mor": 0}
 	if fx.get("swapDamage", 0) and ctx.get("kind", "") != "spellPure":
 		var x := phys; phys = mor; mor = x
 	if fx.get("noPhysical", 0) and phys > 0:
@@ -635,18 +657,18 @@ func deal_damage(t: Stk, phys: int, mor: int, ctx: Dictionary = {}) -> Dictionar
 		var mv := t.morale_val  # "calculate morale before damage"
 		t.mor += mor
 		var h := health(t)
-		while t.count > 0 and t.mor > t.count * (mv - 1):
+		while t.count > 0 and t.mor > t.count * cap(mv):
 			t.count -= 1; deserted += 1; t.deserters += 1
 			t.mor -= maxi(1, 2 * mv + courage)
 			if t.phys > 0:
-				t.phys = maxi(0, t.phys - (h - 1))
+				t.phys = maxi(0, t.phys - cap(h))
 		if deserted:
 			t.mor = maxi(0, t.mor)
 	if phys != 0:
 		t.phys += phys
 		var h := health(t)
 		var extra: int = courage if t.sp("courageHealth") else 0
-		while t.count > 0 and t.phys > t.count * (h - 1):
+		while t.count > 0 and t.phys > t.count * cap(h):
 			t.count -= 1; killed += 1; t.dead += 1
 			t.phys -= maxi(1, 2 * h + extra)
 		if killed:
@@ -656,15 +678,16 @@ func deal_damage(t: Stk, phys: int, mor: int, ctx: Dictionary = {}) -> Dictionar
 	t.last_loss_dead = killed > 0
 	if killed or deserted:
 		on_losses(t, killed, deserted, ctx)
-	return {"killed": killed, "deserted": deserted}
+	return {"killed": killed, "deserted": deserted, "phys": phys, "mor": mor}
 
 func simulate_phys(t: Stk, phys: float) -> int:
 	var p: float = t.phys + phys
 	var c := t.count
 	var k := 0
 	var h := health(t)
-	while c > 0 and p > c * (h - 1):
-		c -= 1; k += 1; p -= 2 * h
+	var extra: int = sides[t.side].courage if t.sp("courageHealth") else 0
+	while c > 0 and p > c * cap(h):
+		c -= 1; k += 1; p -= maxi(1, 2 * h + extra)
 	return k
 
 func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
@@ -1012,6 +1035,8 @@ func strike(a: Stk, t: Stk, opts: Dictionary = {}):
 	if n.roll.how == "max" or n.roll.how == "crit":
 		events.append({"type": "crit", "side": a.side, "id": a.id})
 	var res := deal_damage(t, n.phys, n.mor, {"source": a, "kind": "attack"})
+	last_attack.append({"a": a.id, "t": t.id, "phys": res.phys, "mor": res.mor, "killed": res.killed, "deserted": res.deserted,
+		"ret": opts.get("ret", false), "crit": n.roll.how == "max" or n.roll.how == "crit"})
 	if a.sp("lifesteal") and a.count > 0 and n.phys > 0:
 		a.phys = maxi(mini(a.phys, 0), a.phys - n.phys)
 	if t.sp("thorns") and t.count > 0 and not opts.get("ret", false) and not ign(a):
@@ -1022,6 +1047,7 @@ func strike(a: Stk, t: Stk, opts: Dictionary = {}):
 	return res
 
 func do_attack(a: Stk, t: Stk) -> void:
+	last_attack = []
 	var engaged := engaged_with(a, t) or engaged_with(t, a)
 	var under_assault := assaulters(a).size() > 0
 	var ranged := is_ranged(a)
@@ -1327,12 +1353,16 @@ func expected_hit(a: Stk, t: Stk) -> Dictionary:
 	var cour: int = sides[t.side].courage
 	var c := t.count
 	var m: int = t.mor + n.mor
-	var p: int = t.phys + n.phys
+	var p: int = t.phys
 	var removed := 0
-	while c > 0 and m > c * (mv - 1):
+	# same order as deal_damage: morale first (deserters shed health − 1 damage), then health
+	while n.mor > 0 and c > 0 and m > c * cap(mv):
 		c -= 1; removed += 1; m -= maxi(1, 2 * mv + cour)
-	while c > 0 and p > c * (h - 1):
-		c -= 1; removed += 1; p -= maxi(1, 2 * h)
+		if p > 0: p = maxi(0, p - cap(h))
+	p += n.phys
+	var extra: int = cour if t.sp("courageHealth") else 0
+	while c > 0 and p > c * cap(h):
+		c -= 1; removed += 1; p -= maxi(1, 2 * h + extra)
 	rng.set_state(save_rng)
 	log.resize(save_log)
 	damage_this_round = save_dmg
