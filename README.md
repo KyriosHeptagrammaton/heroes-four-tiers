@@ -43,6 +43,11 @@ godot --headless --path . -- --test=playthrough          # autopiloted 35-day ho
 produces exactly the same battles as the JS prototype (300/300 identical), and
 `tests/worldgen.gd` + `tests/compare_world.py` do the same for map generation.
 
+## Credits
+
+Button sound effects are built from Kenney's [Impact Sounds](https://kenney.nl/assets/impact-sounds) and
+[RPG Audio](https://kenney.nl/assets/rpg-audio) packs (CC0, see `sfx/KENNEY_LICENSE.txt`).
+
 ## Design flags
 
 Anything the design doc left open is listed in-game under **Design flags** on

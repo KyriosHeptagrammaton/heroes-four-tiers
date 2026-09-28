@@ -1,13 +1,16 @@
 # ============================================================================
-# Sfx — UI sound effects. Every button plays a chunky stone-slab "ba-DOOM"
-# when pressed (checkboxes and drop-downs a lighter stone tick). The sounds
-# are synthesised by tools/make_sfx.py.
+# Sfx — UI sound effects. Buttons play a heavy stone/door "ba-DOOM" when
+# pressed (style selectable); checkboxes and drop-downs a lighter stone tick.
+# Button sounds are built from Kenney's CC0 packs by tools/build_kenney_sfx.py;
+# the tick is synthesised by tools/make_sfx.py.
 # ============================================================================
 extends Node
 
 var on := true
 var vol := 0.7
-var _slabs: Array = []
+var style := "stone"
+const STYLES := {"stone": ["Stone", 3], "pick": ["Rock knock", 3], "door": ["Heavy door", 2]}
+var _sets := {}
 var _tick: AudioStream
 var _pool: Array = []
 var _next := 0
@@ -19,8 +22,12 @@ func _ready() -> void:
 	if cf.load(CFG_PATH) == OK:
 		on = cf.get_value("sfx", "on", true)
 		vol = cf.get_value("sfx", "vol", 0.7)
-	for i in 3:
-		_slabs.append(load("res://sfx/stone_button_%d.wav" % (i + 1)))
+		style = cf.get_value("sfx", "style", "stone")
+	if not STYLES.has(style): style = "stone"
+	for st in STYLES:
+		_sets[st] = []
+		for i in STYLES[st][1]:
+			_sets[st].append(load("res://sfx/button_%s_%d.ogg" % [st, i + 1]))
 	_tick = load("res://sfx/stone_tick.wav")
 	for i in 6:
 		var p := AudioStreamPlayer.new()
@@ -49,7 +56,8 @@ func play_slab() -> void:
 	var now := Time.get_ticks_msec()
 	var db := -6.0 if now - _last_ms < 120 else 0.0
 	_last_ms = now
-	_play(_slabs[randi() % _slabs.size()], randf_range(0.96, 1.04), db)
+	var set: Array = _sets[style]
+	_play(set[randi() % set.size()], randf_range(0.97, 1.03), db)
 
 func play_tick() -> void:
 	_play(_tick, randf_range(0.95, 1.08))
@@ -59,8 +67,18 @@ func save() -> void:
 	cf.load(CFG_PATH)
 	cf.set_value("sfx", "on", on)
 	cf.set_value("sfx", "vol", vol)
+	cf.set_value("sfx", "style", style)
 	cf.save(CFG_PATH)
 
 func toggle() -> void:
 	on = not on
 	save()
+
+func set_style(s: String) -> void:
+	if s == "off":
+		on = false
+	else:
+		on = true
+		style = s
+	save()
+	play_slab()

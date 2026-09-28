@@ -1,6 +1,6 @@
-"""Synthesises the UI sound effects (no samples): a chunky stone-slab
-"ba-DOOM" for buttons, in a few variants, plus a light stone tick for
-checkboxes and drop-downs. Run: python3 tools/make_sfx.py"""
+"""Synthesises the light stone tick used by checkboxes and drop-downs.
+(slab() is the old synthesised button sound, kept for reference; buttons now
+use Kenney's CC0 sounds, see build_kenney_sfx.py.) Run: python3 tools/make_sfx.py"""
 import numpy as np
 from scipy.signal import butter, sosfilt
 from scipy.io import wavfile
@@ -73,7 +73,5 @@ def save(name, x, peak_db=-3.0):
     x = x / np.max(np.abs(x)) * 10 ** (peak_db / 20)
     wavfile.write(os.path.join(OUT, name), SR, (x * 32767).astype(np.int16))
 
-for i, (seed, p) in enumerate([(11, 1.0), (23, 0.94), (37, 1.06)]):
-    save(f"stone_button_{i + 1}.wav", slab(seed, p))
 save("stone_tick.wav", tick(5), -6.0)
 print("ok")

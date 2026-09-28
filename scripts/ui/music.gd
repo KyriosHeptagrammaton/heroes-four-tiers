@@ -121,9 +121,10 @@ func control() -> Control:
 	sl.focus_mode = Control.FOCUS_NONE
 	sl.value_changed.connect(func(v): set_vol(v / 100.0))
 	UI.tip(sl, "Music volume")
-	var sfx := UI.button("⚒" if Sfx.on else "⚒ off", func(): pass, "Small")
-	sfx.pressed.connect(func():
-		Sfx.toggle()
-		sfx.text = "⚒" if Sfx.on else "⚒ off")
-	UI.tip(sfx, "Button sounds on/off")
+	var items := []
+	for st in Sfx.STYLES: items.append([st, "⚒ " + Sfx.STYLES[st][0]])
+	items.append(["off", "⚒ Off"])
+	var sfx := UI.option(items, Sfx.style if Sfx.on else "off", func(v): Sfx.set_style(v))
+	sfx.add_theme_font_size_override("font_size", 12)
+	UI.tip(sfx, "Button sound")
 	return UI.hbox([btn, sl, sfx], 4)
