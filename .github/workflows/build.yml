@@ -63,6 +63,8 @@ jobs:
             grep -i -A2 "resources modification" export.log | while read -r l; do echo "::error::$l"; done
             exit 1
           fi
+          command -v python3 >/dev/null || DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3 >/dev/null
+          python3 tools/fix_exe_icon.py build/windows/HeroesOfFourSeasons.exe
           ls -la build/windows
 
       - uses: actions/upload-artifact@v4
