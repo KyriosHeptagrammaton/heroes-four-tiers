@@ -1276,7 +1276,7 @@
     "initiative": 1
    }
   },
-  "horn": {"name": "Horn of Returning", "desc": "Your commander may Recall deserters and Revive fallen even into a stack that was wiped out, bringing it back onto the field.", "value": 3},
+  "horn": {"name": "Horn of Returning", "desc": "Your commander may Recall deserters even into a stack that was wiped out, bringing it back onto the field.", "value": 3},
   "boots": {
    "name": "Road Boots",
    "desc": "+2 movement per day.",
