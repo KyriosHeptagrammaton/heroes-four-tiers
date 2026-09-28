@@ -140,7 +140,7 @@ func render() -> void:
 	UI.tip(o3, D.WEATHER[cfg.weather].desc)
 	var ig := UI.check("Defender ignored", cfg.ignored, func(v): cfg.ignored = v)
 	UI.tip(ig, "The defender chose to ignore the attack instead of picking ground: 1-3 random defending stacks gain one slow.")
-	var bar := UI.hbox([UI.button("◂ Menu", func(): Main.menu()), UI.h2("Combat Sandbox"), UI.spacer(),
+	var bar := UI.hbox([UI.button("◂ Menu", func(): Main.menu()), UI.h2("Combat Sandbox"), UI.button("⚙", Main.options, "Small", "Options"), UI.spacer(),
 		UI.label("Ground", "muted"), o1, UI.label("Time", "muted"), o2, UI.label("Weather", "muted"), o3, ig,
 		_gated(UI.button("⚖ Simulate ×100", func(): simulate(100), "", "Run 100 AI-vs-AI battles with these armies")),
 		_gated(UI.button("⚔ Fight!", fight, "Primary"))], 10)

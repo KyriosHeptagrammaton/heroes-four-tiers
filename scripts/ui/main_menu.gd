@@ -61,6 +61,7 @@ func menu() -> void:
 		box.add_child(UI.button("New hotseat game", Game.new_game_dialog, "Big" if has_game else "BigPrimary"))
 		box.add_child(UI.button("Load game", Game.load_dialog, "Big"))
 	box.add_child(UI.button("Combat sandbox", func(): UI.screen("sandbox").open(), "Big"))
+	box.add_child(UI.button("Options", options, "Big"))
 	box.add_child(UI.button("Design flags (%d)" % D.FLAGS.size(), flags, "Big"))
 	box.add_child(UI.button("Combat rules", func(): UI.screen("battle").show_rules(), "Big"))
 	box.add_child(UI.button("Quit", func(): get_tree().quit(), "Big"))
@@ -84,3 +85,22 @@ func flags() -> void:
 				box.add_child(UI.panel(r, st))
 	box.add_child(UI.row_end([UI.button("Close", UI.close_modal, "Primary")]))
 	UI.modal(box, false, 720)
+
+## Options: unit icon style, music and button sounds (saved in the settings file)
+func options() -> void:
+	var icons := UI.option([["portraits", "Hand-drawn portraits"], ["abstract", "Abstract symbols (original placeholders)"]],
+		"portraits" if UnitSym.portraits() else "abstract", func(v):
+			UnitSym.set_portraits(v == "portraits")
+			get_tree().call_group("unitsym", "queue_redraw")
+			var ws = UI.screen("world")
+			if ws and ws.has_method("redraw"): ws.redraw())
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 10)
+	grid.add_child(UI.label("Unit icons"))
+	grid.add_child(icons)
+	grid.add_child(UI.label("Music & sounds"))
+	grid.add_child(Music.control())
+	var box := UI.vbox([UI.h2("Options"), grid, UI.row_end([UI.button("Close", UI.close_modal, "Primary")])], 12)
+	UI.modal(box, false, 460)

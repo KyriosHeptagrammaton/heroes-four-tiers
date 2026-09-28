@@ -11,9 +11,58 @@ var dim := false
 
 static var _meta = null
 static var _tex := {}
+static var _portraits = null   # Options → "Unit icons": portraits or abstract symbols
+const CFG_PATH := "user://settings.cfg"
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
+	add_to_group("unitsym")
+
+static func portraits() -> bool:
+	if _portraits == null:
+		var cf := ConfigFile.new()
+		_portraits = cf.get_value("display", "portraits", true) if cf.load(CFG_PATH) == OK else true
+	return _portraits
+
+static func set_portraits(on: bool) -> void:
+	_portraits = on
+	var cf := ConfigFile.new()
+	cf.load(CFG_PATH)
+	cf.set_value("display", "portraits", on)
+	cf.save(CFG_PATH)
+
+## the original placeholder: tier shape (1 circle, 2 triangle, 3 square, 4 star) in
+## faction colour with the faction glyph; arrow = ranged, ✦ = magi, » = cavalry
+static func draw_abstract(ci: CanvasItem, d: Dictionary, rect: Rect2, dim_it: bool = false) -> void:
+	var k := minf(rect.size.x, rect.size.y) / 40.0
+	var o := rect.position + Vector2((rect.size.x - 40 * k) / 2, (rect.size.y - 40 * k) / 2)
+	var P := func(x: float, y: float) -> Vector2: return o + Vector2(x, y) * k
+	var mod := Color(1, 1, 1, 0.3) if dim_it else Color(1, 1, 1, 1)
+	var font: Font = UI.font_bold
+	if d.get("mounted", false):
+		var R := Units.resolve(d.riderKey)
+		var M := Units.resolve(d.mountKey)
+		draw_shape(ci, mini(4, M.tier), P.call(20, 26), 11 * k, Color(Color(D.FACTIONS[M.faction].color), 0.9) * mod, Color.BLACK * mod, 1.5 * k)
+		draw_shape(ci, mini(4, R.tier), P.call(20, 13), 8 * k, Color(D.FACTIONS[R.faction].color) * mod, Color.WHITE * mod, 1.5 * k)
+	else:
+		draw_shape(ci, mini(4, d.tier), P.call(20, 20), 14 * k, Color(D.FACTIONS[d.faction].color) * mod, Color.BLACK * mod, 1.5 * k)
+		var g: String = D.FACTIONS[d.faction].glyph
+		var fs := int(maxf(6, 12 * k))
+		var tw := font.get_string_size(g, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var pos: Vector2 = P.call(20, 24.5) - Vector2(tw / 2, 0)
+		ci.draw_string_outline(font, pos, g, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, int(2 * k), Color(0, 0, 0, 0.55) * mod)
+		ci.draw_string(font, pos, g, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE * mod)
+	if d.ab.get("ranged", false):
+		ci.draw_line(P.call(30, 10), P.call(39, 1), Color.WHITE * mod, 2 * k)
+		ci.draw_polyline(PackedVector2Array([P.call(34, 1), P.call(39, 1), P.call(39, 6)]), Color.WHITE * mod, 2 * k)
+	if d.get("mod", "") == "m":
+		ci.draw_string(UI.font, P.call(1, 11), "✦", HORIZONTAL_ALIGNMENT_LEFT, -1, int(maxf(6, 12 * k)), Color("#e9d0ff") * mod)
+	if d.up >= 1:
+		ci.draw_circle(P.call(36, 37), 2.2 * k, Color("#f0d68e") * mod)
+		if d.up >= 2:
+			ci.draw_circle(P.call(30, 37), 2.2 * k, Color("#f0d68e") * mod)
+	if d.ab.get("cavalry", false):
+		ci.draw_string(UI.font_bold, P.call(0, 39), "»", HORIZONTAL_ALIGNMENT_LEFT, -1, int(maxf(6, 12 * k)), Color.WHITE * mod)
 
 static func meta() -> Dictionary:
 	if _meta == null:
@@ -72,6 +121,9 @@ static func _draw_creature(ci: CanvasItem, d: Dictionary, c: Vector2, ext: float
 
 ## draw a unit (including riders on their mounts) inside `rect`
 static func draw_unit(ci: CanvasItem, d: Dictionary, rect: Rect2, dim_it: bool = false) -> void:
+	if not portraits():
+		draw_abstract(ci, d, rect, dim_it)
+		return
 	var mod := Color(1, 1, 1, 0.3) if dim_it else Color.WHITE
 	var box := minf(rect.size.x, rect.size.y)
 	var c := rect.get_center()

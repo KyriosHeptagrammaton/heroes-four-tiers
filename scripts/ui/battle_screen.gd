@@ -90,7 +90,7 @@ func _build() -> void:
 	qs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	qs.custom_minimum_size.y = 46
 	qs.add_child(_queue)
-	var top := UI.hbox([_chips, _top_status, qs, Music.control(), UI.button("? Rules", show_rules, "Small", "Quick rules reference")], 10)
+	var top := UI.hbox([_chips, _top_status, qs, Music.control(), UI.button("⚙", Main.options, "Small", "Options"), UI.button("? Rules", show_rules, "Small", "Quick rules reference")], 10)
 	root.add_child(UI.panel(top, UI.stone("bar").margins(12, 6)))
 	# main
 	var main := UI.hbox([], 0)

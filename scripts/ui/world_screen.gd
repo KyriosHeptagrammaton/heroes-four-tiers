@@ -75,6 +75,7 @@ func _build() -> void:
 		UI.button("−", func(): zoom(1 / 1.2), "Small", "Zoom out"),
 		UI.button("☰ Menu", func(): Main.menu(), "Small", "Main menu (game stays open)"),
 		UI.button("▣ Save", Game.save_dialog, "Small"),
+		UI.button("⚙ Options", Main.options, "Small"),
 		UI.button("⚑ Flags", Main.flags, "Small"),
 		UI.button("? Help", help, "Small"),
 		Music.control()], 6)
