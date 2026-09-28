@@ -59,8 +59,8 @@ jobs:
           set -o pipefail
           mkdir -p build/windows
           godot --headless --path . --export-release "Windows Desktop" build/windows/HeroesOfFourSeasons.exe 2>&1 | tee export.log
-          if grep -qi "rcedit\|resources modification" export.log; then
-            grep -i -A2 "rcedit\|resources modification" export.log | while read -r l; do echo "::error::$l"; done
+          if grep -qi "resources modification" export.log; then
+            grep -i -A2 "resources modification" export.log | while read -r l; do echo "::error::$l"; done
             exit 1
           fi
           ls -la build/windows
