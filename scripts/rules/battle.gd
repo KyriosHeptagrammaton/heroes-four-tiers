@@ -1192,8 +1192,8 @@ func command_options(side: int) -> Array:
 	if hs == null:
 		return []
 	return [
-		{"id": "recall", "label": "Recall deserter", "desc": "Spend courage = tier to return 1 deserter to a stack.", "need": "stack"},
-		{"id": "revive", "label": "Revive fallen", "desc": "Spend spare knowledge (%d) = tier to revive 1 dead." % hs.spareKnowledge, "need": "stack"},
+		{"id": "recall", "label": "Recall deserter", "desc": "Spend courage = tier to return 1 deserter to a stack (even one that was wiped out).", "need": "stack"},
+		{"id": "revive", "label": "Revive fallen", "desc": "Spend spare knowledge (%d) = tier to revive 1 dead (even in a wiped-out stack)." % hs.spareKnowledge, "need": "stack"},
 		{"id": "embolden", "label": "Embolden", "desc": "Spend one initiative pip: +1 advantage to a stack.", "need": "stack"},
 		{"id": "steel", "label": "Steel nerves", "desc": "+1 courage.", "need": null},
 	]
@@ -1208,16 +1208,19 @@ func command(side: int, cmd: String, t_id = null):
 	var tier: int = mini(4, int(t.def.tier)) if t else 0
 	match cmd:
 		"recall":
-			if t == null or t.side != side or t.count <= 0: return "Pick a friendly stack"
+			# works on wiped-out stacks too: the recalled creature brings the stack back
+			if t == null or t.side != side: return "Pick a friendly stack"
 			if t.deserters <= 0: return "No deserters"
 			if sd.courage < tier: return "Not enough courage"
-			sd.courage -= tier; t.deserters -= 1; t.count += 1; recalc_morale(t)
+			sd.courage -= tier; t.deserters -= 1
+			_return_one(t)
 			say("%s recalls a deserter to %s." % [h.name, t.name], "hero")
 		"revive":
-			if t == null or t.side != side or t.count <= 0: return "Pick a friendly stack"
+			if t == null or t.side != side: return "Pick a friendly stack"
 			if t.dead <= 0: return "No dead to revive"
 			if hs.spareKnowledge < tier: return "Not enough spare knowledge"
-			hs.spareKnowledge -= tier; t.dead -= 1; t.count += 1; recalc_morale(t)
+			hs.spareKnowledge -= tier; t.dead -= 1
+			_return_one(t)
 			say("%s revives one of %s." % [h.name, t.name], "hero")
 		"embolden":
 			if t == null or t.side != side or t.count <= 0: return "Pick a friendly stack"
@@ -1231,6 +1234,16 @@ func command(side: int, cmd: String, t_id = null):
 			return "Unknown command"
 	hs.castsLeft -= 1
 	return null
+
+## one creature rejoins a stack; a wiped-out stack comes back onto the field
+func _return_one(t: Stk) -> void:
+	var was_gone := t.count <= 0
+	t.count = maxi(0, t.count) + 1
+	if was_gone:
+		t.phys = 0; t.mor = 0; t.hero = false
+		say("%s return to the field!" % t.name, "good")
+		check_hero_unit(t)
+	recalc_morale(t)
 
 func hero_end(side: int):
 	if not hero_turn_now(side):

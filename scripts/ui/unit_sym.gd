@@ -40,10 +40,23 @@ static func draw_abstract(ci: CanvasItem, d: Dictionary, rect: Rect2, dim_it: bo
 	var mod := Color(1, 1, 1, 0.3) if dim_it else Color(1, 1, 1, 1)
 	var font: Font = UI.font_bold
 	if d.get("mounted", false):
+		# each creature gets its own full symbol: the mounts along the bottom, the rider above
 		var R := Units.resolve(d.riderKey)
-		var M := Units.resolve(d.mountKey)
-		draw_shape(ci, mini(4, M.tier), P.call(20, 26), 11 * k, Color(Color(D.FACTIONS[M.faction].color), 0.9) * mod, Color.BLACK * mod, 1.5 * k)
-		draw_shape(ci, mini(4, R.tier), P.call(20, 13), 8 * k, Color(D.FACTIONS[R.faction].color) * mod, Color.WHITE * mod, 1.5 * k)
+		var Mo := Units.resolve(d.mountKey)
+		var n: int = maxi(1, int(d.get("mountsPer", 1)))
+		var shown := mini(n, 4)
+		var box := 40.0 * k
+		var ms := box * (0.62 if shown == 1 else (0.5 if shown == 2 else 0.4))
+		var step := ms * 0.8
+		var row_w := ms + step * (shown - 1)
+		var top := o.y + box - ms
+		for i in shown:
+			draw_abstract(ci, Mo, Rect2(o.x + (box - row_w) / 2 + i * step, top, ms, ms), dim_it)
+		var rs := box * 0.52
+		draw_abstract(ci, R, Rect2(o.x + (box - rs) / 2, top - rs * 0.72, rs, rs), dim_it)
+		if n > shown:
+			_count_label(ci, "×%d" % n, rect, box, mod)
+		return
 	else:
 		draw_shape(ci, mini(4, d.tier), P.call(20, 20), 14 * k, Color(D.FACTIONS[d.faction].color) * mod, Color.BLACK * mod, 1.5 * k)
 		var g: String = D.FACTIONS[d.faction].glyph
@@ -88,7 +101,8 @@ static func _path(d: Dictionary) -> String:
 	return {"": "melee", "r": "ranged", "m": "magi"}.get(d.mod, "melee")
 
 ## draw one creature (no rider logic) centred at `c` with portrait extent `ext`
-static func _draw_creature(ci: CanvasItem, d: Dictionary, c: Vector2, ext: float, mod: Color, cav: bool, show_weapon: bool = true) -> void:
+## pass "body" draws the portrait, pass "gear" its weapon(s) and upgrade pips, "all" both
+static func _draw_creature(ci: CanvasItem, d: Dictionary, c: Vector2, ext: float, mod: Color, cav: bool, pass_: String = "all", pips: bool = false) -> void:
 	var key := "%s_%d" % [d.faction, mini(4, d.tier)]
 	var M: Dictionary = meta().units.get(key, {})
 	var t := tex("res://art/units/%s.png" % key)
@@ -98,9 +112,19 @@ static func _draw_creature(ci: CanvasItem, d: Dictionary, c: Vector2, ext: float
 	var s: float = ext / maxf(M.w, M.h)
 	var size := Vector2(M.w, M.h) * s
 	var o := c - size / 2
-	ci.draw_texture_rect(t, Rect2(o, size), false, mod)
+	if pass_ != "gear":
+		ci.draw_texture_rect(t, Rect2(o, size), false, mod)
+	if pass_ == "body":
+		return
+	if pips and d.up >= 1:
+		var k := ext / 40.0
+		var base := c + Vector2(size.x / 2, size.y / 2)
+		for i in mini(2, int(d.up)):
+			var pp := base - Vector2(2 + i * 6, 1) * k
+			ci.draw_circle(pp, 2.8 * k, Color(0, 0, 0, 0.7) * mod)
+			ci.draw_circle(pp, 2.1 * k, Color("#f0d68e") * mod)
 	var p := _path(d)
-	if not show_weapon or p == "":
+	if p == "":
 		return
 	var wkey := p + ("_cav" if cav else "_inf")
 	var W: Dictionary = meta().weapons.get(wkey, {})
@@ -118,6 +142,13 @@ static func _draw_creature(ci: CanvasItem, d: Dictionary, c: Vector2, ext: float
 		ci.draw_texture_rect(wt, r, false, mod)
 		if tint:
 			ci.draw_texture_rect(tint, r, false, ucol * mod)
+
+static func _count_label(ci: CanvasItem, txt: String, rect: Rect2, box: float, mod: Color) -> void:
+	var f: Font = UI.font_bold
+	var fs := int(maxf(8, box * 0.26))
+	var pos := Vector2(rect.end.x - f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x, rect.end.y)
+	ci.draw_string_outline(f, pos, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 3, Color(0, 0, 0, 0.8) * mod)
+	ci.draw_string(f, pos, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE * mod)
 
 ## draw a unit (including riders on their mounts) inside `rect`
 static func draw_unit(ci: CanvasItem, d: Dictionary, rect: Rect2, dim_it: bool = false) -> void:
@@ -137,20 +168,17 @@ static func draw_unit(ci: CanvasItem, d: Dictionary, rect: Rect2, dim_it: bool =
 		var step := mext * 0.72
 		var row_w := mext + step * (shown - 1)
 		var my := rect.position.y + (rect.size.y + box) / 2 - mext * 0.5
-		for i in shown:
-			var mx := c.x - row_w / 2 + mext / 2 + i * step
-			_draw_creature(ci, Mo, Vector2(mx, my), mext, mod, false, false)
-		# rider on top
+		# rider on top; everyone shows their own weapon and upgrade, drawn over all the bodies
 		var rext := box * 0.52
-		_draw_creature(ci, R, Vector2(c.x, my - mext * 0.42 - rext * 0.28), rext, mod, true)
+		var rc := Vector2(c.x, my - mext * 0.42 - rext * 0.28)
+		for pass_ in ["body", "gear"]:
+			for i in shown:
+				var mx := c.x - row_w / 2 + mext / 2 + i * step
+				_draw_creature(ci, Mo, Vector2(mx, my), mext, mod, Mo.ab.get("cavalry", false), pass_, i == shown - 1)
+			_draw_creature(ci, R, rc, rext, mod, R.ab.get("cavalry", false), pass_, true)
 		if n > shown:
-			var f: Font = UI.font_bold
-			var fs := int(maxf(8, box * 0.26))
-			var txt := "×%d" % n
-			var pos := Vector2(rect.end.x - f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x, rect.end.y)
-			ci.draw_string_outline(f, pos, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 3, Color(0, 0, 0, 0.8) * mod)
-			ci.draw_string(f, pos, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE * mod)
-		d = R
+			_count_label(ci, "×%d" % n, rect, box, mod)
+		return
 	else:
 		var key := "%s_%d" % [d.faction, mini(4, d.tier)]
 		var M: Dictionary = meta().units.get(key, {"w": 40, "h": 40})

@@ -571,8 +571,8 @@ func stack_card(s) -> Control:
 		elif S.target == "pair" and spell.t1 != null: reason = null
 		else: reason = err
 		state = "invalid" if reason != null else "valid"
-	if s.count > 0 and cmd != null:
-		state = "valid" if s.side == cmd.side else "invalid"
+	if cmd != null and (s.count > 0 or _can_bring_back(s)):
+		state = "valid" if (s.side == cmd.side and (s.count > 0 or _can_bring_back(s))) else "invalid"
 	var active: bool = cur == s and b.over == null
 	var border: Color = UI.C.line2
 	if state == "valid": border = UI.C.good
@@ -639,7 +639,7 @@ func stack_card(s) -> Control:
 	card.custom_minimum_size.x = 138
 	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if s.count > 0 else Control.CURSOR_ARROW
-	if s.count <= 0: card.modulate = Color(0.6, 0.6, 0.6, 0.3)
+	if s.count <= 0: card.modulate = Color(0.8, 0.8, 0.8, 0.75) if state == "valid" else Color(0.6, 0.6, 0.6, 0.3)
 	elif state == "invalid" and not active: card.modulate.a = 0.45
 	elif s.fallen_back: card.modulate.a = 0.7
 	# tooltip
@@ -663,7 +663,7 @@ func stack_card(s) -> Control:
 				if v != null and v != "":
 					s.name = v
 					render()
-			elif s.count > 0:
+			elif s.count > 0 or (cmd != null and _can_bring_back(s)):
 				click_stack(s)
 			card.accept_event()
 		elif e.button_index == MOUSE_BUTTON_RIGHT:
@@ -672,6 +672,11 @@ func stack_card(s) -> Control:
 				render()
 			card.accept_event())
 	return card
+
+## a wiped-out stack the current command could bring back (recall a deserter / revive a dead)
+func _can_bring_back(s) -> bool:
+	if cmd == null or s.count > 0 or s.side != cmd.side: return false
+	return (cmd.id == "recall" and s.deserters > 0) or (cmd.id == "revive" and s.dead > 0)
 
 func preview_tip(a, t) -> String:
 	var n := b.hit_numbers(a, t, {"average": true})
