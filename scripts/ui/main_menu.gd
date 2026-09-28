@@ -102,5 +102,10 @@ func options() -> void:
 	grid.add_child(icons)
 	grid.add_child(UI.label("Music & sounds"))
 	grid.add_child(Music.control())
+	grid.add_child(UI.label("Battle"))
+	grid.add_child(UI.check("Crowd cheers on critical (maximum) rolls", Sfx.cheers, func(v):
+		Sfx.cheers = v
+		Sfx.save()
+		if v: Sfx.play_cheer()))
 	var box := UI.vbox([UI.h2("Options"), grid, UI.row_end([UI.button("Close", UI.close_modal, "Primary")])], 12)
 	UI.modal(box, false, 460)

@@ -23,6 +23,7 @@ var _act: VBoxContainer
 var _info: VBoxContainer
 var _log: RichTextLabel
 var _log_n := 0
+var _ev_n := 0
 var _lines: Control
 var _field_base: ColorRect
 var _field_paint: Control
@@ -69,6 +70,7 @@ func start(battle: Battle, end_cb: Callable) -> void:
 	on_end = end_cb
 	mode = null; sel = null; spell = null; cmd = null; ended = false; busy = false
 	_log_n = 0
+	_ev_n = b.events.size()
 	if not _built:
 		_build()
 	_setup_field()
@@ -393,6 +395,7 @@ func render() -> void:
 	render_actions()
 	render_info()
 	render_log()
+	_play_events()
 	maybe_ai()
 	if b.over != null and not ended:
 		ended = true
@@ -752,6 +755,14 @@ func render_info() -> void:
 	_info.add_child(UI.rich(UI.unit_tip(s.def, live_tip(s)), 12))
 
 const LOG_COL := {"round": "#d9b45a", "dmg": "#e8c9a8", "loss": "#f08a7a", "good": "#6cc07a", "hero": "#f0d68e", "spell": "#b58cf0", "big": "#ffffff"}
+
+func _play_events() -> void:
+	var crit := false
+	while _ev_n < b.events.size():
+		if b.events[_ev_n].type == "crit": crit = true
+		_ev_n += 1
+	if crit and not UI.autopilot:
+		Sfx.play_cheer()
 
 func render_log() -> void:
 	if _log_n > b.log.size():

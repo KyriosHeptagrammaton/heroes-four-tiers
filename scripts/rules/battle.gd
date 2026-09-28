@@ -58,6 +58,7 @@ var weather_id: String
 var fx := {}
 var round_n := 0
 var log: Array = []
+var events: Array = []   # for the UI (sounds): {"type": "crit", "side", "id"}
 var over = null   # Dictionary {winner, reason, fled}
 var stacks: Array = []
 var queue: Array = []
@@ -979,6 +980,8 @@ func strike(a: Stk, t: Stk, opts: Dictionary = {}):
 	var what := "retaliate against" if opts.get("ret", false) else "hit"
 	var pct := U.jr((n.mult - 1.0) * 100.0)
 	say("%s %s %s: %d dmg (%s roll %d/%d, %s%d%%) → %d morale, %d health." % [a.name, what, t.name, n.phys + n.mor, n.roll.how, n.roll.roll, n.roll.X, "+" if n.mult >= 1 else "", pct, n.mor, n.phys], "dmg")
+	if n.roll.how == "max" or n.roll.how == "crit":
+		events.append({"type": "crit", "side": a.side, "id": a.id})
 	var res := deal_damage(t, n.phys, n.mor, {"source": a, "kind": "attack"})
 	if a.sp("lifesteal") and a.count > 0 and n.phys > 0:
 		a.phys = maxi(mini(a.phys, 0), a.phys - n.phys)

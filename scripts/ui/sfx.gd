@@ -9,6 +9,9 @@ extends Node
 var on := true
 var vol := 0.7
 var style := "stone"
+var cheers := true
+var _cheer: Array = []
+var _cheer_player: AudioStreamPlayer
 const STYLES := {"stone": ["Stone", 3], "pick": ["Rock knock", 3], "door": ["Heavy door", 2]}
 var _sets := {}
 var _tick: AudioStream
@@ -23,12 +26,17 @@ func _ready() -> void:
 		on = cf.get_value("sfx", "on", true)
 		vol = cf.get_value("sfx", "vol", 0.7)
 		style = cf.get_value("sfx", "style", "stone")
+		cheers = cf.get_value("sfx", "cheers", true)
 	if not STYLES.has(style): style = "stone"
 	for st in STYLES:
 		_sets[st] = []
 		for i in STYLES[st][1]:
 			_sets[st].append(load("res://sfx/button_%s_%d.ogg" % [st, i + 1]))
 	_tick = load("res://sfx/stone_tick.wav")
+	for i in 3:
+		_cheer.append(load("res://sfx/cheer_%d.ogg" % (i + 1)))
+	_cheer_player = AudioStreamPlayer.new()
+	add_child(_cheer_player)
 	for i in 6:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
@@ -59,6 +67,15 @@ func play_slab() -> void:
 	var set: Array = _sets[style]
 	_play(set[randi() % set.size()], randf_range(0.97, 1.03), db)
 
+## a crowd cheer for a critical (maximum) roll; a new cheer restarts rather than piling up
+func play_cheer() -> void:
+	if not cheers or _cheer.is_empty():
+		return
+	_cheer_player.stream = _cheer[randi() % _cheer.size()]
+	_cheer_player.pitch_scale = randf_range(0.95, 1.06)
+	_cheer_player.volume_db = linear_to_db(maxf(vol, 0.0001)) - 2.0
+	_cheer_player.play()
+
 func play_tick() -> void:
 	_play(_tick, randf_range(0.95, 1.08))
 
@@ -68,6 +85,7 @@ func save() -> void:
 	cf.set_value("sfx", "on", on)
 	cf.set_value("sfx", "vol", vol)
 	cf.set_value("sfx", "style", style)
+	cf.set_value("sfx", "cheers", cheers)
 	cf.save(CFG_PATH)
 
 func toggle() -> void:
