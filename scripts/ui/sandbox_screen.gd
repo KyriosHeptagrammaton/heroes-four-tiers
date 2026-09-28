@@ -283,12 +283,15 @@ func _variant(f: String, tier: int, path: String, level: int):
 	return Units.key(f, tier, level, path)
 
 ## area 1: upgrade path (Melee / Ranged / Magi) · area 2: upgrade level (– / I / II)
-func upgrade_picker(s: Dictionary) -> Control:
+## part 0 = the creature itself (or the rider), part 1 = its mount
+func upgrade_picker(s: Dictionary, part: int = 0) -> Control:
 	var parts: PackedStringArray = s.key.split("@")
-	var mount_part := ("@" + parts[1]) if parts.size() > 1 else ""
-	var p := Units.parse(parts[0])
+	var p := Units.parse(parts[part])
+	var join := func(k: String) -> String:
+		if part == 1: return parts[0] + "@" + k
+		return k + (("@" + parts[1]) if parts.size() > 1 else "")
 	var apply := func(k: String):
-		s.key = k + mount_part
+		s.key = join.call(k)
 		render()
 	var paths := UI.hbox([], 2)
 	for pp in [["", "Melee"], ["r", "Ranged"], ["m", "Magi"]]:
@@ -301,7 +304,7 @@ func upgrade_picker(s: Dictionary) -> Control:
 			bt.disabled = true
 			UI.tip(bt, "No %s path for tier %d" % [pp[1].to_lower(), p.tier])
 		else:
-			UI.tip(bt, UI.unit_tip(Units.resolve(k + mount_part)))
+			UI.tip(bt, UI.unit_tip(Units.resolve(join.call(k))))
 		paths.add_child(bt)
 	var levels := UI.hbox([], 2)
 	for lv in [[0, "–"], [1, "I"], [2, "II"]]:
@@ -313,7 +316,7 @@ func upgrade_picker(s: Dictionary) -> Control:
 			bt.disabled = true
 			UI.tip(bt, "No second upgrade for this creature")
 		else:
-			UI.tip(bt, UI.unit_tip(Units.resolve(k + mount_part)))
+			UI.tip(bt, UI.unit_tip(Units.resolve(join.call(k))))
 		levels.add_child(bt)
 	return UI.hbox([paths, levels], 10)
 
@@ -336,6 +339,7 @@ func mount_row(sd: Dictionary, s: Dictionary) -> Control:
 		mb.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		kids.append(UI.sym(md, 20))
 		kids.append(mb)
+		kids.append(upgrade_picker(s, 1))
 		kids.append(UI.label("%d per rider" % per, "muted", 12))
 	else:
 		var fb := UI.button("On foot", func(): pick_unit(sd, s, "mount"), "Small", "Click to put this stack on mounts (any creature can ride any creature: mounts needed = rider weight ÷ mount strength, rounded up)")
