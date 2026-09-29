@@ -730,8 +730,11 @@ func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
 			src.extra_mor += killed
 		var g = src.sp("gainHealthOnKill", "")
 		if g:
+			# doc: "0 health counts as one health for all purposes but gaining health" —
+			# so the grower compares with its TRUE health (a 0-health Leshi out-healths
+			# nothing and grows from any kill); the victim's 0 still counts as 1
 			var th := raw_health(t)
-			var mh := raw_health(src)
+			var mh: int = int(src.def.hp) + src.extra_hp
 			if (g == "gt" and th > mh) or (g == "ge" and th >= mh):
 				var true_before: int = int(src.def.hp) + src.extra_hp
 				src.extra_hp += 1
