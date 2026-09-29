@@ -340,7 +340,7 @@ func upgrade_picker(s: Dictionary, part: int = 0) -> Control:
 		else:
 			UI.tip(bt, UI.unit_tip(Units.resolve(join.call(k))))
 		levels.add_child(bt)
-	return UI.hbox([paths, levels], 10)
+	return UI.hbox([levels, paths], 10)   # level (– I II) first, then the path
 
 ## unit picker modal: all variants, optionally mounted
 ## the little "↳ Riding: ..." line under a stack row
