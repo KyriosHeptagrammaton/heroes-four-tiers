@@ -362,6 +362,7 @@ func review_step(d: int) -> void:
 	if not reviewing():
 		if d > 0: return
 		_live = b
+		_act_h = _act.size.y        # keep the action panel this tall while re-viewing
 		_rev = _hist.size() - 1     # the newest frozen board is the live one
 	_rev += d
 	if _rev >= _hist.size() - 1:
@@ -483,6 +484,7 @@ func render() -> void:
 	if b.over != null and not ended and not reviewing():
 		ended = true
 		await get_tree().create_timer(0.02 if UI.autopilot else 0.45).timeout
+		if reviewing(): go_live()   # the report is always about the real battle
 		finish()
 
 func _hero_sb(cur: bool) -> StoneBox:
@@ -530,7 +532,7 @@ func hero_card(side: int) -> Control:
 		casts = "Casts left this round: " + (U.fmt(hs.castsLeft) if hs.active else "— (acts at its initiative)")
 	var cl := UI.label(casts, "muted", 11)
 	cl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	cl.custom_minimum_size.x = 150
+	cl.custom_minimum_size = Vector2(150, ceilf(UI.font.get_height(11) * 2) + 4)   # always two lines tall
 	box.add_child(cl)
 	var left := b.spell_uses_left(side)
 	for id in left:
@@ -546,10 +548,13 @@ func hero_card(side: int) -> Control:
 			tp += "\nRight now: %d (power +%d%%)" % [U.jr(S.amount * pm), U.jr((pm - 1) * 100)]
 		UI.tip(bt, tp)
 		box.add_child(bt)
-	if not sd.ai and not b.pre_combat and not reviewing():
+	# commands, End command and Retreat are always listed (greyed out when unusable)
+	# so the card never changes size — during play or while re-viewing past boards
+	if not sd.ai:
 		var cmds := UI.flow([], 4)
 		for c in b.command_options(side):
 			var cb := UI.button(c.label, func():
+				if reviewing(): return
 				if c.need == null:
 					var err = b.command(side, c.id)
 					if err != null: UI.toast(err)
@@ -558,16 +563,22 @@ func hero_card(side: int) -> Control:
 				mode = null; spell = null
 				cmd = {"side": side, "id": c.id, "label": c.label}
 				render(), "SmallSel" if (cmd != null and cmd.id == c.id) else "Small", c.desc)
-			cb.disabled = not can_act
+			cb.disabled = not can_act or b.pre_combat
 			cmds.add_child(cb)
 		box.add_child(cmds)
 		var r2 := UI.flow([], 4)
-		if b.hero_turn_now(side):
-			r2.add_child(UI.button("End command ▸", func(): b.hero_end(side); spell = null; cmd = null; render(), "SmallPrimary"))
-		r2.add_child(UI.button("Retreat", func():
+		var eb := UI.button("End command ▸", func():
+			if reviewing() or not b.hero_turn_now(side): return
+			b.hero_end(side); spell = null; cmd = null; render(), "SmallPrimary", "Finish your commander's turn")
+		eb.disabled = reviewing() or not b.hero_turn_now(side)
+		r2.add_child(eb)
+		var rb := UI.button("Retreat", func():
+			if reviewing() or b.over != null: return
 			if await UI.confirm("%s: retreat from the battle?" % sd.name):
 				b.flee(side)
-				render(), "SmallDanger"))
+				render(), "SmallDanger")
+		rb.disabled = reviewing() or b.over != null
+		r2.add_child(rb)
 		box.add_child(r2)
 	card.gui_input.connect(func(e):
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and spell != null and D.SPELLS[spell.id].target == "stackOrHero":
@@ -789,11 +800,7 @@ func _hint(text: String) -> Control:
 var _act_h := 0.0
 func render_actions() -> void:
 	# keep the panel's height while re-viewing, so nothing below it jumps
-	if reviewing():
-		_act.custom_minimum_size.y = _act_h
-	else:
-		_act.custom_minimum_size.y = 0
-		_act_h = maxf(_act_h if _hist.size() > 1 else 0.0, _act.size.y)
+	_act.custom_minimum_size.y = _act_h if reviewing() else 0.0
 	UI.clear(_act)
 	if reviewing():
 		var hn := _hint("Re-viewing a past board — view only.")
