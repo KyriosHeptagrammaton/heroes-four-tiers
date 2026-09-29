@@ -632,8 +632,10 @@ func hit_numbers(a: Stk, t: Stk, opts: Dictionary = {}) -> Dictionary:
 		mor = U.jr(tot / 2.0); phys = tot - mor
 	else:
 		mor = U.jr(tot * C.moraleShare); phys = tot - mor
+	# Beta T2 (Lion): a flat bonus equal to its current morale, added after everything
+	# else — not scaled by stack size or by the attack/defence multiplier
 	if a.sp("extraMoraleDmg") and not ign(t):
-		mor += U.jr(a.morale_val * (n if C.beta2PerCreature else 1) * mult)
+		mor += a.morale_val
 	if t.sp("extraDamageTaken") and not (t.sp("extraDamageOnlyIfAttLE") and A > Dv):
 		phys += 1
 	return {"phys": phys, "mor": mor, "total": tot, "mult": mult, "A": A, "D": Dv, "roll": roll}

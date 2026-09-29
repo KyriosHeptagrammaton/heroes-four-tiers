@@ -148,7 +148,7 @@ func special_text(k: String, v) -> String:
 		"dmgAuraMinus1": return "Creatures attacking it have -1 damage"
 		"advPerTurn": return "Gains 1 advantage at the start of each turn"
 		"crit": return "Critical: +%s to its damage roll when trying to roll the top face (maximum damage)" % str(v)
-		"extraMoraleDmg": return "Deals extra morale damage equal to its current morale"
+		"extraMoraleDmg": return "Deals extra morale damage equal to its current morale (a flat bonus per attack, added after all other calculations, whatever the stack size)"
 		"scatterOnStart": return "Start of combat: 1 creature flees from every other tier 1-3 stack (both sides)"
 		"fleeOnAttack": return "When it attacks a tier 1-3 stack, 1 creature flees the target first"
 		"advAfterGuard": return "Gains 1 advantage after guarding"

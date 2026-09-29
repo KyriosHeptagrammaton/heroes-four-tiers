@@ -97,7 +97,7 @@
   "villageMilitia": 6,
   "crossroadsMercs": 4,
   "wallPerStack": 12,
-  "beta2PerCreature": true,
+  "beta2PerCreature": false,
   "rainChance": 0.25
  },
  "FACTIONS": {
@@ -1713,7 +1713,7 @@
   {
    "id": "beta2",
    "area": "Units",
-   "text": "Beta T2 \"additional morale damage equal to its current morale\" is applied per creature (x stack size). In AI-vs-AI sims this makes Beta win almost every matchup. Toggle G.CFG.beta2PerCreature = false to add it once per attack instead."
+   "text": "Beta T2 (Lion) \"additional morale damage equal to its current morale\": settled as a flat bonus added once per attack after all other calculations (not multiplied by stack size or by attack vs defence)."
   },
   {
    "id": "alpha3regen",
