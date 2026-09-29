@@ -31,7 +31,9 @@ func resolve_single(k: String) -> Dictionary:
 		"flatAtt": 0, "flatDef": 0, "flatMor": 0, "placeholder": false, "mounted": false,
 	}
 	var base_min = base.dmg[0]
-	if p.up >= 1 and base.has("I"):
+	# the doc's "Melee I" changes belong to the melee path only: a ranged upgrade is the
+	# base creature + the ranged ability, a Magi is the base creature + its Magi special
+	if p.up >= 1 and p.mod == "" and base.has("I"):
 		var I: Dictionary = base.I
 		for f in ["hp", "mor", "ini", "att", "def", "w", "s"]:
 			if I.has(f):
