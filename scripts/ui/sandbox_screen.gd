@@ -363,6 +363,13 @@ func mount_row(sd: Dictionary, s: Dictionary) -> Control:
 		kids.append(mb)
 		kids.append(upgrade_picker(s, 1))
 		kids.append(UI.label("%d per rider" % per, "muted", 12))
+		kids.append(UI.spacer())
+		kids.append(UI.button("✕", func():
+			var old_n := default_count(s.key)
+			s.key = parts[0]
+			var new_n := default_count(s.key)
+			if new_n != old_n: s.count = new_n
+			render(), "Small", "Dismount: back on foot"))
 	else:
 		var fb := UI.button("On foot", func(): pick_unit(sd, s, "mount"), "Small", "Click to put this stack on mounts (any creature can ride any creature: mounts needed = rider weight ÷ mount strength, rounded up)")
 		fb.custom_minimum_size.x = 150
