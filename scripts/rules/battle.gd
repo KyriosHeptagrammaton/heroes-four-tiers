@@ -733,8 +733,13 @@ func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
 			var th := raw_health(t)
 			var mh := raw_health(src)
 			if (g == "gt" and th > mh) or (g == "ge" and th >= mh):
+				var true_before: int = int(src.def.hp) + src.extra_hp
 				src.extra_hp += 1
-				say("%s grows stronger (+1 health)." % src.name, "good")
+				if true_before <= 0:
+					# doc: 0 health counts as 1 for everything except gaining health
+					say("%s grows stronger: true health %d → %d (no visible change yet — 0 health already counted as 1)." % [src.name, true_before, true_before + 1], "good")
+				else:
+					say("%s grows stronger (+1 health, now %d)." % [src.name, health(src)], "good")
 		if src.sp("killRecoverDeserter"):
 			var r := mini(killed, src.deserters)
 			if r:

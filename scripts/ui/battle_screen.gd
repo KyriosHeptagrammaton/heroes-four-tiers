@@ -788,9 +788,13 @@ func live_tip(s) -> String:
 	var tri := b.dmg_triple(s)
 	var ec := b.eff_count(s)
 	var created := "%d / %d (%d dead, %d deserted%s)" % [s.count, s.start, s.dead, s.deserters, (", %d gained" % s.gained) if s.gained else ""]
-	return "\n\n" + UI.b("In this battle") + "\n" + UI.kv([
+	var rows := [
 		["Creatures", created], ["Morale damage", "%s taken" % U.fmt(s.mor)], ["Health damage", "%s taken" % U.fmt(s.phys)],
-		["Damage roll", "%s × %s (d%d)" % [" / ".join(tri.map(func(x): return U.fmt(x))), U.fmt(ec), maxi(3, U.jr(ec))]]])
+		["Damage roll", "%s × %s (d%d)" % [" / ".join(tri.map(func(x): return U.fmt(x))), U.fmt(ec), maxi(3, U.jr(ec))]]]
+	if s.extra_hp:
+		var tb: int = int(s.def.hp) + s.extra_hp
+		rows.append(["Health gained", "+%d (true health %d%s)" % [s.extra_hp, tb, ", counts as 1" if tb <= 0 else ""]])
+	return "\n\n" + UI.b("In this battle") + "\n" + UI.kv(rows)
 
 func _hint(text: String) -> Control:
 	var l := UI.label(text, "gold2", 12)
