@@ -186,6 +186,8 @@ func _build() -> void:
 	_log.add_theme_font_override("normal_font", UI.font_mono)
 	_log.add_theme_color_override("default_color", Color("#cfcabd"))
 	_nav_lbl = UI.label("", "muted", 11)
+	_nav_lbl.custom_minimum_size.x = 96   # fixed width so the buttons never shift
+	_nav_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_nav_prev = UI.button("◀", func(): review_step(-1), "Small", "Step back one action to re-view the board as it was (← key). View only — nothing can be played from past boards.")
 	_nav_next = UI.button("▶", func(): review_step(1), "Small", "Step forward one action (→ key)")
 	_nav_live = UI.button("Live ⏭", go_live, "SmallPrimary", "Back to the current board (End / Esc)")
@@ -383,7 +385,7 @@ func _render_nav() -> void:
 	_nav_lbl.text = ("Action %d / %d" % [_rev, n] if _rev > 0 else "Start / %d" % n) if reviewing() else ("%d actions" % n if n > 0 else "")
 	_nav_prev.disabled = _hist.size() < 2 or _rev == 0
 	_nav_next.disabled = not reviewing()
-	_nav_live.visible = reviewing()
+	_nav_live.disabled = not reviewing()
 
 # ------------------------------------------------------------------ rendering
 func render() -> void:
@@ -784,10 +786,19 @@ func _hint(text: String) -> Control:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return UI.panel(l, UI.sb(Color(0.23, 0.19, 0.125, 0.6), Color("#6e5a30"), 6, 1, 8, 6))
 
+var _act_h := 0.0
 func render_actions() -> void:
+	# keep the panel's height while re-viewing, so nothing below it jumps
+	if reviewing():
+		_act.custom_minimum_size.y = _act_h
+	else:
+		_act.custom_minimum_size.y = 0
+		_act_h = maxf(_act_h if _hist.size() > 1 else 0.0, _act.size.y)
 	UI.clear(_act)
 	if reviewing():
-		_act.add_child(_hint("Re-viewing a past board (view only). ◀ ▶ or the arrow keys step through actions; Live ⏭ (or End / Esc) returns to the battle. Click stacks to see their details as they were."))
+		var hn := _hint("Re-viewing a past board — view only.")
+		UI.tip(hn, "◀ ▶ or the arrow keys step through actions; Live ⏭ (or End / Esc) returns to the battle. Click stacks to see their details as they were.")
+		_act.add_child(hn)
 		return
 	var a := b.turn_stack()
 	if b.over != null:
