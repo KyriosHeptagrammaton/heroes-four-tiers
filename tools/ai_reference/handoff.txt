@@ -1,0 +1,15 @@
+Integrate the attached Combat Search AI pack into Heroes of Four Seasons / heroes-four-tiers.
+
+Target audited commit: 26d4cdc0436c740cae6a2524bdfd057789f247a7. First compare your checkout against this commit and read README.md plus TEST_RESULTS.md. Do not assume interfaces remain identical on a newer branch.
+
+Requested difficulty design: Easy retains the existing CombatAI.step exactly. Medium uses the supplied search budget 2 samples x16 continuation actions; Hard uses 4x24. Treat these as proposed tuning labels, not proven monotonic strength. Preserve the original archived reference source and provenance. The supplied adaptation has actually run in Godot4.3; do not describe unsupported additions as tested.
+
+Copy the supplied planner and adapter; review/apply the tiny clone_view explicit-seed patch (required to avoid global RNG pollution). Keep combat rules and native AI unchanged otherwise. Build the difficulty selection and persistence in the appropriate existing UI/settings. For smooth UI, use begin/advance incrementally rather than synchronous decide. Benchmark one advance on minimum hardware; split further if needed. Do not assume autoloads and shared battle definitions are safe to access from worker threads.
+
+Protect async results with battle identity AND a monotonically increasing state-generation token. Cancel and discard on any mutation, turn/scene change, load/restart or battle end. Freeze battle inputs during search but keep rendering/cancel responsive. Apply a valid result exactly once through Battle.act; handle errors by native fallback. Keep a deterministic battle-scoped decision index in save/replay state. Full fixed budgets are reproducible; a wall-clock timeout is soft and machine-dependent, and may revert to baseline before any full candidate sweep.
+
+Important scope: supplied search rejects all battles with commander records or walls, plus unsupported decision phases. The adapter falls back to unchanged original AI. Promoted hero-unit stacks are supported; commanders are not. Do not advertise smarter campaign/commander play yet. If broader coverage is requested, first deep-copy mutable commander state, implement complete legal commander/casting/command sequencing and siege handling, and add dedicated tests; do not just remove the guard.
+
+Run included package_search and review_search tests on Godot4.3; inspect logs and markers as well as exit codes. Run benchmark with a writable PACKAGE_RESULTS path. Expand validation to both sides, paired seeds, mixed armies, faction matchups, terrain/weather, large stacks, commander and siege fallback; test Medium vs Hard directly before promising ordered strength. Historical90/34/4 results used RNG-isolated native heuristic as comparator, not literal unchanged Easy. Keep those claims separate from fresh results.
+
+Return implementation summary, changed files, exact engine/commit, test logs, decision latency (median/p95/max), limitations and any new benchmark results. Do not push, publish or deploy without the user's authorization.

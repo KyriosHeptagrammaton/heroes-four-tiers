@@ -1,0 +1,1980 @@
+{
+  "action_simulation_runtime_counters_exclude_resumed": true,
+  "actions": {
+    "builtin:attack": 249,
+    "builtin:engage": 5,
+    "builtin:guard": 11,
+    "builtin:rally": 44,
+    "builtin:retaliate": 2,
+    "builtin:seek": 3,
+    "rollout:attack": 270,
+    "rollout:engage": 15,
+    "rollout:fallback": 21,
+    "rollout:guard": 8,
+    "rollout:rally": 26,
+    "rollout:seek": 2
+  },
+  "commit": "26d4cdc0436c740cae6a2524bdfd057789f247a7",
+  "elapsed_seconds": 92.177,
+  "engine": "Godot 4.3",
+  "full_threshold": false,
+  "hero_present": false,
+  "horizon": 24,
+  "independent_seed_blocks_per_scenario": 8,
+  "opponent": "builtin",
+  "policy": "rollout",
+  "records": [
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 25,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 101,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 29,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 101,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 23,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 8020,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 25,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 8020,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 25,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 15939,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 26,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 15939,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 26,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 23858,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 26,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 23858,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 23,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 31777,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 24,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 31777,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 21,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 39696,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 22,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 39696,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 26,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 47615,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 24,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 47615,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 55534,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 24,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 55534,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 24,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 101,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 15,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 4,
+      "seed": 101,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 22,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 8020,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 24,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 8020,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 20,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 15939,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 18,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 5,
+      "seed": 15939,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 19,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 23858,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 25,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 23858,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 16,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 3,
+      "seed": 31777,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 30,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 31777,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 39696,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 21,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 39696,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 19,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 47615,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 17,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 4,
+      "seed": 47615,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 55534,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 43,
+      "faction": "alpha",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 12,
+      "seed": 55534,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 25,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 101,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 30,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 10,
+      "seed": 101,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 22,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 8020,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 19,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "stalemate",
+        "winner": null
+      },
+      "round": 4,
+      "seed": 8020,
+      "shape": 0,
+      "value": 0
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 16,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 15939,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 25,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 8,
+      "seed": 15939,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 32,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 10,
+      "seed": 23858,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 27,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 9,
+      "seed": 23858,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 24,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 31777,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 28,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 10,
+      "seed": 31777,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 20,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 39696,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 23,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 39696,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 23,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 47615,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 27,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 8,
+      "seed": 47615,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 22,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 55534,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 19,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "stalemate",
+        "winner": null
+      },
+      "round": 4,
+      "seed": 55534,
+      "shape": 0,
+      "value": 0
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 21,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 101,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 21,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 5,
+      "seed": 101,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 27,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 8020,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 21,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 5,
+      "seed": 8020,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 19,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 4,
+      "seed": 15939,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 17,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 4,
+      "seed": 15939,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 37,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 23858,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 18,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 4,
+      "seed": 23858,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 25,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 31777,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 21,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 31777,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 22,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 39696,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 20,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 4,
+      "seed": 39696,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 21,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 4,
+      "seed": 47615,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 25,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 47615,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 25,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 55534,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 27,
+      "faction": "beta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 5,
+      "seed": 55534,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 34,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 10,
+      "seed": 101,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 35,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 10,
+      "seed": 101,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 26,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 8020,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 39,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 12,
+      "seed": 8020,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 29,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 15939,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 27,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 15939,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 33,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "stalemate",
+        "winner": null
+      },
+      "round": 8,
+      "seed": 23858,
+      "shape": 0,
+      "value": 0
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 30,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 23858,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 29,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 31777,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 32,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 9,
+      "seed": 31777,
+      "shape": 0,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 23,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "stalemate",
+        "winner": null
+      },
+      "round": 5,
+      "seed": 39696,
+      "shape": 0,
+      "value": 0
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 26,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 39696,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 30,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 47615,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 24,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 47615,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 27,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 55534,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 28,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 55534,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 101,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 25,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 9,
+      "seed": 101,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 8020,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 21,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 8020,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 19,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 15939,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 17,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 15939,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 23858,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 24,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 9,
+      "seed": 23858,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 31777,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 19,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 31777,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 19,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 39696,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 22,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 39696,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 47615,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 22,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 47615,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 55534,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 20,
+      "faction": "gamma",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 55534,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 40,
+      "faction": "delta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 101,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 26,
+      "faction": "delta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 101,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 38,
+      "faction": "delta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 8020,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 29,
+      "faction": "delta",
+      "opponent": "builtin",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 8020,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 32,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 15939,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 26,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 15939,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 38,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 9,
+      "seed": 23858,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 28,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 23858,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 39,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 11,
+      "seed": 31777,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 30,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 31777,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 37,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 10,
+      "seed": 39696,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 27,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 39696,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 33,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 8,
+      "seed": 47615,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 30,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 47615,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 27,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 7,
+      "seed": 55534,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 35,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 7,
+      "seed": 55534,
+      "shape": 0,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 17,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 101,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 18,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 6,
+      "seed": 101,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 13,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 3,
+      "seed": 8020,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 23,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 6,
+      "seed": 8020,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 21,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 15939,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 13,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 3,
+      "seed": 15939,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 17,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 23858,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 19,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 1
+      },
+      "round": 5,
+      "seed": 23858,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 31777,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 14,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 31777,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 39696,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 15,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 39696,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 17,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 47615,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 17,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 47615,
+      "shape": 1,
+      "value": -1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 0,
+      "decisions": 18,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 5,
+      "seed": 55534,
+      "shape": 1,
+      "value": 1000
+    },
+    {
+      "challenger": "rollout",
+      "challenger_side": 1,
+      "decisions": 16,
+      "faction": "delta",
+      "opponent": "builtin",
+      "opponent_faction": "delta",
+      "over": {
+        "reason": "destroyed",
+        "winner": 0
+      },
+      "round": 4,
+      "seed": 55534,
+      "shape": 1,
+      "value": -1000
+    }
+  ],
+  "resumed_records": 100,
+  "rng_isolation": true,
+  "samples": 4,
+  "simulations": 17728
+}

@@ -13,7 +13,17 @@ func run(_root) -> void:
 		if b.current_stack() != null: b.act("seek")
 		else: break
 		n += 1
-	ok(b.over != null and b.over.reason == "stalemate" and b.round_n == 2, "stalemate after 2 quiet rounds (round %d, %s)" % [b.round_n, b.over])
+	# Leshi are slow 1, +1 in a swamp: nobody can attack in rounds 1-2, so those don't count
+	ok(b.over != null and b.over.reason == "stalemate" and b.round_n == 4, "slow armies: stalemate only after 2 quiet rounds in which someone could attack (ended round %d)" % b.round_n)
+	var b3 := Battle.new({"seed": 5, "terrain": "field", "sides": [
+		{"name": "A", "stacks": [{"key": Units.key("alpha", 2, 0, ""), "count": 9}]},
+		{"name": "B", "stacks": [{"key": Units.key("gamma", 3, 0, ""), "count": 6}]}]})
+	n = 0
+	while b3.over == null and n < 50:
+		if b3.current_stack() != null: b3.act("seek")
+		else: break
+		n += 1
+	ok(b3.over != null and b3.round_n == 2, "a fast army that won't fight can still end it after 2 rounds (ended round %d)" % b3.round_n)
 	# commander loss
 	var h := Heroes.create("warlord", "alpha", "Hero", Rng.new(3))
 	h.stats.courage = 20

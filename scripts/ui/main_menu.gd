@@ -107,6 +107,11 @@ func options() -> void:
 		Sfx.cheers = v
 		Sfx.save()
 		if v: Sfx.play_cheer()))
+	grid.add_child(UI.label("Battle AI"))
+	var BS = preload("res://scripts/ui/battle_screen.gd")
+	var ai_opt := UI.option(BS.AI_LEVELS, BS.ai_difficulty(), func(v): BS.set_ai_difficulty(v))
+	UI.tip(ai_opt, "[b]Normal[/b]: the original combat AI.\n[b]Hard[/b]: on each stack's turn it tries every legal move and plays each one forward (2 samples × 16 actions) before choosing, so it thinks a little longer.\n[color=#d9a441]Hard's look-ahead ignores commanders (their turns, spells and stat bonuses) and walls. Commander turns themselves are played by the Normal AI, and if Hard's move isn't legal on the real board (e.g. behind walls) that turn falls back to Normal.[/color]")
+	grid.add_child(ai_opt)
 	grid.add_child(UI.label("Casualty rule"))
 	var th := UI.check("Test: stack × full value threshold (health and morale)", Battle.full_threshold(), func(v): Battle.set_full_threshold(v))
 	UI.tip(th, "[b]Off (doc rule):[/b] a stack starts losing creatures once its damage exceeds count × (health − 1), and likewise count × (morale − 1).\n[b]On (test):[/b] the thresholds are count × health and count × morale, and each deserter sheds a full health of damage. Each creature lost still removes twice its value.\nTakes effect immediately, including mid-battle.")

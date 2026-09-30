@@ -64,6 +64,7 @@ var stacks: Array = []
 var queue: Array = []
 var qi := 0
 var damage_this_round := false
+var ai_tick := 0       # committed decisions so far: the search AI's deterministic decision index
 var quiet_rounds := 0   # consecutive rounds without any damage (the stall rule)
 var attacked_this_round := [false, false]
 var attacked_last_round := [true, true]
@@ -542,6 +543,7 @@ func begin_turn() -> void:
 	recalc_morale(s)
 
 func end_turn(action_kind: String) -> void:
+	ai_tick += 1
 	var e = current()
 	if check_end():
 		return
@@ -567,7 +569,14 @@ func end_round() -> void:
 		if sd.hero:
 			sd.st.rounds += 1
 	# stall rule: the battle ends after stallRounds consecutive rounds without damage
-	quiet_rounds = 0 if damage_this_round else quiet_rounds + 1
+	# a quiet round only counts if at least one stack (either side) could attack in it —
+	# slow armies still closing in on each other don't run the clock
+	if damage_this_round:
+		quiet_rounds = 0
+	elif someone_could_attack():
+		quiet_rounds += 1
+	else:
+		say("No stack could reach the enemy yet (slow) — this round doesn't count toward the stall.", "")
 	var need: int = int(C.get("stallRounds", 2))
 	if quiet_rounds >= need:
 		say("No damage was dealt for %d rounds — the battle ends." % need, "big")
@@ -580,6 +589,13 @@ func end_round() -> void:
 		say("Both armies are exhausted.", "big")
 		return
 	start_round()
+
+## is any living stack past its slow (or already engaged), i.e. able to attack this round?
+func someone_could_attack() -> bool:
+	for st in stacks:
+		if st.count > 0 and (round_n > slow_level(st) or not st.engaging.is_empty()):
+			return true
+	return false
 
 func check_end() -> bool:
 	if over:
@@ -1345,7 +1361,7 @@ func command(side: int, cmd: String, t_id = null):
 ## A frozen copy of the whole board for the replay viewer (◀ ▶ under the log).
 ## It can be rendered and queried like the live battle but is never played on.
 func clone_view() -> Battle:
-	var c := Battle.new({"probe": true, "sides": [{"stacks": []}, {"stacks": []}]})
+	var c := Battle.new({"seed": 1, "probe": true, "sides": [{"stacks": []}, {"stacks": []}]})   # explicit seed: never draws from Godot's global RNG
 	for p in get_property_list():
 		if not (p.usage & PROPERTY_USAGE_SCRIPT_VARIABLE): continue
 		var n: String = p.name
@@ -1425,10 +1441,17 @@ func ai_should_flee(side: int) -> bool:
 	return weak or not can_kill
 
 ## average-roll hit simulation with no side effects
-func expected_hit(a: Stk, t: Stk) -> Dictionary:
-	# (like the prototype, the preview roll consumes one random number: state is saved after it)
+## hit_numbers for display only: leaves the battle's dice exactly as they were
+func preview_numbers(a: Stk, t: Stk) -> Dictionary:
+	var save := rng.get_state()
 	var n := hit_numbers(a, t, {"average": true})
+	rng.set_state(save)
+	return n
+
+func expected_hit(a: Stk, t: Stk) -> Dictionary:
+	# previews never touch the battle's dice: the RNG is restored after the preview roll
 	var save_rng := rng.get_state()
+	var n := hit_numbers(a, t, {"average": true})
 	var save_log := log.size()
 	var save_dmg := damage_this_round
 	var mv := t.morale_val
