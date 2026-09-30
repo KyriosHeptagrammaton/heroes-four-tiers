@@ -815,7 +815,7 @@ func eliminated(s: Stk) -> void:
 	var lost: int = int(C.get("stackLossCourage", 2)) + (int(C.get("heroStackLossCourage", 1)) if s.hero else 0)
 	sd.courage -= lost
 	say("%s lose %d courage%s." % [sd.name, lost, " (a hero stack)" if s.hero else ""], "loss")
-	# kin lost: every other allied stack of the same base creature loses 1 morale for the fight
+	# kin lost: every other allied stack of the same base creature AND path loses 1 morale for the fight
 	var base_k := _base_of(s)
 	for o in allies_of(s):
 		if o != s and o.count > 0 and _base_of(o) == base_k:
@@ -830,10 +830,12 @@ func eliminated(s: Stk) -> void:
 		sd.courage -= cl
 		say("%s lose %d courage for losing their commander." % [sd.name, cl], "loss")
 
-## base creature of a stack (the rider's faction + tier): "delta.1" for any Skeleton
+## base creature + upgrade path of a stack's rider: Skeleton Ranged I and Ranged II
+## share "delta.1.ranged"; a plain Skeleton ("base") and Melee I ("melee") differ
 func _base_of(s: Stk) -> String:
 	var p := Units.parse(s.key.split("@")[0])
-	return "%s.%d" % [p.faction, p.tier]
+	var path: String = "base" if p.up == 0 else {"r": "ranged", "m": "magi"}.get(p.mod, "melee")
+	return "%s.%d.%s" % [p.faction, p.tier, path]
 
 # ------------------------------------------------------------------ legality
 func turn_stack() -> Stk:

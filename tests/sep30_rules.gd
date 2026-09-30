@@ -26,11 +26,10 @@ func run(_root) -> void:
 	var met := Units.key("beta", 4, 0, "")
 	var b3 := Battle.new({"seed": 5, "sides": [{"name": "A", "stacks": [{"key": met, "count": 1}, {"key": met, "count": 1}, {"key": pk, "count": 18}]}, {"name": "B", "stacks": [{"key": pk, "count": 18}]}]})
 	ok(b3.stacks[2].count == 17 and b3.stacks[3].count == 17, "two Metatrons: each other stack loses only 1 creature (%d, %d)" % [b3.stacks[2].count, b3.stacks[3].count])
-	# kin loss
-	var sk := Units.key("delta", 1, 0, "")
-	var b4 := mk([{"name": "A", "stacks": [{"key": sk, "count": 5}, {"key": Units.key("delta", 1, 1, "r"), "count": 18}, {"key": Units.key("delta", 1, 2, ""), "count": 18}, {"key": Units.key("delta", 2, 0, ""), "count": 9}]},
+	# kin loss: same creature AND path only
+	var b4 := mk([{"name": "A", "stacks": [{"key": Units.key("delta", 1, 1, "r"), "count": 5}, {"key": Units.key("delta", 1, 2, "r"), "count": 18}, {"key": Units.key("delta", 1, 0, ""), "count": 18}, {"key": Units.key("delta", 1, 1, ""), "count": 18}]},
 		{"name": "B", "stacks": [{"key": pk, "count": 18}]}])
 	var m_before := [b4.stacks[1].morale_val, b4.stacks[2].morale_val, b4.stacks[3].morale_val]
 	b4.stacks[0].count = 0; b4.eliminated(b4.stacks[0])
-	ok(b4.stacks[1].morale_val == m_before[0] - 1 and b4.stacks[2].morale_val == m_before[1] - 1, "other Skeleton stacks (Ranged I, Melee II) lose 1 morale")
-	ok(b4.stacks[3].morale_val == m_before[2], "a different base creature is unaffected")
+	ok(b4.stacks[1].morale_val == m_before[0] - 1, "Skeleton Ranged I lost: Skeleton Ranged II loses 1 morale")
+	ok(b4.stacks[2].morale_val == m_before[1] and b4.stacks[3].morale_val == m_before[2], "plain Skeleton and Skeleton Melee I are unaffected")
