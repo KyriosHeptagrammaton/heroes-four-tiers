@@ -25,6 +25,8 @@ func play(root, sb, commanders: bool, terrain: String) -> Dictionary:
 	var ms: Array = bs.ai_stats.ms.duplicate(); ms.sort()
 	var med = ms[ms.size() / 2] if ms.size() else 0
 	return {"over": b.over, "rounds": b.round_n, "stats": bs.ai_stats, "median_ms": med, "max_ms": ms.back() if ms.size() else 0, "worst_frame_ms": worst / 1000.0}
+func bs_horizon() -> int:
+	return UI.screen("battle")._planner.horizon
 func run(root) -> void:
 	Main.boot()
 	var BS = load("res://scripts/ui/battle_screen.gd")
@@ -37,6 +39,7 @@ func run(root) -> void:
 	BS._ai_level = "hard"
 	var r1 = await play(root, sb, false, "field")
 	print("no commanders: ", r1)
+	ok(bs_horizon() == 8, "Hard plays 8 actions forward")
 	ok(r1.over != null and r1.stats.searched > 0 and r1.stats.rejected == 0, "Hard plays a full battle without commanders")
 	var r2 = await play(root, sb, true, "field")
 	print("with commanders: ", r2)

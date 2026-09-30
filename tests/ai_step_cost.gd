@@ -15,6 +15,7 @@ func run(_root) -> void:
 		var c := b.clone_view()
 		clone_costs.append((Time.get_ticks_usec() - t) / 1000.0)
 		pl.begin(b, dec, "medium")
+		pl.horizon = 8
 		print("decision ", dec, " candidates ", pl.candidates.size())
 		while not pl.done:
 			var t2 := Time.get_ticks_usec()

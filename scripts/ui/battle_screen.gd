@@ -1057,12 +1057,12 @@ func _draw_blam(c: Vector2, rad: Vector2, lines: Array, fs: int, seed_v: int) ->
 # ------------------------------------------------------------------ AI & end
 # ------------------------------------------------------------------ AI difficulty
 ## Normal = the original combat AI. Hard = look-ahead search (scripts/rules/
-## combat_search_ai.gd, its "medium" budget: 2 samples × 16 actions) for ordinary
+## combat_search_ai.gd, "medium" samples with a shorter look-ahead: 2 samples × 8 actions) for ordinary
 ## stack turns. Battles with a commander or walls, commander turns and pre-combat
 ## always use the original AI.
 const SearchAI = preload("res://scripts/rules/combat_search_ai.gd")
 const AI_LEVELS := [["normal", "Normal"], ["hard", "Hard"]]
-const SEARCH_BUDGET := {"hard": "medium"}
+const SEARCH_BUDGET := {"hard": {"preset": "medium", "horizon": 8}}
 static var _ai_level = null
 var _planner = SearchAI.new()
 var ai_stats := {"searched": 0, "rejected": 0, "native": 0, "ms": []}   # diagnostics for tests
@@ -1133,7 +1133,8 @@ func maybe_ai() -> void:
 	var lvl := ai_difficulty()
 	# Hard: search a few milliseconds per frame so the screen stays responsive
 	var stack_turn: bool = not b.pre_combat and b.current() != null and b.current().type == "stack"
-	if SEARCH_BUDGET.has(lvl) and not UI.autopilot and stack_turn and _planner.begin(_plan_view(), b.ai_tick, SEARCH_BUDGET[lvl]):
+	if SEARCH_BUDGET.has(lvl) and not UI.autopilot and stack_turn and _planner.begin(_plan_view(), b.ai_tick, SEARCH_BUDGET[lvl].preset):
+		_planner.horizon = SEARCH_BUDGET[lvl].horizon   # actions played forward per sample
 		while not _planner.done:
 			var fs := Time.get_ticks_usec()
 			while not _planner.done and Time.get_ticks_usec() - fs < 10000:
