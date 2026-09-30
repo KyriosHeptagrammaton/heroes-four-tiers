@@ -98,7 +98,12 @@
   "crossroadsMercs": 4,
   "wallPerStack": 12,
   "beta2PerCreature": false,
-  "rainChance": 0.25
+  "rainChance": 0.25,
+  "factionPriceMult": {
+   "beta": 1.25
+  },
+  "stackLossCourage": 2,
+  "heroStackLossCourage": 1
  },
  "FACTIONS": {
   "alpha": {
@@ -139,8 +144,8 @@
      3
     ],
     "ini": 1,
-    "att": 5,
-    "def": 5,
+    "att": 6,
+    "def": 4,
     "w": 1,
     "s": 1,
     "sp": {
@@ -296,6 +301,13 @@
      ],
      "att": 13,
      "def": 13
+    },
+    "II": {
+     "dmg": [
+      6,
+      6,
+      6
+     ]
     }
    },
    "4": {
@@ -327,8 +339,8 @@
      3
     ],
     "ini": 1,
-    "att": 5,
-    "def": 5,
+    "att": 4,
+    "def": 7,
     "w": 1,
     "s": 1,
     "ab": {
@@ -397,7 +409,8 @@
      "moralePerTurn": 1,
      "counterEngage": "melee",
      "fallbackRecover": true,
-     "doubleGrowth": true
+     "doubleGrowth": true,
+     "startNegPhys": true
     },
     "I": {
      "dmg": [
@@ -1276,7 +1289,11 @@
     "initiative": 1
    }
   },
-  "horn": {"name": "Horn of Returning", "desc": "Your commander may Recall deserters even into a stack that was wiped out, bringing it back onto the field.", "value": 3},
+  "horn": {
+   "name": "Horn of Returning",
+   "desc": "Your commander may Recall deserters even into a stack that was wiped out, bringing it back onto the field.",
+   "value": 3
+  },
   "boots": {
    "name": "Road Boots",
    "desc": "+2 movement per day.",

@@ -34,19 +34,14 @@ func resolve_single(k: String) -> Dictionary:
 	# the doc's "Melee I" changes belong to the melee path only: a ranged upgrade is the
 	# base creature + the ranged ability, a Magi is the base creature + its Magi special
 	if p.up >= 1 and p.mod == "" and base.has("I"):
-		var I: Dictionary = base.I
-		for f in ["hp", "mor", "ini", "att", "def", "w", "s"]:
-			if I.has(f):
-				d[f] = I[f]
-		if I.has("dmg"):
-			d.dmg = I.dmg.duplicate()
-		if I.has("sp"):
-			d.sp.merge(I.sp, true)
-		if I.has("ab"):
-			d.ab.merge(I.ab, true)
+		_apply_up(d, base.I)
+	# a melee II with its own stats in the doc ("II") replaces the placeholder +1s
+	var real_ii: bool = p.up >= 2 and p.mod == "" and base.has("II")
+	if real_ii:
+		_apply_up(d, base.II)
 	if p.up >= 1 and p.tier == 4 and p.mod != "m":
 		d.flatAtt += 1; d.flatDef += 1; d.flatMor += 1; d.placeholder = true
-	if p.up >= 2:
+	if p.up >= 2 and not real_ii:
 		d.flatAtt += 1; d.flatDef += 1; d.flatMor += 1; d.placeholder = true
 	if p.mod == "r":
 		d.ab["ranged"] = true
@@ -56,6 +51,34 @@ func resolve_single(k: String) -> Dictionary:
 	d["name"] = name_for(p)
 	d["baseKey"] = key(p.faction, p.tier, 0, "")
 	return d
+
+func _apply_up(d: Dictionary, I: Dictionary) -> void:
+	for f in ["hp", "mor", "ini", "att", "def", "w", "s"]:
+		if I.has(f):
+			d[f] = I[f]
+	if I.has("dmg"):
+		d.dmg = I.dmg.duplicate()
+	if I.has("sp"):
+		d.sp.merge(I.sp, true)
+	if I.has("ab"):
+		d.ab.merge(I.ab, true)
+
+## faction price multiplier (Beta costs 25% more)
+func price_mult(faction: String) -> float:
+	return float(D.CFG.get("factionPriceMult", {}).get(faction, 1.0))
+
+## gold value of one creature (or one rider with its mounts): base recruit price
+## plus one upgrade fee per upgrade level, times the faction multiplier
+func unit_price(k: String) -> float:
+	if "@" in k:
+		var parts := k.split("@")
+		var R := resolve(parts[0])
+		var M := resolve(parts[1])
+		var per := int(ceil(float(R.w) / M.s))
+		return unit_price(parts[0]) + per * unit_price(parts[1])
+	var p := parse(k)
+	var t := str(mini(4, p.tier))
+	return (float(D.CFG.unitPrice[t]) + p.up * float(D.CFG.upgradeFee[t])) * price_mult(p.faction)
 
 ## "Alpha tier 1", "Troll Ranged I", "Skeleton Magi"...
 func name_for(p: Dictionary) -> String:
@@ -163,6 +186,7 @@ func special_text(k: String, v) -> String:
 		"bigKillMorale": return "+1 morale for every tier 3+ creature it kills"
 		"keepAdvOnAttack": return "Does not lose advantage when attacking"
 		"negMoraleOverflow": return "Morale recovery with no morale damage becomes a buffer (half)"
+		"startNegPhys": return "Starts each battle with negative health damage equal to the number of creatures in the stack"
 		"gainHealthOnKill": return "+1 health when it kills a creature with %s health" % (">=" if v == "ge" else "more")
 		"moralePerTurn": return "+%s morale at the start of each turn" % str(v)
 		"counterEngage": return "Engages anything that %s it" % ("attacks" if v == "any" else "melee-attacks")

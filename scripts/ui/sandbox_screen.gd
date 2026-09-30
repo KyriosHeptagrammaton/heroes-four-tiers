@@ -193,6 +193,13 @@ func side_editor(i: int) -> Control:
 		render(), "Small")
 	add.disabled = sd.stacks.size() >= D.CFG.maxStacks
 	sp.add_child(UI.hbox([UI.h3("Army (%d/%d stacks)" % [sd.stacks.size(), D.CFG.maxStacks]), UI.spacer(), add]))
+	# total army cost, bottom right; kept current as counts change
+	var cost_lbl := UI.label("", "gold2", 13)
+	var upd_cost := func():
+		var tot := 0.0
+		for st in sd.stacks: tot += st.count * Units.unit_price(st.key)
+		cost_lbl.text = "Army cost: %s gold" % U.fmt(U.jr(tot))
+	UI.tip(cost_lbl, "Recruit price of every creature (mounts included) plus one upgrade fee per upgrade level, at base weekly prices. Beta creatures cost 25% more. Upgrade essence is not counted.")
 	for k in sd.stacks.size():
 		var s: Dictionary = sd.stacks[k]
 		var d := Units.resolve(s.key)
@@ -209,9 +216,13 @@ func side_editor(i: int) -> Control:
 		nb.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		nb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nb.clip_text = true
-		var cnt := UI.spin(s.count, 1, 9999, func(v): s.count = maxi(1, v), 90)
+		var cnt := UI.spin(s.count, 1, 9999, func(v):
+			s.count = maxi(1, v)
+			upd_cost.call(), 90)
 		sp.add_child(UI.hbox([sy, nb, upgrade_picker(s), cnt, UI.button("✕", func(): sd.stacks.remove_at(k); render(), "Small")], 6))
 		sp.add_child(mount_row(sd, s))
+	upd_cost.call()
+	sp.add_child(UI.hbox([UI.spacer(), cost_lbl]))
 	box.add_child(UI.panel(sp))
 	# hero
 	var hc: Dictionary = sd.hero

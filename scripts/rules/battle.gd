@@ -172,6 +172,8 @@ func setup_sides() -> void:
 				s.phys -= [0, 3, 6, 12][w]
 			if Heroes.skill(hs, "tactics") >= 3:
 				s.adv += 1
+		if s.sp("startNegPhys"):   # Leshi: negative health damage = creatures in the stack
+			s.phys -= s.count
 		if fx.get("defAdv", 0) and s.side == 1:
 			s.adv += fx.defAdv
 		if s.count <= always_hero_n(s.side):
@@ -780,8 +782,10 @@ func eliminated(s: Stk) -> void:
 	s.engaging = []; s.guarding = null; s.guarded_by = null
 	say("%s are gone from the field." % s.name, "big")
 	var sd: BSide = sides[s.side]
-	if s.hero:
-		sd.courage -= 1
+	# losing a stack costs courage; a stack that had become heroes costs extra
+	var lost: int = int(C.get("stackLossCourage", 2)) + (int(C.get("heroStackLossCourage", 1)) if s.hero else 0)
+	sd.courage -= lost
+	say("%s lose %d courage%s." % [sd.name, lost, " (a hero stack)" if s.hero else ""], "loss")
 	for o in allies_of(s):
 		recalc_morale(o)
 	if s.def.tier >= 4 and not s.def.mounted and sd.hs != null and not sd.hs.gone:

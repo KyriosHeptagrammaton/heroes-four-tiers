@@ -61,9 +61,9 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Casualties.[/b] When damage exceeds creatures × (value − 1), one creature is removed and damage drops by twice its value (+courage for morale). Morale casualties desert, health casualties die. Deserters also remove (health − 1) physical damage. (Options → Casualty rule can test creatures × value instead.) Every turn a stack recovers morale damage equal to its morale.
 
-[b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks at ≤ ⅓ of their start (or ≤ 2) become [b]heroes[/b]: +1 attack, defence, damage, morale; they rally; +1 courage (−1 when a hero stack is lost).
+[b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks at ≤ ⅓ of their start (or ≤ 2) become [b]heroes[/b]: +1 attack, defence, damage, morale; they rally; +1 courage.
 
-[b]Courage[/b] = hero courage − (number of allied stacks + number of allied tier-4 creatures). Each point removes 1 extra morale damage when a creature deserts.
+[b]Courage[/b] = hero courage − (number of allied stacks + number of allied tier-4 creatures). Each point removes 1 extra morale damage when a creature deserts. Losing a stack costs 2 courage (3 if it had become heroes); courage may go negative.
 
 [b]Mouse.[/b] On your stack's turn, click an enemy to attack it. For other actions, click the action then a target. Right-click cancels targeting, or shows a stack's details. Double-click one of your stacks to rename it. Keys: A E G D R S T F W, Esc cancels.
 
@@ -401,7 +401,7 @@ func render() -> void:
 	if b.over == null and b.round_n >= 1 and not b.damage_this_round:
 		_top_status.add_child(UI.chip("No damage yet this round", "warn", "If neither side takes damage during a round, the battle ends."))
 	for sd in b.sides:
-		_top_status.add_child(UI.chip("%s Courage %s" % ["▲" if sd.idx else "▼", U.fmt(sd.courage)], "", "%s courage. Each point removes 1 extra morale damage when a creature deserts. Starts at hero courage − (number of allied stacks + number of allied tier-4 creatures)." % U.esc(sd.name)))
+		_top_status.add_child(UI.chip("%s Courage %s" % ["▲" if sd.idx else "▼", U.fmt(sd.courage)], "", "%s courage. Each point removes 1 extra morale damage when a creature deserts. Starts at hero courage − (number of allied stacks + number of allied tier-4 creatures). −2 for each stack lost (−3 for a hero stack), +1 when a stack becomes heroes." % U.esc(sd.name)))
 	# queue
 	UI.clear(_queue)
 	for i in b.queue.size():
