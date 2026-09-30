@@ -1290,7 +1290,7 @@ func command_options(side: int) -> Array:
 		return []
 	return [
 		{"id": "recall", "label": "Recall deserter", "desc": "Spend courage = tier to return 1 deserter to a stack%s." % (" (Horn of Returning: even one that was wiped out)" if can_return_wiped(side) else " still on the field"), "need": "stack"},
-		{"id": "revive", "label": "Revive fallen", "desc": "Spend spare knowledge (%d) = tier to revive 1 dead (even in a wiped-out stack)." % hs.spareKnowledge, "need": "stack"},
+		{"id": "revive", "label": "Revive fallen", "desc": "Spend spare knowledge (%d) = tier to revive 1 dead in a stack%s." % [hs.spareKnowledge, " (Necromancy: even one that was wiped out; +%d%% revival)" % U.jr(necro_bonus(side) * 100) if can_revive_wiped(side) else " still on the field"], "need": "stack"},
 		{"id": "embolden", "label": "Embolden", "desc": "Spend one initiative pip: +1 advantage to a stack.", "need": "stack"},
 		{"id": "steel", "label": "Steel nerves", "desc": "+1 courage.", "need": null},
 	]
@@ -1310,7 +1310,7 @@ func command_block(side: int, cmd: String) -> String:
 			if cands.filter(func(x): return sd.courage >= mini(4, int(x.def.tier))).is_empty():
 				return "Not enough courage (%s) for any stack with deserters" % U.fmt(sd.courage)
 		"revive":
-			var cands := own.filter(func(x): return x.dead > 0)
+			var cands := own.filter(func(x): return x.dead > 0 and (x.count > 0 or can_revive_wiped(side)))
 			if cands.is_empty(): return "No fallen to revive"
 			if cands.filter(func(x): return hs.spareKnowledge >= mini(4, int(x.def.tier))).is_empty():
 				return "Not enough spare knowledge (%d) for any stack with fallen" % hs.spareKnowledge
@@ -1338,13 +1338,22 @@ func command(side: int, cmd: String, t_id = null):
 			_return_one(t)
 			say("%s recalls a deserter to %s." % [h.name, t.name], "hero")
 		"revive":
-			# revival works on wiped-out stacks too: the revived creature brings the stack back
+			# a wiped-out stack can only be revived with Necromancy
 			if t == null or t.side != side: return "Pick a friendly stack"
+			if t.count <= 0 and not can_revive_wiped(side): return "That stack was wiped out (needs Necromancy)"
 			if t.dead <= 0: return "No dead to revive"
 			if hs.spareKnowledge < tier: return "Not enough spare knowledge"
 			hs.spareKnowledge -= tier; t.dead -= 1
 			_return_one(t)
-			say("%s revives one of %s." % [h.name, t.name], "hero")
+			var raised := 1
+			# Necromancy +25 / 50 / 100%: the fraction carries over between revives
+			hs["necroFrac"] = float(hs.get("necroFrac", 0.0)) + necro_bonus(side)
+			while hs.necroFrac >= 1.0 and t.dead > 0:
+				hs.necroFrac -= 1.0
+				t.dead -= 1
+				_return_one(t)
+				raised += 1
+			say("%s revives %s of %s%s." % [h.name, "one" if raised == 1 else str(raised), t.name, " (Necromancy)" if raised > 1 else ""], "hero")
 		"embolden":
 			if t == null or t.side != side or t.count <= 0: return "Pick a friendly stack"
 			if Heroes.stat(h, "initiative") - hs.pips <= 0: return "No initiative pips left"
@@ -1387,7 +1396,15 @@ static func _copy_obj(src: Object, dst: Object) -> Object:
 			dst.set(p.name, v.duplicate(true))
 	return dst
 
-## Horn of Returning: Recall deserter may target a wiped-out stack (Revive always can)
+## Necromancy (any level): Revive fallen may target a wiped-out stack
+func can_revive_wiped(side: int) -> bool:
+	return Heroes.skill(sides[side].hero, "necromancy") >= 1
+
+## Necromancy revival bonus: +25% / +50% / +100%
+func necro_bonus(side: int) -> float:
+	return [0.0, 0.25, 0.5, 1.0][clampi(Heroes.skill(sides[side].hero, "necromancy"), 0, 3)]
+
+## Horn of Returning: Recall deserter may target a wiped-out stack
 func can_return_wiped(side: int) -> bool:
 	var h = sides[side].hero
 	return h != null and Heroes.has(h, "horn")

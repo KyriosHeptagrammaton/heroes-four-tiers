@@ -1218,6 +1218,15 @@
     "Tier 2 too",
     "Tier 3 too"
    ]
+  },
+  "necromancy": {
+   "name": "Necromancy",
+   "cat": "magic",
+   "tiers": [
+    "Revive fallen can raise the dead of a stack that was wiped out; +25% revival (every 4th revive raises one extra)",
+    "+50% revival (every 2nd revive raises one extra)",
+    "+100% revival (each revive raises two)"
+   ]
   }
  },
  "ARTIFACTS": {

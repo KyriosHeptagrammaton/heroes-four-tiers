@@ -780,7 +780,7 @@ func stack_card(s) -> Control:
 ## a wiped-out stack the current command could bring back (recall a deserter / revive a dead)
 func _can_bring_back(s) -> bool:
 	if cmd == null or s.count > 0 or s.side != cmd.side: return false
-	return (cmd.id == "recall" and s.deserters > 0 and b.can_return_wiped(s.side)) or (cmd.id == "revive" and s.dead > 0)
+	return (cmd.id == "recall" and s.deserters > 0 and b.can_return_wiped(s.side)) or (cmd.id == "revive" and s.dead > 0 and b.can_revive_wiped(s.side))
 
 func preview_tip(a, t) -> String:
 	var n := b.preview_numbers(a, t)
