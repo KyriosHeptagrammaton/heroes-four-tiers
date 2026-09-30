@@ -64,6 +64,7 @@ var stacks: Array = []
 var queue: Array = []
 var qi := 0
 var damage_this_round := false
+var quiet_rounds := 0   # consecutive rounds without any damage (the stall rule)
 var attacked_this_round := [false, false]
 var attacked_last_round := [true, true]
 var next_id := 1
@@ -565,10 +566,15 @@ func end_round() -> void:
 	for sd in sides:
 		if sd.hero:
 			sd.st.rounds += 1
-	if not damage_this_round:
-		say("No damage was dealt this round — the battle ends.", "big")
+	# stall rule: the battle ends after stallRounds consecutive rounds without damage
+	quiet_rounds = 0 if damage_this_round else quiet_rounds + 1
+	var need: int = int(C.get("stallRounds", 2))
+	if quiet_rounds >= need:
+		say("No damage was dealt for %d rounds — the battle ends." % need, "big")
 		over = {"winner": null, "reason": "stalemate"}
 		return
+	if quiet_rounds > 0:
+		say("No damage this round (%d of %d before the battle ends)." % [quiet_rounds, need], "")
 	if round_n >= C.roundCap:
 		over = {"winner": null, "reason": "exhaustion"}
 		say("Both armies are exhausted.", "big")
@@ -791,6 +797,9 @@ func eliminated(s: Stk) -> void:
 	if s.def.tier >= 4 and not s.def.mounted and sd.hs != null and not sd.hs.gone:
 		sd.hs.gone = "dead" if s.last_loss_dead else "fled"
 		say("%s %s the %s!" % [sd.hero.name, "falls with" if sd.hs.gone == "dead" else "flees with", s.name], "big")
+		var cl: int = int(C.get("commanderLossCourage", 4))
+		sd.courage -= cl
+		say("%s lose %d courage for losing their commander." % [sd.name, cl], "loss")
 
 # ------------------------------------------------------------------ legality
 func turn_stack() -> Stk:

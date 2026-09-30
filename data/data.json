@@ -103,7 +103,9 @@
    "beta": 1.25
   },
   "stackLossCourage": 2,
-  "heroStackLossCourage": 1
+  "heroStackLossCourage": 1,
+  "commanderLossCourage": 4,
+  "stallRounds": 2
  },
  "FACTIONS": {
   "alpha": {

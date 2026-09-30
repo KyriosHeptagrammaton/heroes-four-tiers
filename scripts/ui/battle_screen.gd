@@ -63,7 +63,7 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks at ≤ ⅓ of their start (or ≤ 2) become [b]heroes[/b]: +1 attack, defence, damage, morale; they rally; +1 courage.
 
-[b]Courage[/b] = hero courage − (number of allied stacks + number of allied tier-4 creatures). Each point removes 1 extra morale damage when a creature deserts. Losing a stack costs 2 courage (3 if it had become heroes); courage may go negative.
+[b]Courage[/b] = hero courage − (number of allied stacks + number of allied tier-4 creatures). Each point removes 1 extra morale damage when a creature deserts. Losing a stack costs 2 courage (3 if it had become heroes), losing the commander 4; courage may go negative.
 
 [b]Mouse.[/b] On your stack's turn, click an enemy to attack it. For other actions, click the action then a target. Right-click cancels targeting, or shows a stack's details. Double-click one of your stacks to rename it. Keys: A E G D R S T F W, Esc cancels.
 
@@ -71,7 +71,7 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Slow[/b] units can't attack in the first round(s) unless engaged with the target. [b]Ranged[/b] units can't be attacked/engaged in round 1 except by cavalry. [b]Cavalry[/b] can only be engaged by cavalry.
 
-[b]End.[/b] An army is destroyed, someone retreats, or a full round passes with no damage."""
+[b]End.[/b] An army is destroyed, someone retreats, or two full rounds in a row pass with no damage."""
 
 func start(battle: Battle, end_cb: Callable) -> void:
 	b = battle
@@ -399,9 +399,12 @@ func render() -> void:
 	UI.clear(_top_status)
 	_top_status.add_child(UI.chip("Round %d" % maxi(1, b.round_n)))
 	if b.over == null and b.round_n >= 1 and not b.damage_this_round:
-		_top_status.add_child(UI.chip("No damage yet this round", "warn", "If neither side takes damage during a round, the battle ends."))
+		var need: int = int(D.CFG.get("stallRounds", 2))
+		var last_q: bool = b.quiet_rounds + 1 >= need
+		_top_status.add_child(UI.chip("No damage yet this round" + (" — last chance" if last_q else " (%d/%d)" % [b.quiet_rounds + 1, need]), "warn",
+			"If neither side takes damage for %d rounds in a row, the battle ends in a stalemate." % need))
 	for sd in b.sides:
-		_top_status.add_child(UI.chip("%s Courage %s" % ["▲" if sd.idx else "▼", U.fmt(sd.courage)], "", "%s courage. Each point removes 1 extra morale damage when a creature deserts. Starts at hero courage − (number of allied stacks + number of allied tier-4 creatures). −2 for each stack lost (−3 for a hero stack), +1 when a stack becomes heroes." % U.esc(sd.name)))
+		_top_status.add_child(UI.chip("%s Courage %s" % ["▲" if sd.idx else "▼", U.fmt(sd.courage)], "", "%s courage. Each point removes 1 extra morale damage when a creature deserts. Starts at hero courage − (number of allied stacks + number of allied tier-4 creatures). −2 for each stack lost (−3 for a hero stack), −4 if the commander is lost, +1 when a stack becomes heroes." % U.esc(sd.name)))
 	# queue
 	UI.clear(_queue)
 	for i in b.queue.size():
@@ -1077,7 +1080,7 @@ func finish() -> void:
 		var ws = b.sides[o.winner]
 		title = "Victory for %s" % (ws.hero.name if ws.hero != null else ws.name)
 	var fl = o.get("fled")
-	var reason: String = {"destroyed": "An army was destroyed or routed.", "fled": "%s retreated." % b.sides[fl if fl != null else 0].name, "stalemate": "No damage was dealt in a whole round.", "exhaustion": "Round limit reached."}.get(o.reason, "")
+	var reason: String = {"destroyed": "An army was destroyed or routed.", "fled": "%s retreated." % b.sides[fl if fl != null else 0].name, "stalemate": "No damage was dealt for %d rounds in a row." % int(D.CFG.get("stallRounds", 2)), "exhaustion": "Round limit reached."}.get(o.reason, "")
 	var armies := UI.vbox([], 10)
 	for side in 2:
 		armies.add_child(_army_summary(side, o.winner == side))
