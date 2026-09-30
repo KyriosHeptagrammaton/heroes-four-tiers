@@ -1266,6 +1266,30 @@ func command_options(side: int) -> Array:
 		{"id": "steel", "label": "Steel nerves", "desc": "+1 courage.", "need": null},
 	]
 
+## why a command can't be used right now ("" = usable): the commander must have the
+## resources for it AND at least one stack it could legally be used on
+func command_block(side: int, cmd: String) -> String:
+	var sd: BSide = sides[side]
+	var hs = sd.hs
+	var h = sd.hero
+	if hs == null: return "No commander"
+	var own := stacks.filter(func(x): return x.side == side)
+	match cmd:
+		"recall":
+			var cands := own.filter(func(x): return x.deserters > 0 and (x.count > 0 or can_return_wiped(side)))
+			if cands.is_empty(): return "No deserters to recall"
+			if cands.filter(func(x): return sd.courage >= mini(4, int(x.def.tier))).is_empty():
+				return "Not enough courage (%s) for any stack with deserters" % U.fmt(sd.courage)
+		"revive":
+			var cands := own.filter(func(x): return x.dead > 0)
+			if cands.is_empty(): return "No fallen to revive"
+			if cands.filter(func(x): return hs.spareKnowledge >= mini(4, int(x.def.tier))).is_empty():
+				return "Not enough spare knowledge (%d) for any stack with fallen" % hs.spareKnowledge
+		"embolden":
+			if Heroes.stat(h, "initiative") - hs.pips <= 0: return "No initiative pips left"
+			if own.filter(func(x): return x.count > 0).is_empty(): return "No stack to embolden"
+	return ""
+
 func command(side: int, cmd: String, t_id = null):
 	if not hero_can_act(side) or pre_combat:
 		return "Commander cannot act now"

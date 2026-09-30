@@ -553,6 +553,8 @@ func hero_card(side: int) -> Control:
 	if not sd.ai:
 		var cmds := UI.flow([], 4)
 		for c in b.command_options(side):
+			var why := b.command_block(side, c.id)
+			var ctip: String = c.desc + ("\n" + UI.col(why, "bad") if why != "" else "")
 			var cb := UI.button(c.label, func():
 				if reviewing(): return
 				if c.need == null:
@@ -562,8 +564,8 @@ func hero_card(side: int) -> Control:
 					return
 				mode = null; spell = null
 				cmd = {"side": side, "id": c.id, "label": c.label}
-				render(), "SmallSel" if (cmd != null and cmd.id == c.id) else "Small", c.desc)
-			cb.disabled = not can_act or b.pre_combat
+				render(), "SmallSel" if (cmd != null and cmd.id == c.id) else "Small", ctip)
+			cb.disabled = not can_act or b.pre_combat or why != ""
 			cmds.add_child(cb)
 		box.add_child(cmds)
 		var r2 := UI.flow([], 4)
