@@ -176,7 +176,7 @@ func special_text(k: String, v) -> String:
 		"advPerTurn": return "Gains 1 advantage at the start of each turn"
 		"crit": return "Critical: +%s to its damage roll when trying to roll the top face (maximum damage)" % str(v)
 		"extraMoraleDmg": return "Deals extra morale damage equal to its current morale (a flat bonus per attack, added after all other calculations, whatever the stack size)"
-		"scatterOnStart": return "Start of combat: 1 creature flees from every other tier 1-3 stack (both sides)"
+		"scatterOnStart": return "Start of combat: 1 creature flees from every other tier 1-3 stack (both sides) — once per battle, however many stacks have this"
 		"fleeOnAttack": return "When it attacks a tier 1-3 stack, 1 creature flees the target first"
 		"advAfterGuard": return "Gains 1 advantage after guarding"
 		"firstOnTie": return "Acts first when tied on initiative with allies"
@@ -195,7 +195,7 @@ func special_text(k: String, v) -> String:
 		"fallbackRecover": return "Recovers 1 deserter when it falls back"
 		"doubleGrowth": return "Twice the weekly growth"
 		"ignoreNegSpecials": return "Ignores enemy specials that would hurt it"
-		"moraleAura": return "+%s morale to all other friendly stacks" % str(v)
+		"moraleAura": return "+%s morale to all other friendly stacks (once per army, however many stacks have it)" % str(v)
 		"necroPhys": return "When another stack loses creatures to damage, gains (its tier / this tier) creatures" if v == "melee" else "When a stack of equal/higher tier loses creatures to damage, gains 1 creature"
 		"alwaysRetaliate": return "Always retaliates when attacked"
 		"rallyConvert": return "Its rally removes physical damage first, turning it into 2x morale damage"
@@ -212,7 +212,7 @@ func special_text(k: String, v) -> String:
 		"guardVsRanged": return "Magi: its guard also blocks ranged attacks"
 		"lifesteal": return "Magi: heals physical damage equal to the physical damage it deals"
 		"killRecoverDeserter": return "Magi: each kill recovers one deserter"
-		"necroAny": return "Magi: gains 1 creature whenever any creature dies"
+		"necroAny": return "Magi: whenever creatures die, gains that many ÷ the number of Skeleton Magi stacks in the battle"
 		"rallyBoost": return "Magi: morale counts 50% higher for rallying"
 		"allPhysical": return "Magi: converts all its damage into physical damage"
 		"purgeMoraleOnTurn": return "Magi: removes all its morale damage at turn start"

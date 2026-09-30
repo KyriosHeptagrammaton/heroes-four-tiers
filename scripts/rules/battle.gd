@@ -30,6 +30,7 @@ class Stk:
 	var extra_hp := 0
 	var extra_mor := 0
 	var extra_slow := 0
+	var necro_frac := 0.0   # Skeleton Magi: share of dead not yet raised
 	var deserters := 0
 	var dead := 0
 	var gained := 0
@@ -64,7 +65,6 @@ var stacks: Array = []
 var queue: Array = []
 var qi := 0
 var damage_this_round := false
-var ai_tick := 0       # committed decisions so far: the search AI's deterministic decision index
 var quiet_rounds := 0   # consecutive rounds without any damage (the stall rule)
 var attacked_this_round := [false, false]
 var attacked_last_round := [true, true]
@@ -182,9 +182,10 @@ func setup_sides() -> void:
 			s.hero = true
 		recalc_morale(s)
 	# Beta T4 (Titan): at start of combat 1 creature flees from every other tier 1-3 stack
-	for b in stacks.filter(func(x): return x.sp("scatterOnStart") and not probe):
+	# Metatron: happens once per battle, however many stacks have it
+	for b in stacks.filter(func(x): return x.sp("scatterOnStart") and not probe).slice(0, 1):
 		for o in stacks:
-			if o != b and o.count > 0 and o.def.tier <= 3 and not o.sp("ignoreNegSpecials"):
+			if not o.sp("scatterOnStart") and o.count > 0 and o.def.tier <= 3 and not o.sp("ignoreNegSpecials"):
 				o.count -= 1; o.deserters += 1
 				say("%s loses 1 creature fleeing from %s." % [o.name, b.name])
 				if o.count <= 0:
@@ -400,9 +401,12 @@ func recalc_morale(s: Stk) -> int:
 		v += C.heroUnitBonus.mor
 	if h:
 		v += [0, 1, 2, 4][Heroes.skill(h, "inspiration")]
+	# Angel aura: applies once per army, however many aura stacks there are
+	var aura := 0
 	for o in allies_of(s):
 		if o != s and o.sp("moraleAura", 0):
-			v += o.def.sp.moraleAura
+			aura = maxi(aura, int(o.def.sp.moraleAura))
+	v += aura
 	if fx.get("defMoraleX", 0) and s.side == 1:
 		v *= fx.defMoraleX
 	if fx.get("moraleHalf", 0):
@@ -543,7 +547,6 @@ func begin_turn() -> void:
 	recalc_morale(s)
 
 func end_turn(action_kind: String) -> void:
-	ai_tick += 1
 	var e = current()
 	if check_end():
 		return
@@ -733,12 +736,16 @@ func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
 		t.extra_mor += lost
 	# Delta T1 necromancy
 	if killed > 0:
+		# Skeleton Magi: the dead are shared between every Skeleton Magi stack in the battle
+		var magi_n := stacks.filter(func(x): return x.count > 0 and x.sp("necroAny")).size()
 		for o in stacks:
 			if o == t or o.count <= 0:
 				continue
 			var g := 0
 			if o.sp("necroAny"):
-				g += killed
+				o.necro_frac += float(killed) / maxi(1, magi_n)   # fractions carry over
+				g += int(floor(o.necro_frac + 0.000001))
+				o.necro_frac -= g
 			elif o.sp("necroPhys", "") == "base" and tier >= mini(4, int(o.def.tier)):
 				g += 1
 			elif o.sp("necroPhys", "") == "melee":
@@ -808,6 +815,12 @@ func eliminated(s: Stk) -> void:
 	var lost: int = int(C.get("stackLossCourage", 2)) + (int(C.get("heroStackLossCourage", 1)) if s.hero else 0)
 	sd.courage -= lost
 	say("%s lose %d courage%s." % [sd.name, lost, " (a hero stack)" if s.hero else ""], "loss")
+	# kin lost: every other allied stack of the same base creature loses 1 morale for the fight
+	var base_k := _base_of(s)
+	for o in allies_of(s):
+		if o != s and o.count > 0 and _base_of(o) == base_k:
+			o.extra_mor -= 1
+			say("%s lose 1 morale at the loss of their kin." % o.name, "loss")
 	for o in allies_of(s):
 		recalc_morale(o)
 	if s.def.tier >= 4 and not s.def.mounted and sd.hs != null and not sd.hs.gone:
@@ -816,6 +829,11 @@ func eliminated(s: Stk) -> void:
 		var cl: int = int(C.get("commanderLossCourage", 4))
 		sd.courage -= cl
 		say("%s lose %d courage for losing their commander." % [sd.name, cl], "loss")
+
+## base creature of a stack (the rider's faction + tier): "delta.1" for any Skeleton
+func _base_of(s: Stk) -> String:
+	var p := Units.parse(s.key.split("@")[0])
+	return "%s.%d" % [p.faction, p.tier]
 
 # ------------------------------------------------------------------ legality
 func turn_stack() -> Stk:

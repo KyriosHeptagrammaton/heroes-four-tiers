@@ -63,7 +63,7 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks at ≤ ⅓ of their start (or ≤ 2) become [b]heroes[/b]: +1 attack, defence, damage, morale; they rally; +1 courage.
 
-[b]Courage[/b] = hero courage − (number of allied stacks + number of allied tier-4 creatures). Each point removes 1 extra morale damage when a creature deserts. Losing a stack costs 2 courage (3 if it had become heroes), losing the commander 4; courage may go negative.
+[b]Courage[/b] = hero courage − (number of allied stacks + number of allied tier-4 creatures). Each point removes 1 extra morale damage when a creature deserts. Losing a stack costs 2 courage (3 if it had become heroes), losing the commander 4; courage may go negative. When a stack is lost, the army's other stacks of the same base creature (any upgrade) lose 1 morale for the rest of the fight.
 
 [b]Mouse.[/b] On your stack's turn, click an enemy to attack it. For other actions, click the action then a target. Right-click cancels targeting, or shows a stack's details. Double-click one of your stacks to rename it. Keys: A E G D R S T F W, Esc cancels.
 
@@ -827,10 +827,7 @@ func render_actions() -> void:
 		return
 	var cur = b.current()
 	if not human_turn():
-		var note := search_note()
-		var lv := ai_difficulty()
-		var who: String = "AI, Easy" if lv == "easy" else ("AI, %s" % lv.capitalize() if note == "" else "AI, Easy for %s" % note)
-		_act.add_child(_hint("%s (%s) is thinking…" % [b.sides[cur.side].name, who]))
+		_act.add_child(_hint("%s (AI) is thinking…" % b.sides[cur.side].name))
 		return
 	if cur.type == "hero":
 		_act.add_child(_hint("Your commander's turn: cast a spell or use a command (commander card), then \"End command\". From now until the round ends, the commander may also act at the start of any of your stacks' turns."))
@@ -1056,65 +1053,6 @@ func _draw_blam(c: Vector2, rad: Vector2, lines: Array, fs: int, seed_v: int) ->
 		y += fs + 2
 
 # ------------------------------------------------------------------ AI & end
-# ------------------------------------------------------------------ AI difficulty
-## Easy = the original combat AI. Normal / Hard = look-ahead search (scripts/rules/
-## combat_search_ai.gd: 2 samples × 8 / 16 actions played forward) for ordinary
-## stack turns. Battles with a commander or walls, commander turns and pre-combat
-## always use the original AI.
-const SearchAI = preload("res://scripts/rules/combat_search_ai.gd")
-const AI_LEVELS := [["easy", "Easy"], ["normal", "Normal"], ["hard", "Hard"]]
-## look-ahead levels: the planner's "medium" samples (2) with 8 or 16 actions played forward
-const SEARCH_BUDGET := {"normal": {"preset": "medium", "horizon": 8}, "hard": {"preset": "medium", "horizon": 16}}
-static var _ai_level = null
-var _planner = SearchAI.new()
-var ai_stats := {"searched": 0, "rejected": 0, "native": 0, "ms": []}   # diagnostics for tests
-
-static func ai_difficulty() -> String:
-	if _ai_level == null:
-		var cf := ConfigFile.new()
-		_ai_level = cf.get_value("ai", "difficulty", "normal") if cf.load("user://settings.cfg") == OK else "normal"
-		if not (_ai_level in ["easy", "normal", "hard"]): _ai_level = "normal"
-	return _ai_level
-
-static func set_ai_difficulty(v: String) -> void:
-	_ai_level = v
-	var cf := ConfigFile.new()
-	cf.load("user://settings.cfg")
-	cf.set_value("ai", "difficulty", v)
-	cf.save("user://settings.cfg")
-
-## identity of the exact board a plan was made for; any change invalidates it
-func _ai_key() -> Array:
-	return [b.get_instance_id(), b.ai_tick, b.log.size(), b.round_n, b.qi, b.over != null, b.pre_combat]
-
-## The board Hard plans on: a copy with commanders and walls left out (their turns,
-## spells and stat bonuses aren't simulated). The chosen move is still played on the
-## real board, which re-checks it; an illegal one falls back to Easy (the original AI) for that turn.
-func _plan_view() -> Battle:
-	var c := b.clone_view()
-	c.probe = false
-	c.wall = null
-	var q := []
-	var nqi := 0
-	for i in c.queue.size():
-		if c.queue[i].type == "hero": continue
-		if i < c.qi: nqi += 1
-		q.append(c.queue[i])
-	c.queue = q
-	c.qi = nqi
-	for sd in c.sides:
-		sd.hero = null
-		sd.hs = null
-	return c
-
-## why Hard isn't searching right now ("" = it is, or difficulty is Normal)
-func search_note() -> String:
-	if not SEARCH_BUDGET.has(ai_difficulty()): return ""
-	if b.pre_combat: return "pre-combat"
-	var cur = b.current()
-	if cur != null and cur.type == "hero": return "commander turns"
-	return ""
-
 func maybe_ai() -> void:
 	if reviewing() or b.over != null or busy: return
 	var e = b.current()
@@ -1129,40 +1067,11 @@ func maybe_ai() -> void:
 	if not ai_now: return
 	busy = true
 	var bb := b
-	var key := _ai_key()
-	var t0 := Time.get_ticks_msec()
-	var plan := {}
-	var lvl := ai_difficulty()
-	# Hard: search a few milliseconds per frame so the screen stays responsive
-	var stack_turn: bool = not b.pre_combat and b.current() != null and b.current().type == "stack"
-	if SEARCH_BUDGET.has(lvl) and not UI.autopilot and stack_turn and _planner.begin(_plan_view(), b.ai_tick, SEARCH_BUDGET[lvl].preset):
-		_planner.horizon = SEARCH_BUDGET[lvl].horizon   # actions played forward per sample
-		while not _planner.done:
-			var fs := Time.get_ticks_usec()
-			while not _planner.done and Time.get_ticks_usec() - fs < 10000:
-				_planner.advance()
-			await get_tree().process_frame
-			if b != bb or reviewing() or not visible or _ai_key() != key:
-				_planner.cancel()       # stale: the board changed (or replay opened) — discard
-				busy = false
-				return
-		var r: Dictionary = _planner.result()
-		if r.reason == "complete": plan = r.action
-		ai_stats.ms.append(Time.get_ticks_msec() - t0)
 	if UI.autopilot: await get_tree().process_frame
-	else:
-		var left := ai_delay - (Time.get_ticks_msec() - t0) / 1000.0
-		if left > 0: await get_tree().create_timer(left).timeout
+	else: await get_tree().create_timer(ai_delay).timeout
 	busy = false
-	if b != bb or reviewing() or _ai_key() != key: return
-	var err = null
-	if not plan.is_empty():
-		err = b.act(plan.action, plan.get("target", null), plan.get("opt", null))
-	if not plan.is_empty() and err == null: ai_stats.searched += 1
-	elif err != null: ai_stats.rejected += 1
-	else: ai_stats.native += 1
-	if plan.is_empty() or err != null:
-		CombatAI.step(b)          # Normal, unsupported state, or a rejected plan: original AI
+	if b != bb or reviewing(): return
+	CombatAI.step(b)
 	render()
 
 func finish() -> void:
