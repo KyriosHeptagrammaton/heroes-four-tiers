@@ -30,7 +30,9 @@ func run(root) -> void:
 	hs_s.count = 0; b.eliminated(hs_s)
 	ok(b.sides[0].courage == c1 - 3, "losing a hero stack: -3 courage (%d -> %d)" % [c1, b.sides[0].courage])
 	# prices
-	ok(is_equal_approx(Units.unit_price(Units.key("beta", 1, 0, "")), 37.5), "Beta T1 price 37.5 (x1.25)")
+	ok(is_equal_approx(Units.unit_price(Units.key("beta", 1, 0, "")), 33.0), "Beta T1 price 33 (x1.1)")
+	ok(is_equal_approx(Units.unit_price(Units.key("gamma", 3, 0, "")), 100.0), "Leshi price 100 (half of 200)")
+	ok(Units.resolve(Units.key("beta", 1, 0, "")).att == 5, "Martial Saint attack 5")
 	ok(is_equal_approx(Units.unit_price(Units.key("alpha", 2, 1, "")), 130.0), "Alpha T2 Melee I = 80 + 50")
 	print("Leshi on War Horse price: ", Units.unit_price(Units.key("gamma", 3, 0, "") + "@" + Units.key("gamma", 2, 0, "")))
 	Main.boot()

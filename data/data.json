@@ -100,12 +100,15 @@
   "beta2PerCreature": false,
   "rainChance": 0.25,
   "factionPriceMult": {
-   "beta": 1.25
+   "beta": 1.1
   },
   "stackLossCourage": 2,
   "heroStackLossCourage": 1,
   "commanderLossCourage": 4,
-  "stallRounds": 2
+  "stallRounds": 2,
+  "unitPriceMult": {
+   "gamma.3": 0.5
+  }
  },
  "FACTIONS": {
   "alpha": {
@@ -238,8 +241,8 @@
      3
     ],
     "ini": 1,
-    "att": 4.5,
-    "def": 4.5,
+    "att": 5,
+    "def": 5,
     "w": 1,
     "s": 1,
     "sp": {

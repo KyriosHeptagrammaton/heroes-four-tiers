@@ -63,9 +63,11 @@ func _apply_up(d: Dictionary, I: Dictionary) -> void:
 	if I.has("ab"):
 		d.ab.merge(I.ab, true)
 
-## faction price multiplier (Beta costs 25% more)
-func price_mult(faction: String) -> float:
-	return float(D.CFG.get("factionPriceMult", {}).get(faction, 1.0))
+## price multiplier for a faction's tier: faction-wide (Beta +10%) times any
+## per-creature factor (the Leshi costs half)
+func price_mult(faction: String, tier: int = 0) -> float:
+	var m := float(D.CFG.get("factionPriceMult", {}).get(faction, 1.0))
+	return m * float(D.CFG.get("unitPriceMult", {}).get("%s.%d" % [faction, tier], 1.0))
 
 ## gold value of one creature (or one rider with its mounts): base recruit price
 ## plus one upgrade fee per upgrade level, times the faction multiplier
@@ -78,7 +80,7 @@ func unit_price(k: String) -> float:
 		return unit_price(parts[0]) + per * unit_price(parts[1])
 	var p := parse(k)
 	var t := str(mini(4, p.tier))
-	return (float(D.CFG.unitPrice[t]) + p.up * float(D.CFG.upgradeFee[t])) * price_mult(p.faction)
+	return (float(D.CFG.unitPrice[t]) + p.up * float(D.CFG.upgradeFee[t])) * price_mult(p.faction, p.tier)
 
 ## "Alpha tier 1", "Troll Ranged I", "Skeleton Magi"...
 func name_for(p: Dictionary) -> String:

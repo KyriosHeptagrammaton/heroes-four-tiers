@@ -493,7 +493,7 @@ func price_for(t: Dictionary, tier: int, n: int, markup: float = 1.0) -> int:
 	var pool: int = t.pool[str(tier)]
 	var extra: int = t.extra[str(tier)]
 	var g := maxi(1, growth(t, tier))
-	var unit: int = U.jr(D.CFG.unitPrice[str(tier)] * Units.price_mult(t.faction))
+	var unit: int = U.jr(D.CFG.unitPrice[str(tier)] * Units.price_mult(t.faction, tier))
 	for i in n:
 		if pool > 0:
 			total += unit; pool -= 1
@@ -538,7 +538,8 @@ func upgrade_options(k: String, ctx: Dictionary) -> Array:
 
 func upgrade_cost(k: String, n: int) -> Dictionary:
 	var tier := mini(4, int(Units.resolve(k).tier))
-	var fee: int = U.jr(D.CFG.upgradeFee[str(tier)] * Units.price_mult(Units.parse(k.split("@")[0]).faction))
+	var rp := Units.parse(k.split("@")[0])
+	var fee: int = U.jr(D.CFG.upgradeFee[str(tier)] * Units.price_mult(rp.faction, rp.tier))
 	return {"gold": fee * n, "essence": n, "tier": tier}
 
 # ---------------------------------------------------------------- battle aftermath
