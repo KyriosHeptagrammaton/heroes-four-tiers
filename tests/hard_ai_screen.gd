@@ -33,14 +33,18 @@ func run(root) -> void:
 	BS._ai_level = "hard"
 	var sb = UI.screen("sandbox")
 	sb.open()
-	BS._ai_level = "normal"
+	BS._ai_level = "easy"
 	var r0 = await play(root, sb, false, "field")
 	print("normal, no commanders: worst frame ", r0.worst_frame_ms, " ms, rounds ", r0.rounds)
 	BS._ai_level = "hard"
 	var r1 = await play(root, sb, false, "field")
 	print("no commanders: ", r1)
-	ok(bs_horizon() == 8, "Hard plays 8 actions forward")
+	ok(bs_horizon() == 16, "Hard plays 16 actions forward")
 	ok(r1.over != null and r1.stats.searched > 0 and r1.stats.rejected == 0, "Hard plays a full battle without commanders")
+	BS._ai_level = "normal"
+	var rn = await play(root, sb, false, "field")
+	ok(rn.over != null and rn.stats.searched > 0 and bs_horizon() == 8, "Normal searches 8 actions forward (%d searched)" % rn.stats.searched)
+	BS._ai_level = "hard"
 	var r2 = await play(root, sb, true, "field")
 	print("with commanders: ", r2)
 	ok(r2.over != null and r2.stats.searched > 0, "Hard also searches with commanders on the field")

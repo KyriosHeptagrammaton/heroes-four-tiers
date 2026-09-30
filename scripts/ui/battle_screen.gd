@@ -828,7 +828,8 @@ func render_actions() -> void:
 	var cur = b.current()
 	if not human_turn():
 		var note := search_note()
-		var who: String = "AI" if ai_difficulty() == "normal" else ("AI, Hard" if note == "" else "AI, Normal for %s" % note)
+		var lv := ai_difficulty()
+		var who: String = "AI, Easy" if lv == "easy" else ("AI, %s" % lv.capitalize() if note == "" else "AI, Easy for %s" % note)
 		_act.add_child(_hint("%s (%s) is thinking…" % [b.sides[cur.side].name, who]))
 		return
 	if cur.type == "hero":
@@ -1056,13 +1057,14 @@ func _draw_blam(c: Vector2, rad: Vector2, lines: Array, fs: int, seed_v: int) ->
 
 # ------------------------------------------------------------------ AI & end
 # ------------------------------------------------------------------ AI difficulty
-## Normal = the original combat AI. Hard = look-ahead search (scripts/rules/
-## combat_search_ai.gd, "medium" samples with a shorter look-ahead: 2 samples × 8 actions) for ordinary
+## Easy = the original combat AI. Normal / Hard = look-ahead search (scripts/rules/
+## combat_search_ai.gd: 2 samples × 8 / 16 actions played forward) for ordinary
 ## stack turns. Battles with a commander or walls, commander turns and pre-combat
 ## always use the original AI.
 const SearchAI = preload("res://scripts/rules/combat_search_ai.gd")
-const AI_LEVELS := [["normal", "Normal"], ["hard", "Hard"]]
-const SEARCH_BUDGET := {"hard": {"preset": "medium", "horizon": 8}}
+const AI_LEVELS := [["easy", "Easy"], ["normal", "Normal"], ["hard", "Hard"]]
+## look-ahead levels: the planner's "medium" samples (2) with 8 or 16 actions played forward
+const SEARCH_BUDGET := {"normal": {"preset": "medium", "horizon": 8}, "hard": {"preset": "medium", "horizon": 16}}
 static var _ai_level = null
 var _planner = SearchAI.new()
 var ai_stats := {"searched": 0, "rejected": 0, "native": 0, "ms": []}   # diagnostics for tests
@@ -1071,7 +1073,7 @@ static func ai_difficulty() -> String:
 	if _ai_level == null:
 		var cf := ConfigFile.new()
 		_ai_level = cf.get_value("ai", "difficulty", "normal") if cf.load("user://settings.cfg") == OK else "normal"
-		if not SEARCH_BUDGET.has(_ai_level): _ai_level = "normal"
+		if not (_ai_level in ["easy", "normal", "hard"]): _ai_level = "normal"
 	return _ai_level
 
 static func set_ai_difficulty(v: String) -> void:
@@ -1087,7 +1089,7 @@ func _ai_key() -> Array:
 
 ## The board Hard plans on: a copy with commanders and walls left out (their turns,
 ## spells and stat bonuses aren't simulated). The chosen move is still played on the
-## real board, which re-checks it; an illegal one falls back to Normal for that turn.
+## real board, which re-checks it; an illegal one falls back to Easy (the original AI) for that turn.
 func _plan_view() -> Battle:
 	var c := b.clone_view()
 	c.probe = false
@@ -1107,7 +1109,7 @@ func _plan_view() -> Battle:
 
 ## why Hard isn't searching right now ("" = it is, or difficulty is Normal)
 func search_note() -> String:
-	if ai_difficulty() == "normal": return ""
+	if not SEARCH_BUDGET.has(ai_difficulty()): return ""
 	if b.pre_combat: return "pre-combat"
 	var cur = b.current()
 	if cur != null and cur.type == "hero": return "commander turns"
