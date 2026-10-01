@@ -45,7 +45,6 @@ const ACTIONS := [
 	{"id": "guard", "key": "G", "label": "Guard", "tip": "Protect a friendly stack: it cannot be attacked or engaged except by units already engaged with it (and ranged/flying). Cannot guard while under assault. Costs advantages and engagements."},
 	{"id": "deny", "key": "D", "label": "Deny", "tip": "End one of the target's engagements, a guard, or one advantage; or (spending an advantage) one level of a spell on it. Costs guard/protector status, one advantage, and engagements with anyone else."},
 	{"id": "rally", "key": "R", "label": "Rally", "tip": "Remove morale damage equal to twice your morale from a friendly stack (or yourself)."},
-	{"id": "heal", "key": "H", "label": "Heal", "tip": "Draugr only: turn up to twice your morale of a friendly stack's health damage into twice as much morale damage. Health damage can go below 0; the morale damage only stacks up and causes no desertion by itself.", "only": "healConvert"},
 	{"id": "seek", "key": "S", "label": "Seek Adv.", "tip": "+1 advantage (+1 attack, +1 defence) until lost."},
 	{"id": "retaliate", "key": "T", "label": "Retaliate", "tip": "Hit back against every attack on you until your next turn."},
 	{"id": "fallback", "key": "F", "label": "Fall Back", "tip": "Drop all engagements, guards and advantages. Until your next turn only guard can target you. Not allowed for your last standing unit."},
@@ -260,8 +259,6 @@ func human_turn() -> bool:
 func pick_action(id: String) -> void:
 	var a := b.turn_stack()
 	if a == null or not human_turn():
-		return
-	if id == "heal" and not a.sp("healConvert"):
 		return
 	spell = null; cmd = null
 	if id in ["seek", "retaliate", "fallback", "wait"]:
@@ -647,7 +644,6 @@ func check_for(m: String, a, t):
 		"guard": return b.check_guard(a, t)
 		"deny": return b.check_deny(a, t)
 		"rally": return b.check_rally(a, t)
-		"heal": return b.check_heal(a, t)
 	return "n/a"
 
 func _bar(frac: float, col: Color) -> Control:

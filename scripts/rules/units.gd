@@ -208,8 +208,7 @@ func special_text(k: String, v) -> String:
 		"moraleAura": return "+%s morale to all other friendly stacks (once per army, however many stacks have it)" % str(v)
 		"necroPhys": return "When another stack loses creatures to damage, gains (its tier / this tier) creatures" if v == "melee" else "When a stack of equal/higher tier loses creatures to damage, gains 1 creature"
 		"alwaysRetaliate": return "Always retaliates when attacked"
-		"rallyConvert": return "Its rally removes physical damage first, turning it into 2x morale damage"
-		"healConvert": return "Heal action: turns up to 2 × its morale of a friendly stack's health damage into twice as much morale damage — health damage can go below 0; the morale damage only stacks up (no desertion until the stack next takes morale damage)"
+		"rallyConvert": return "Its rally first turns health damage into 2× morale damage (no desertion), then removes morale damage, and any rally left over becomes negative health damage"
 		"rallyFoeConvert": return "Magi: can rally foes — converts up to 2 × its morale of their morale damage into health damage (1 for 1)"
 		"courageHealth": return "Courage also applies to health casualties"
 		"rallyEnemy": return "Its rally can target enemies (deals morale damage)"

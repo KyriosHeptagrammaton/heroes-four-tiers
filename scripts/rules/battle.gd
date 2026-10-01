@@ -975,7 +975,6 @@ func act(action: String, target_id = null, opt = null):
 		"deny": err = check_deny(a, t)
 		"fallback": err = check_fallback(a)
 		"rally": err = check_rally(a, t)
-		"heal": err = check_heal(a, t)
 		"seek", "retaliate": err = null
 		"wait": err = null if can_wait(a) else "Cannot wait"
 		_: err = "Unknown action"
@@ -1044,8 +1043,6 @@ func act(action: String, target_id = null, opt = null):
 			say("%s ready to retaliate." % a.name)
 		"rally":
 			do_rally(a, t)
-		"heal":
-			do_heal(a, t)
 		"wait":
 			a.waited = true
 			var e = queue[qi]
@@ -1149,22 +1146,6 @@ func do_attack(a: Stk, t: Stk) -> void:
 		a.engaging.append(t.id)
 		say("%s engage %s." % [a.name, t.name])
 
-## Draugr: Heal — turn a friendly stack's health damage into twice as much morale damage
-func check_heal(a: Stk, t: Stk):
-	if not a.sp("healConvert"): return "Only the Draugr can heal"
-	if t == null or t.count <= 0 or t.side != a.side: return "Heal targets friendly units"
-	if t.fallen_back and t != a: return "Fallen back (only guard may target it)"
-	return null
-
-func heal_amount(a: Stk) -> int:
-	return 2 * a.morale_val
-
-func do_heal(a: Stk, t: Stk) -> void:
-	var p := heal_amount(a)      # may push health damage below 0 (a buffer)
-	t.phys -= p
-	t.mor += 2 * p               # only stacks morale damage: no desertion check here
-	say("%s heal %s: %d health damage becomes %d morale damage." % [a.name, "themselves" if t == a else t.name, p, 2 * p], "good")
-
 func do_rally(a: Stk, t: Stk) -> void:
 	if t.side != a.side and a.sp("rallyFoeConvert"):
 		# Draugr Magi: the foe's morale damage turns into health damage, 1 for 1
@@ -1182,10 +1163,22 @@ func do_rally(a: Stk, t: Stk) -> void:
 		return
 	var amt := U.jr(2 * a.morale_val * (1.5 if a.sp("rallyBoost") else 1.0))
 	if a.sp("rallyConvert"):
+		# Draugr: 1) health damage -> 2x morale damage (no desertion check), 2) remove morale
+		# damage with what's left, 3) any rally still left becomes negative health damage
 		var p := mini(maxi(t.phys, 0), amt)
 		t.phys -= p; t.mor += 2 * p; amt -= p
 		if p:
-			say("%s convert %d physical damage on %s into %d morale damage." % [a.name, p, t.name, 2 * p])
+			say("%s convert %d health damage on %s into %d morale damage." % [a.name, p, t.name, 2 * p])
+		var q := mini(maxi(t.mor, 0), amt)
+		t.mor -= q
+		var rest := amt - q
+		if rest > 0:
+			t.phys -= rest
+			say("%s rally %s (−%d morale damage, %d negative health damage)." % [a.name, "themselves" if t == a else t.name, q, rest], "good")
+		else:
+			say("%s rally %s (−%d morale damage)." % [a.name, "themselves" if t == a else t.name, q], "good")
+		recalc_morale(t)
+		return
 	if t.mor <= 0 and t.sp("negMoraleOverflow"):
 		t.mor -= U.jr(amt / 2.0)
 	else:

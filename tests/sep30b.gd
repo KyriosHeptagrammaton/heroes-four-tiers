@@ -16,16 +16,24 @@ func run(root) -> void:
 		print("  %d Leshi start with %d health damage" % [n, b.stacks[0].phys])
 	var b12 := Battle.new({"seed": 5, "probe": true, "sides": [{"name": "A", "stacks": [{"key": L, "count": 12}]}, {"name": "B", "stacks": [{"key": L, "count": 1}]}]})
 	ok(b12.stacks[0].phys == -13, "12 Leshi: -13")
-	# Draugr heal
+	# Draugr rally: health -> 2x morale, then remove morale, then the rest as negative health damage
 	var DR := Units.key("delta", 3, 0, "")
-	var bh := Battle.new({"seed": 5, "sides": [{"name": "A", "stacks": [{"key": DR, "count": 6}, {"key": Units.key("delta", 2, 0, ""), "count": 9}]}, {"name": "B", "stacks": [{"key": Units.key("alpha", 1, 0, ""), "count": 18}]}]})
+	var mkb := func() -> Battle: return Battle.new({"seed": 5, "probe": true, "sides": [{"name": "A", "stacks": [{"key": DR, "count": 6}, {"key": Units.key("delta", 2, 0, ""), "count": 9}]}, {"name": "B", "stacks": [{"key": Units.key("alpha", 1, 0, ""), "count": 18}]}]})
+	var bh: Battle = mkb.call()
 	var dr = bh.stacks[0]; var ally = bh.stacks[1]
-	ally.phys = 2
-	while bh.current_stack() != dr and bh.over == null: CombatAI.step(bh)
-	var amt := bh.heal_amount(dr)
-	var err = bh.act("heal", ally.id)
-	print("  heal amount %d: ally health damage %d, morale damage %d, err %s" % [amt, ally.phys, ally.mor, err])
-	ok(err == null and ally.phys == 2 - amt, "heal pushes health damage below 0")
+	var amt: int = 2 * dr.morale_val
+	print("  rally amount ", amt)
+	ally.phys = 3; ally.mor = 4
+	bh.do_rally(dr, ally)
+	print("  phys 3 / mor 4 -> phys %d / mor %d" % [ally.phys, ally.mor])
+	# 3 health -> 6 morale (mor 10), uses 3; removes 10 morale, uses 10; rest amt-13 negative health
+	ok(ally.mor == 0 and ally.phys == -(amt - 13) and ally.deserters == 0, "Draugr rally: convert, clear morale, rest as negative health damage")
+	var bh2: Battle = mkb.call()
+	var a2 = bh2.stacks[1]
+	a2.phys = 30; a2.mor = 50
+	bh2.do_rally(bh2.stacks[0], a2)
+	print("  phys 30 / mor 50 -> phys %d / mor %d, deserters %d" % [a2.phys, a2.mor, a2.deserters])
+	ok(a2.phys == 30 - amt and a2.mor == 50 + 2 * amt and a2.deserters == 0, "big health damage: the whole rally converts, no desertion")
 	# Draugr Magi foe rally
 	var DM := Units.key("delta", 3, 1, "m")
 	var bm := Battle.new({"seed": 5, "sides": [{"name": "A", "stacks": [{"key": DM, "count": 6}]}, {"name": "B", "stacks": [{"key": Units.key("alpha", 3, 0, ""), "count": 6}]}]})
