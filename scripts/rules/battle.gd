@@ -174,7 +174,7 @@ func setup_sides() -> void:
 				s.phys -= [0, 3, 6, 12][w]
 			if Heroes.skill(hs, "tactics") >= 3:
 				s.adv += 1
-		if s.sp("startNegPhys"):   # Leshi: negative health damage = 2.1 · n^0.7
+		if s.sp("startNegPhys") and not full_threshold():   # Leshi: negative health damage = 2.1 · n^0.7 (off in the test casualty rule)
 			s.phys -= U.jr(2.1 * pow(float(s.count), 0.7))
 		if fx.get("defAdv", 0) and s.side == 1:
 			s.adv += fx.defAdv
@@ -1172,6 +1172,7 @@ func do_rally(a: Stk, t: Stk) -> void:
 		var q := mini(maxi(t.mor, 0), amt)
 		t.mor -= q
 		var rest := amt - q
+		if full_threshold(): rest = 0     # test casualty rule: no negative health damage from rallies
 		if rest > 0:
 			t.phys -= rest
 			say("%s rally %s (−%d morale damage, %d negative health damage)." % [a.name, "themselves" if t == a else t.name, q, rest], "good")
