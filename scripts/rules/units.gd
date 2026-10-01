@@ -209,7 +209,7 @@ func special_text(k: String, v) -> String:
 		"necroPhys": return "When another stack loses creatures to damage, gains (its tier / this tier) creatures" if v == "melee" else "When a stack of equal/higher tier loses creatures to damage, gains 1 creature"
 		"alwaysRetaliate": return "Always retaliates when attacked"
 		"rallyConvert": return "Its rally removes physical damage first, turning it into 2x morale damage"
-		"healConvert": return "Heal action: turns up to 2 × its morale of a friendly stack's health damage into twice as much morale damage — health damage can go below 0"
+		"healConvert": return "Heal action: turns up to 2 × its morale of a friendly stack's health damage into twice as much morale damage — health damage can go below 0; the morale damage only stacks up (no desertion until the stack next takes morale damage)"
 		"rallyFoeConvert": return "Magi: can rally foes — converts up to 2 × its morale of their morale damage into health damage (1 for 1)"
 		"courageHealth": return "Courage also applies to health casualties"
 		"rallyEnemy": return "Its rally can target enemies (deals morale damage)"

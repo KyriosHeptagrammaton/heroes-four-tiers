@@ -1162,8 +1162,8 @@ func heal_amount(a: Stk) -> int:
 func do_heal(a: Stk, t: Stk) -> void:
 	var p := heal_amount(a)      # may push health damage below 0 (a buffer)
 	t.phys -= p
+	t.mor += 2 * p               # only stacks morale damage: no desertion check here
 	say("%s heal %s: %d health damage becomes %d morale damage." % [a.name, "themselves" if t == a else t.name, p, 2 * p], "good")
-	deal_damage(t, 0, 2 * p, {"kind": "heal"})
 
 func do_rally(a: Stk, t: Stk) -> void:
 	if t.side != a.side and a.sp("rallyFoeConvert"):
