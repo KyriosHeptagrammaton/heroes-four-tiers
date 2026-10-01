@@ -112,7 +112,7 @@ func render() -> void:
 		if in_town: row.add_child(UI.button("→ Hero", func(): buy.call("hero"), "SmallPrimary"))
 		row.add_child(UI.button("→ Garrison", func(): buy.call("garrison"), "Small"))
 		grid.add_child(_card([head, UI.label("At base price: %d" % t.pool[str(tier)]), row], true))
-	body.add_child(UI.panel(UI.vbox([UI.h3("Recruit"), _wide(_desc("The weekly muster is sold at the base price. You may keep buying beyond it: the next week-sized batch costs ×2, then ×3, and so on. Prices reset each week.")), grid])))
+	body.add_child(UI.panel(UI.vbox([UI.h3("Recruit"), _wide(_desc("The weekly muster is sold at the base price. You may keep buying beyond it: the next week-sized batch costs ×2, then ×3, ×5, ×8, ×13 … (each step adds the previous two). Prices reset each week.")), grid])))
 	# buildings
 	var bgrid := UI.flow([], 10)
 	for k in D.BUILDINGS:

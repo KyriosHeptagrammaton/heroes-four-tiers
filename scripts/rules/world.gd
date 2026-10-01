@@ -488,7 +488,7 @@ func growth(t: Dictionary, tier: int) -> int:
 	return D.CFG.growth[str(tier)] * (2 if f.get("sp", {}).get("doubleGrowth", false) else 1)
 
 ## price of buying n more creatures of tier at town t (past the weekly amount the price doubles, then
-## triples..., each step one normal week's growth long)
+## goes ×3, ×5, ×8 … (price_step), each step one normal week's growth long)
 func price_for(t: Dictionary, tier: int, n: int, markup: float = 1.0) -> int:
 	var total := 0
 	var pool: int = t.pool[str(tier)]
@@ -501,8 +501,17 @@ func price_for(t: Dictionary, tier: int, n: int, markup: float = 1.0) -> int:
 		if pool > 0:
 			total += unit; pool -= 1
 		else:
-			total += unit * (2 + extra / g); extra += 1
+			total += unit * price_step(extra / g); extra += 1
 	return U.jr(total * markup)
+
+## price multiplier of the k-th batch past the weekly muster: Fibonacci from 2 — ×2, ×3, ×5, ×8, ×13 …
+func price_step(k: int) -> int:
+	var a := 2
+	var b := 3
+	for i in k:
+		var c := a + b
+		a = b; b = c
+	return a
 
 func buy(t: Dictionary, tier: int, n: int) -> void:
 	for i in n:

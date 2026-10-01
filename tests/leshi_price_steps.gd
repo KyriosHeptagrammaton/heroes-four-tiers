@@ -8,6 +8,8 @@ func run(_root) -> void:
 	var p_pool := World.price_for(t, 3, pool)
 	var p_next := World.price_for(t, 3, pool + g) - p_pool
 	var p_after := World.price_for(t, 3, pool + 2 * g) - p_pool - p_next
-	print("normal growth %d, Leshi weekly pool %d at %d each = %d; next %d cost %d (x2); next %d cost %d (x3)" % [g, pool, unit, p_pool, g, p_next, g, p_after])
-	failed = pool != 2 * g or p_next != U.jr(g * unit * 2) or p_after != U.jr(g * unit * 3)
+	var p_4 := World.price_for(t, 3, pool + 5 * g) - World.price_for(t, 3, pool + 4 * g)
+	print("normal growth %d, Leshi weekly pool %d at %d each = %d; next %d cost %d (x2); next %d cost %d (x3); 5th batch %d (x13)" % [g, pool, unit, p_pool, g, p_next, g, p_after, p_4])
+	print("steps: ", range(7).map(func(k): return World.price_step(k)))
+	failed = pool != 2 * g or p_next != U.jr(g * unit * 2) or p_after != U.jr(g * unit * 3) or p_4 != U.jr(g * unit * 13)
 	print("leshi_price_steps ", "FAIL" if failed else "PASS")
