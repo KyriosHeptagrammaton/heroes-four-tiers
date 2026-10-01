@@ -69,6 +69,13 @@ func price_mult(faction: String, tier: int = 0) -> float:
 	var m := float(D.CFG.get("factionPriceMult", {}).get(faction, 1.0))
 	return m * float(D.CFG.get("unitPriceMult", {}).get("%s.%d" % [faction, tier], 1.0))
 
+## recruit price of a faction's tier: an explicit override, else base × multipliers
+func base_price(faction: String, tier: int) -> float:
+	var t := mini(4, tier)
+	var o = D.CFG.get("unitPriceOverride", {}).get("%s.%d" % [faction, t], null)
+	if o != null: return float(o)
+	return float(D.CFG.unitPrice[str(t)]) * price_mult(faction, t)
+
 ## gold value of one creature (or one rider with its mounts): base recruit price
 ## plus one upgrade fee per upgrade level, times the faction multiplier
 func unit_price(k: String) -> float:
@@ -80,7 +87,7 @@ func unit_price(k: String) -> float:
 		return unit_price(parts[0]) + per * unit_price(parts[1])
 	var p := parse(k)
 	var t := str(mini(4, p.tier))
-	return (float(D.CFG.unitPrice[t]) + p.up * float(D.CFG.upgradeFee[t])) * price_mult(p.faction, p.tier)
+	return base_price(p.faction, p.tier) + p.up * float(D.CFG.upgradeFee[t]) * price_mult(p.faction, p.tier)
 
 ## "Alpha tier 1", "Troll Ranged I", "Skeleton Magi"...
 func name_for(p: Dictionary) -> String:
@@ -188,7 +195,7 @@ func special_text(k: String, v) -> String:
 		"bigKillMorale": return "+1 morale for every tier 3+ creature it kills"
 		"keepAdvOnAttack": return "Does not lose advantage when attacking"
 		"negMoraleOverflow": return "Morale recovery with no morale damage becomes a buffer (half)"
-		"startNegPhys": return "Starts each battle with negative health damage equal to the number of creatures in the stack"
+		"startNegPhys": return "Starts each battle with negative health damage = 2 × √(creatures) × creatures^0.3 (12 Leshi: 15)"
 		"gainHealthOnKill": return "+1 health when it kills a creature with %s health" % (">=" if v == "ge" else "more")
 		"moralePerTurn": return "+%s morale at the start of each turn" % str(v)
 		"counterEngage": return "Engages anything that %s it" % ("attacks" if v == "any" else "melee-attacks")
@@ -199,6 +206,8 @@ func special_text(k: String, v) -> String:
 		"necroPhys": return "When another stack loses creatures to damage, gains (its tier / this tier) creatures" if v == "melee" else "When a stack of equal/higher tier loses creatures to damage, gains 1 creature"
 		"alwaysRetaliate": return "Always retaliates when attacked"
 		"rallyConvert": return "Its rally removes physical damage first, turning it into 2x morale damage"
+		"healConvert": return "Heal action: turns up to 2 × its morale of a friendly stack's health damage into twice as much morale damage — health damage can go below 0"
+		"rallyFoeConvert": return "Magi: can rally foes — converts up to 2 × its morale of their morale damage into health damage (1 for 1)"
 		"courageHealth": return "Courage also applies to health casualties"
 		"rallyEnemy": return "Its rally can target enemies (deals morale damage)"
 		"rallyHealsPhys": return "Magi: its rally also removes physical damage equal to its stack size"

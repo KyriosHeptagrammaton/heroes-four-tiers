@@ -174,8 +174,8 @@ func setup_sides() -> void:
 				s.phys -= [0, 3, 6, 12][w]
 			if Heroes.skill(hs, "tactics") >= 3:
 				s.adv += 1
-		if s.sp("startNegPhys"):   # Leshi: negative health damage = creatures in the stack
-			s.phys -= s.count
+		if s.sp("startNegPhys"):   # Leshi: negative health damage = 2·√n·n^0.3
+			s.phys -= U.jr(2.0 * sqrt(float(s.count)) * pow(float(s.count), 0.3))
 		if fx.get("defAdv", 0) and s.side == 1:
 			s.adv += fx.defAdv
 		if s.count <= always_hero_n(s.side):
@@ -950,7 +950,7 @@ func check_rally(a: Stk, t: Stk):
 	if t == null or t.count <= 0:
 		return "Invalid target"
 	if t.side != a.side:
-		if a.sp("rallyEnemy"):
+		if a.sp("rallyEnemy") or a.sp("rallyFoeConvert"):
 			return "Fallen back" if t.fallen_back else null
 		return "Rally targets friendly units"
 	if t.fallen_back and t != a:
@@ -975,6 +975,7 @@ func act(action: String, target_id = null, opt = null):
 		"deny": err = check_deny(a, t)
 		"fallback": err = check_fallback(a)
 		"rally": err = check_rally(a, t)
+		"heal": err = check_heal(a, t)
 		"seek", "retaliate": err = null
 		"wait": err = null if can_wait(a) else "Cannot wait"
 		_: err = "Unknown action"
@@ -1043,6 +1044,8 @@ func act(action: String, target_id = null, opt = null):
 			say("%s ready to retaliate." % a.name)
 		"rally":
 			do_rally(a, t)
+		"heal":
+			do_heal(a, t)
 		"wait":
 			a.waited = true
 			var e = queue[qi]
@@ -1146,7 +1149,31 @@ func do_attack(a: Stk, t: Stk) -> void:
 		a.engaging.append(t.id)
 		say("%s engage %s." % [a.name, t.name])
 
+## Draugr: Heal — turn a friendly stack's health damage into twice as much morale damage
+func check_heal(a: Stk, t: Stk):
+	if not a.sp("healConvert"): return "Only the Draugr can heal"
+	if t == null or t.count <= 0 or t.side != a.side: return "Heal targets friendly units"
+	if t.fallen_back and t != a: return "Fallen back (only guard may target it)"
+	return null
+
+func heal_amount(a: Stk) -> int:
+	return 2 * a.morale_val
+
+func do_heal(a: Stk, t: Stk) -> void:
+	var p := heal_amount(a)      # may push health damage below 0 (a buffer)
+	t.phys -= p
+	say("%s heal %s: %d health damage becomes %d morale damage." % [a.name, "themselves" if t == a else t.name, p, 2 * p], "good")
+	deal_damage(t, 0, 2 * p, {"kind": "heal"})
+
 func do_rally(a: Stk, t: Stk) -> void:
+	if t.side != a.side and a.sp("rallyFoeConvert"):
+		# Draugr Magi: the foe's morale damage turns into health damage, 1 for 1
+		var p := mini(maxi(t.mor, 0), 2 * a.morale_val)
+		t.mor -= p
+		say("%s turn %d of %s's morale damage into health damage." % [a.name, p, t.name], "dmg")
+		attacked_this_round[a.side] = true
+		if p > 0: deal_damage(t, p, 0, {"source": a, "kind": "attack"})
+		return
 	if t.side != a.side:
 		var amt0 := 2 * a.morale_val
 		say("%s terrify %s (%d morale damage)." % [a.name, t.name, amt0], "dmg")

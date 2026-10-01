@@ -81,6 +81,21 @@ func decide(b: Battle, a) -> Dictionary:
 		var amt: float = mini(t.mor, 2 * a.morale_val)
 		var score: float = (amt / maxf(1.0, t.morale_val * 2)) * value_of(t) * (0.6 + ratio)
 		cands.append({"action": "rally", "target": t.id, "score": score})
+	# Draugr Heal: worth it when an ally carries a lot of health damage
+	if a.sp("healConvert"):
+		for t in allies:
+			if b.check_heal(a, t) != null or t.phys <= 0: continue
+			var hcap: float = maxf(1.0, t.count * maxf(0.5, Battle.cap(b.health(t))))
+			var hr: float = t.phys / hcap
+			if hr < 0.4: continue
+			var p: float = mini(t.phys, b.heal_amount(a))
+			cands.append({"action": "heal", "target": t.id, "score": (p / maxf(1.0, b.health(t))) * value_of(t) * 0.5 * (0.5 + hr)})
+	# Draugr Magi: rally a foe to turn its morale damage into health damage
+	if a.sp("rallyFoeConvert"):
+		for t in enemies:
+			if b.check_rally(a, t) != null or t.mor <= 0: continue
+			var p2: float = mini(t.mor, 2 * a.morale_val)
+			cands.append({"action": "rally", "target": t.id, "score": (p2 / maxf(1.0, b.health(t))) * value_of(t) * 0.35})
 	if not under_assault and not b.is_ranged(a):
 		for t in allies:
 			if t == a or not b.is_ranged(t) or b.is_guarded(t) or b.check_guard(a, t) != null:

@@ -84,7 +84,7 @@ func render() -> void:
 		var d := Units.resolve(Units.key(t.faction, tier, 0, ""))
 		var nm := _t(d.name)
 		UI.tip(nm, UI.unit_tip(d))
-		var head := UI.hbox([UI.sym(d, 32), UI.vbox([nm, UI.label("Tier %d · base %d gold · growth %d/week" % [tier, U.jr(D.CFG.unitPrice[str(tier)] * Units.price_mult(t.faction, tier)), World.growth(t, tier)], "muted", 12)], 0)])
+		var head := UI.hbox([UI.sym(d, 32), UI.vbox([nm, UI.label("Tier %d · base %d gold · growth %d/week" % [tier, U.jr(Units.base_price(t.faction, tier)), World.growth(t, tier)], "muted", 12)], 0)])
 		if not t.built.get(bk, false):
 			grid.add_child(_card([head, UI.label("Build the dwelling first.", "muted", 12)]))
 			continue

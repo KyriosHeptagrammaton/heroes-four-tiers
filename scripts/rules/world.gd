@@ -493,7 +493,7 @@ func price_for(t: Dictionary, tier: int, n: int, markup: float = 1.0) -> int:
 	var pool: int = t.pool[str(tier)]
 	var extra: int = t.extra[str(tier)]
 	var g := maxi(1, growth(t, tier))
-	var unit: int = U.jr(D.CFG.unitPrice[str(tier)] * Units.price_mult(t.faction, tier))
+	var unit: int = U.jr(Units.base_price(t.faction, tier))
 	for i in n:
 		if pool > 0:
 			total += unit; pool -= 1

@@ -100,14 +100,19 @@
   "beta2PerCreature": false,
   "rainChance": 0.25,
   "factionPriceMult": {
-   "beta": 1.1
+   "beta": 1.04
   },
   "stackLossCourage": 2,
   "heroStackLossCourage": 1,
   "commanderLossCourage": 4,
   "stallRounds": 2,
   "unitPriceMult": {
-   "gamma.3": 0.5
+   "gamma.3": 0.625
+  },
+  "unitPriceOverride": {
+   "beta.2": 82,
+   "beta.3": 210,
+   "beta.4": 835
   }
  },
  "FACTIONS": {
@@ -496,7 +501,7 @@
     }
    },
    "3": {
-    "hp": 3,
+    "hp": 4,
     "mor": 6,
     "dmg": [
      3,
@@ -509,7 +514,7 @@
     "w": 2,
     "s": 2,
     "sp": {
-     "rallyConvert": true
+     "healConvert": true
     },
     "I": {
      "mor": 8
@@ -586,7 +591,7 @@
     "rallyBoost": true
    },
    "3": {
-    "allPhysical": true
+    "rallyFoeConvert": true
    },
    "4": {
     "purgeMoraleOnTurn": true
