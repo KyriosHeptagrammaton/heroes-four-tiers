@@ -7,7 +7,7 @@ func run(root) -> void:
 	ok(is_equal_approx(Units.unit_price(Units.key("beta", 2, 0, "")), 82.0), "Lion 82")
 	ok(is_equal_approx(Units.unit_price(Units.key("beta", 3, 0, "")), 210.0), "Archon 210")
 	ok(is_equal_approx(Units.unit_price(Units.key("beta", 4, 0, "")), 835.0), "Metatron 835")
-	ok(is_equal_approx(Units.unit_price(Units.key("beta", 1, 0, "")), 31.2), "Martial Saint 30 × 1.04")
+	ok(is_equal_approx(Units.unit_price(Units.key("beta", 1, 0, "")), 31.0), "Martial Saint 31")
 	ok(is_equal_approx(Units.unit_price(Units.key("gamma", 3, 0, "")), 125.0), "Leshi 125")
 	ok(int(Units.resolve(Units.key("delta", 3, 0, "")).hp) == 4, "Draugr 4 health")
 	var L := Units.key("gamma", 3, 0, "")

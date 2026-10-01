@@ -190,7 +190,7 @@ func upgrade_modal(h_id: String, t_id: String, font: bool = false) -> void:
 	var draw := [null]
 	draw[0] = func():
 		var box := UI.vbox([UI.h2("◎ Arcane font" if font else "Upgrade creatures"),
-			UI.rich(UI.col("Cost per creature: 1 essence of its tier + a gold fee. You have %d gold and essence %s." % [P.gold, " ".join([1, 2, 3, 4].map(func(k): return "T%d:%d" % [k, P.essence[str(k)]]))], "muted"))])
+			UI.rich(UI.col("Cost per creature: 1 essence of its tier + the difference in gold value between the two kinds. You have %d gold and essence %s." % [P.gold, " ".join([1, 2, 3, 4].map(func(k): return "T%d:%d" % [k, P.essence[str(k)]]))], "muted"))])
 		var any := false
 		for A in armies:
 			box.add_child(UI.h3(A.label))
@@ -202,7 +202,7 @@ func upgrade_modal(h_id: String, t_id: String, font: bool = false) -> void:
 				var row := UI.flow([UI.sym(d, 24), _t("%d %s" % [g.count, d.name]), UI.label("→")], 6)
 				for k in opts:
 					var nd := Units.resolve(k)
-					var cost := World.upgrade_cost(g.key, g.count)
+					var cost := World.upgrade_cost(g.key, k, g.count)
 					var can: bool = P.gold >= cost.gold and P.essence[str(cost.tier)] >= cost.essence
 					var bt := UI.button(nd.name + (" ⚑" if nd.placeholder else ""), func():
 						P.gold -= cost.gold

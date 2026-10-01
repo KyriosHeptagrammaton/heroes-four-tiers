@@ -14,6 +14,7 @@ var MAGI: Dictionary
 var SECOND_UPGRADE: Dictionary
 var ABILITY_TEXT: Dictionary
 var UNIT_NAMES: Dictionary
+var UNIT_VALUES: Dictionary   # gold value of every unit variant (recruit price / upgrade fees)
 var SPELLS: Dictionary
 var TERRAIN: Dictionary
 var TIMES: Dictionary
@@ -37,7 +38,7 @@ func _init() -> void:
 	var parsed = JSON.parse_string(f.get_as_text())
 	J = _ints(parsed)
 	CFG = J["CFG"]; FACTIONS = J["FACTIONS"]; FACTION_IDS = J["FACTION_IDS"]; UNIT_BASE = J["UNIT_BASE"]; MAGI = J["MAGI"]
-	SECOND_UPGRADE = J["SECOND_UPGRADE"]; ABILITY_TEXT = J["ABILITY_TEXT"]; UNIT_NAMES = J["UNIT_NAMES"]
+	SECOND_UPGRADE = J["SECOND_UPGRADE"]; ABILITY_TEXT = J["ABILITY_TEXT"]; UNIT_NAMES = J["UNIT_NAMES"]; UNIT_VALUES = J["UNIT_VALUES"]
 	SPELLS = J["SPELLS"]; TERRAIN = J["TERRAIN"]; TIMES = J["TIMES"]; WEATHER = J["WEATHER"]; SKILLS = J["SKILLS"]
 	ARTIFACTS = J["ARTIFACTS"]; PRIMARY = J["PRIMARY"]; CLASSES = J["CLASSES"]; HERO_NAMES = J["HERO_NAMES"]
 	OBJ = J["OBJ"]; MINES = J["MINES"]; BUILDINGS = J["BUILDINGS"]; MUSIC = J["MUSIC"]; FLAGS = J["FLAGS"]

@@ -35,12 +35,6 @@
   "sightDefault": 3,
   "sightScale": 1,
   "scoutTilesPerXP": 10,
-  "unitPrice": {
-   "1": 30,
-   "2": 80,
-   "3": 200,
-   "4": 800
-  },
   "priceEscalation": [
    1,
    2,
@@ -48,12 +42,6 @@
    4,
    5
   ],
-  "upgradeFee": {
-   "1": 20,
-   "2": 50,
-   "3": 120,
-   "4": 400
-  },
   "startGold": 2500,
   "townIncome": 500,
   "heroCost": 1500,
@@ -99,21 +87,10 @@
   "wallPerStack": 12,
   "beta2PerCreature": false,
   "rainChance": 0.25,
-  "factionPriceMult": {
-   "beta": 1.04
-  },
   "stackLossCourage": 2,
   "heroStackLossCourage": 1,
   "commanderLossCourage": 4,
-  "stallRounds": 2,
-  "unitPriceMult": {
-   "gamma.3": 0.625
-  },
-  "unitPriceOverride": {
-   "beta.2": 82,
-   "beta.3": 210,
-   "beta.4": 835
-  }
+  "stallRounds": 2
  },
  "FACTIONS": {
   "alpha": {
@@ -1921,5 +1898,131 @@
    "area": "Overworld",
    "text": "A defeated hero is removed; the winner takes their spell book (doc) and artifacts (assumed). If a commander dies with its tier-4 stack but its army wins, the survivors walk to the nearest own town garrison."
   }
- ]
+ ],
+ "UNIT_VALUES": {
+  "alpha": {
+   "1": {
+    "base": 30,
+    "melee1": 50,
+    "ranged1": 50,
+    "magi": 50,
+    "melee2": 70,
+    "ranged2": 70
+   },
+   "2": {
+    "base": 80,
+    "melee1": 130,
+    "ranged1": 130,
+    "magi": 130,
+    "melee2": 180,
+    "ranged2": 180
+   },
+   "3": {
+    "base": 200,
+    "melee1": 320,
+    "ranged1": 320,
+    "magi": 320,
+    "melee2": 440,
+    "ranged2": 440
+   },
+   "4": {
+    "base": 800,
+    "upgraded": 1200,
+    "magi": 1200
+   }
+  },
+  "beta": {
+   "1": {
+    "base": 31,
+    "melee1": 52,
+    "ranged1": 52,
+    "magi": 52,
+    "melee2": 73,
+    "ranged2": 73
+   },
+   "2": {
+    "base": 82,
+    "melee1": 134,
+    "ranged1": 134,
+    "magi": 134,
+    "melee2": 186,
+    "ranged2": 186
+   },
+   "3": {
+    "base": 210,
+    "melee1": 335,
+    "ranged1": 335,
+    "magi": 335,
+    "melee2": 460,
+    "ranged2": 460
+   },
+   "4": {
+    "base": 835,
+    "upgraded": 1251,
+    "magi": 1251
+   }
+  },
+  "gamma": {
+   "1": {
+    "base": 30,
+    "melee1": 50,
+    "ranged1": 50,
+    "magi": 50,
+    "melee2": 70,
+    "ranged2": 70
+   },
+   "2": {
+    "base": 80,
+    "melee1": 130,
+    "ranged1": 130,
+    "magi": 130,
+    "melee2": 180,
+    "ranged2": 180
+   },
+   "3": {
+    "base": 125,
+    "melee1": 200,
+    "ranged1": 200,
+    "magi": 200,
+    "melee2": 275,
+    "ranged2": 275
+   },
+   "4": {
+    "base": 800,
+    "upgraded": 1200,
+    "magi": 1200
+   }
+  },
+  "delta": {
+   "1": {
+    "base": 30,
+    "melee1": 50,
+    "ranged1": 50,
+    "magi": 50,
+    "melee2": 70,
+    "ranged2": 70
+   },
+   "2": {
+    "base": 80,
+    "melee1": 130,
+    "ranged1": 130,
+    "magi": 130,
+    "melee2": 180,
+    "ranged2": 180
+   },
+   "3": {
+    "base": 200,
+    "melee1": 320,
+    "ranged1": 320,
+    "magi": 320,
+    "melee2": 440,
+    "ranged2": 440
+   },
+   "4": {
+    "base": 800,
+    "upgraded": 1200,
+    "magi": 1200
+   }
+  }
+ }
 }

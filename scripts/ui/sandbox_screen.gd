@@ -199,7 +199,7 @@ func side_editor(i: int) -> Control:
 		var tot := 0.0
 		for st in sd.stacks: tot += st.count * Units.unit_price(st.key)
 		cost_lbl.text = "Army cost: %s gold" % U.fmt(U.jr(tot))
-	UI.tip(cost_lbl, "Recruit price of every creature (mounts included) plus one upgrade fee per upgrade level, at base weekly prices. Beta creatures cost 4% more (Lion 82, Archon 210, Metatron 835); the Leshi costs 125. Upgrade essence is not counted.")
+	UI.tip(cost_lbl, "Gold value of every creature (mounts included) — the value of its exact kind and upgrade level, i.e. its recruit price plus the upgrade fees paid to reach it. Upgrade essence is not counted.")
 	for k in sd.stacks.size():
 		var s: Dictionary = sd.stacks[k]
 		var d := Units.resolve(s.key)

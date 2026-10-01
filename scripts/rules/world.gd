@@ -536,10 +536,11 @@ func upgrade_options(k: String, ctx: Dictionary) -> Array:
 		if font: return x.ends_with(".m")
 		return t == null or Units.parse(x).faction == t.faction or (x.ends_with(".m") and built.call("sanctum")))
 
-func upgrade_cost(k: String, n: int) -> Dictionary:
-	var tier := mini(4, int(Units.resolve(k).tier))
-	var rp := Units.parse(k.split("@")[0])
-	var fee: int = U.jr(D.CFG.upgradeFee[str(tier)] * Units.price_mult(rp.faction, rp.tier))
+## upgrading n creatures from one variant to another: the gold difference in their
+## values (UNIT_VALUES) plus 1 essence of their tier per creature
+func upgrade_cost(from_k: String, to_k: String, n: int) -> Dictionary:
+	var tier := mini(4, int(Units.resolve(from_k).tier))
+	var fee := maxi(0, U.jr(Units.variant_value(to_k) - Units.variant_value(from_k)))
 	return {"gold": fee * n, "essence": n, "tier": tier}
 
 # ---------------------------------------------------------------- battle aftermath

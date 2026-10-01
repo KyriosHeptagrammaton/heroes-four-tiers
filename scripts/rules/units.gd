@@ -63,31 +63,34 @@ func _apply_up(d: Dictionary, I: Dictionary) -> void:
 	if I.has("ab"):
 		d.ab.merge(I.ab, true)
 
-## price multiplier for a faction's tier: faction-wide (Beta +10%) times any
-## per-creature factor (the Leshi costs half)
-func price_mult(faction: String, tier: int = 0) -> float:
-	var m := float(D.CFG.get("factionPriceMult", {}).get(faction, 1.0))
-	return m * float(D.CFG.get("unitPriceMult", {}).get("%s.%d" % [faction, tier], 1.0))
+## which entry of UNIT_VALUES a variant uses: base / melee1 / ranged1 / magi /
+## melee2 / ranged2 (tier 4: base / upgraded / magi)
+func value_slot(p: Dictionary) -> String:
+	if p.up == 0: return "base"
+	if p.mod == "m": return "magi"
+	if p.tier >= 4: return "upgraded"
+	return ("ranged" if p.mod == "r" else "melee") + str(mini(2, p.up))
 
-## recruit price of a faction's tier: an explicit override, else base × multipliers
+## gold value of one creature of this variant (data: UNIT_VALUES)
+func variant_value(k: String) -> float:
+	var p := parse(k)
+	var t := str(mini(4, p.tier))
+	var row: Dictionary = D.UNIT_VALUES.get(p.faction, {}).get(t, {})
+	return float(row.get(value_slot(p), row.get("base", 0)))
+
+## recruit price: the value of the plain creature
 func base_price(faction: String, tier: int) -> float:
-	var t := mini(4, tier)
-	var o = D.CFG.get("unitPriceOverride", {}).get("%s.%d" % [faction, t], null)
-	if o != null: return float(o)
-	return float(D.CFG.unitPrice[str(t)]) * price_mult(faction, t)
+	return variant_value(key(faction, mini(4, tier), 0, ""))
 
-## gold value of one creature (or one rider with its mounts): base recruit price
-## plus one upgrade fee per upgrade level, times the faction multiplier
+## gold value of one creature (or one rider with its mounts)
 func unit_price(k: String) -> float:
 	if "@" in k:
 		var parts := k.split("@")
 		var R := resolve(parts[0])
 		var M := resolve(parts[1])
 		var per := int(ceil(float(R.w) / M.s))
-		return unit_price(parts[0]) + per * unit_price(parts[1])
-	var p := parse(k)
-	var t := str(mini(4, p.tier))
-	return base_price(p.faction, p.tier) + p.up * float(D.CFG.upgradeFee[t]) * price_mult(p.faction, p.tier)
+		return variant_value(parts[0]) + per * variant_value(parts[1])
+	return variant_value(k)
 
 ## "Alpha tier 1", "Troll Ranged I", "Skeleton Magi"...
 func name_for(p: Dictionary) -> String:
