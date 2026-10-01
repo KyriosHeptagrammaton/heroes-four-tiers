@@ -487,12 +487,15 @@ func growth(t: Dictionary, tier: int) -> int:
 	var f: Dictionary = D.UNIT_BASE[t.faction][str(tier)]
 	return D.CFG.growth[str(tier)] * (2 if f.get("sp", {}).get("doubleGrowth", false) else 1)
 
-## price of buying n more creatures of tier at town t (past the weekly amount the price doubles, then triples...)
+## price of buying n more creatures of tier at town t (past the weekly amount the price doubles, then
+## triples..., each step one normal week's growth long)
 func price_for(t: Dictionary, tier: int, n: int, markup: float = 1.0) -> int:
 	var total := 0
 	var pool: int = t.pool[str(tier)]
 	var extra: int = t.extra[str(tier)]
-	var g := maxi(1, growth(t, tier))
+	# the price steps (x2, x3 ...) use the normal growth: double growth (Leshi) only
+	# doubles the weekly batch sold at the base price
+	var g := maxi(1, int(D.CFG.growth[str(tier)]))
 	var unit: int = U.jr(Units.base_price(t.faction, tier))
 	for i in n:
 		if pool > 0:
