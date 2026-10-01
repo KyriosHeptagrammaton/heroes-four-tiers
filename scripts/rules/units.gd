@@ -198,7 +198,7 @@ func special_text(k: String, v) -> String:
 		"bigKillMorale": return "+1 morale for every tier 3+ creature it kills"
 		"keepAdvOnAttack": return "Does not lose advantage when attacking"
 		"negMoraleOverflow": return "Morale recovery with no morale damage becomes a buffer (half)"
-		"startNegPhys": return "Starts each battle with negative health damage = 2.1 × creatures^0.7, rounded (12 Leshi: 12); not with the test casualty rule"
+		"startNegPhys": return "Starts each battle with negative health damage = 2.1 × creatures^0.7, rounded (12 Leshi: 12)"
 		"gainHealthOnKill": return "+1 health when it kills a creature with %s health" % (">=" if v == "ge" else "more")
 		"moralePerTurn": return "+%s morale at the start of each turn" % str(v)
 		"counterEngage": return "Engages anything that %s it" % ("attacks" if v == "any" else "melee-attacks")
@@ -208,7 +208,7 @@ func special_text(k: String, v) -> String:
 		"moraleAura": return "+%s morale to all other friendly stacks (once per army, however many stacks have it)" % str(v)
 		"necroPhys": return "When another stack loses creatures to damage, gains (its tier / this tier) creatures" if v == "melee" else "When a stack of equal/higher tier loses creatures to damage, gains 1 creature"
 		"alwaysRetaliate": return "Always retaliates when attacked"
-		"rallyConvert": return "Its rally first turns health damage into 2× morale damage (no desertion), then removes morale damage, and any rally left over becomes negative health damage (not with the test casualty rule)"
+		"rallyConvert": return "Its rally first turns health damage into 2× morale damage (no desertion), then removes morale damage, and any rally left over becomes negative health damage"
 		"rallyFoeConvert": return "Magi: can rally foes — converts up to 2 × its morale of their morale damage into health damage (1 for 1)"
 		"courageHealth": return "Courage also applies to health casualties"
 		"rallyEnemy": return "Its rally can target enemies (deals morale damage)"

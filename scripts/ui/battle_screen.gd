@@ -59,7 +59,7 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Critical.[/b] Adds to your roll while you are trying to roll the top face (maximum damage), so with 3 or fewer creatures a +2 critical always hits maximum — there are no natural 1s.
 
-[b]Casualties.[/b] When damage exceeds creatures × (value − 1), one creature is removed and damage drops by twice its value (+courage for morale). Morale casualties desert, health casualties die. Deserters also remove (health − 1) physical damage. (Options → Casualty rule can test creatures × value instead.) Every turn a stack recovers morale damage equal to its morale.
+[b]Casualties.[/b] When damage exceeds creatures × (value − 1), one creature is removed and damage drops by twice its value (+courage for morale). Morale casualties desert, health casualties die. Deserters also remove (health − 1) physical damage. (Options → Casualty rule has two experimental alternatives: creatures × full value, and front rank / back rank.) Every turn a stack recovers morale damage equal to its morale.
 
 [b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks at ≤ ⅓ of their start (or ≤ 2) become [b]heroes[/b]: +1 attack, defence, damage, morale; they rally; +1 courage.
 
@@ -703,8 +703,8 @@ func stack_card(s) -> Control:
 		st.trim = Color(1, 1, 1, 0.75)
 	var mv: int = s.morale_val
 	var hp := b.health(s)
-	var mcap := maxi(0, s.count * Battle.cap(mv))
-	var hcap := maxi(0, s.count * Battle.cap(hp))
+	var mcap := b.mor_cap(s)
+	var hcap := b.phys_cap(s)
 	var mfrac: float = minf(1, maxf(0, s.mor) / mcap) if mcap > 0 else (1.0 if s.mor > 0 else 0.0)
 	var hfrac: float = minf(1, maxf(0, s.phys) / hcap) if hcap > 0 else (1.0 if s.phys > 0 else 0.0)
 	var slow := b.slow_level(s)

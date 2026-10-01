@@ -33,7 +33,7 @@ func run(_root) -> void:
 	var pre := b.simulate_phys(s, 25)
 	ok(pre == 5, "simulate_phys agrees (%d)" % pre)
 	# test toggle: count x health
-	Battle._full = true
+	Battle._mode = "full"
 	b = mk(key, 3); s = b.stacks[0]
 	r = b.deal_damage(s, 6, 0)
 	ok(r.killed == 0 and s.phys == 6, "toggle: 3x2hp holds 6")
@@ -43,4 +43,4 @@ func run(_root) -> void:
 	var mv: int = s.morale_val
 	r = b.deal_damage(s, 0, 10 * mv)
 	ok(r.deserted == 0, "toggle: morale holds count x morale (%d)" % (10 * mv))
-	Battle._full = false
+	Battle._mode = "standard"

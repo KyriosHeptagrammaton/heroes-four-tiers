@@ -174,7 +174,7 @@ func setup_sides() -> void:
 				s.phys -= [0, 3, 6, 12][w]
 			if Heroes.skill(hs, "tactics") >= 3:
 				s.adv += 1
-		if s.sp("startNegPhys") and not full_threshold():   # Leshi: negative health damage = 2.1 · n^0.7 (off in the test casualty rule)
+		if s.sp("startNegPhys"):   # Leshi: negative health damage = 2.1 · n^0.7
 			s.phys -= U.jr(2.1 * pow(float(s.count), 0.7))
 		if fx.get("defAdv", 0) and s.side == 1:
 			s.adv += fx.defAdv
@@ -336,26 +336,96 @@ static func probe_stats(o: Dictionary) -> Array:
 		out.append(st.slice(0, n).map(func(x): return b.eff_stats(x)))
 	return out
 
-## How much damage one creature soaks before the stack starts losing creatures.
-## Doc rule: value − 1 (count × (health − 1)). The "full threshold" test option in
-## Options → Battle uses the whole value (count × health) for both health and morale;
-## deserters then also shed a full health of damage.
-static var _full = null
-static func full_threshold() -> bool:
-	if _full == null:
+## ---------------------------------------------------------------- casualty rules
+## Options → Casualty rule picks how much damage a stack soaks before losing creatures:
+##  "standard" (doc rule): count × (value − 1)
+##  "full"     (experimental): count × value
+##  "ranks"    (experimental): a front rank of ⌈√count⌉ creatures at the standard
+##             threshold, then a back rank (the rest) at the full threshold
+const CASUALTY_MODES := [["standard", "Standard: creatures × (value − 1)"], ["full", "Experimental: creatures × full value"], ["ranks", "Experimental: front rank / back rank"]]
+static var _mode = null
+static func casualty_mode() -> String:
+	if _mode == null:
 		var cf := ConfigFile.new()
-		_full = cf.get_value("rules", "full_threshold", false) if cf.load("user://settings.cfg") == OK else false
-	return _full
+		_mode = "standard"
+		if cf.load("user://settings.cfg") == OK:
+			_mode = cf.get_value("rules", "casualty_mode", "full" if cf.get_value("rules", "full_threshold", false) else "standard")
+		if not (_mode in ["standard", "full", "ranks"]): _mode = "standard"
+	return _mode
 
-static func set_full_threshold(on: bool) -> void:
-	_full = on
+static func set_casualty_mode(m: String) -> void:
+	_mode = m
 	var cf := ConfigFile.new()
 	cf.load("user://settings.cfg")
-	cf.set_value("rules", "full_threshold", on)
+	cf.set_value("rules", "casualty_mode", m)
 	cf.save("user://settings.cfg")
 
-static func cap(v: int) -> int:
-	return v if full_threshold() else v - 1
+## front rank size in the ranks rule
+static func front_rank(n: int) -> int:
+	return mini(n, int(ceil(sqrt(float(maxi(0, n))))))
+
+## The one place casualties are worked out (real damage, previews, last stand).
+## n creatures carrying P health / M morale damage receive add_p / add_m more.
+## h = health, mv = morale before damage, ddes / dkill = damage removed per deserter /
+## per death. Only the dimensions actually hit are checked ("only remove units in the
+## dimension they are attacked in").
+func resolve_losses(n: int, P: int, M: int, add_p: int, add_m: int, h: int, mv: int, courage: int, extra: int) -> Dictionary:
+	var mode := casualty_mode()
+	var killed := 0
+	var deserted := 0
+	var do_m := add_m > 0
+	var do_p := add_p != 0
+	var dkill := maxi(1, 2 * h + extra)
+	var ddes := maxi(1, 2 * mv + courage)
+	if mode == "ranks":
+		if do_p: P += add_p
+		if do_m: M += add_m
+		var F := front_rank(n)
+		var Bk := n - F
+		# front rank: whole stack's damage vs the front's standard threshold — health, then morale
+		if do_p:
+			while F > 0 and P > F * (h - 1):
+				F -= 1; killed += 1; P -= dkill
+		if do_m:
+			while F > 0 and M > F * (mv - 1):
+				F -= 1; deserted += 1; M -= ddes
+				if P > 0: P = maxi(0, P - (h - 1))
+		# back rank (front not counted): full threshold — morale, then health
+		if do_m:
+			while Bk > 0 and M > Bk * mv:
+				Bk -= 1; deserted += 1; M -= ddes
+				if P > 0: P = maxi(0, P - h)
+		if do_p:
+			while Bk > 0 and P > Bk * h:
+				Bk -= 1; killed += 1; P -= dkill
+		n = F + Bk     # the ranks re-form next time (any excess waits for the next hit)
+	else:
+		var off := 0 if mode == "full" else 1
+		if do_m:
+			M += add_m
+			while n > 0 and M > n * (mv - off):
+				n -= 1; deserted += 1; M -= ddes
+				if P > 0: P = maxi(0, P - (h - off))
+		if do_p:
+			P += add_p
+			while n > 0 and P > n * (h - off):
+				n -= 1; killed += 1; P -= dkill
+	if killed: P = maxi(0, P)
+	if deserted: M = maxi(0, M)
+	return {"count": n, "phys": P, "mor": M, "killed": killed, "deserted": deserted}
+
+## damage a stack can hold before its next casualty (bars, AI)
+func phys_cap(s: Stk) -> int:
+	return _cap_for(s.count, health(s))
+
+func mor_cap(s: Stk) -> int:
+	return _cap_for(s.count, s.morale_val)
+
+func _cap_for(n: int, v: int) -> int:
+	match casualty_mode():
+		"full": return maxi(0, n * v)
+		"ranks": return maxi(0, front_rank(n) * (v - 1))
+	return maxi(0, n * (v - 1))
 
 func raw_health(s: Stk) -> int:
 	return maxi(1, int(s.def.hp) + s.extra_hp)
@@ -680,28 +750,13 @@ func deal_damage(t: Stk, phys: int, mor: int, ctx: Dictionary = {}) -> Dictionar
 	if phys > 0 or mor > 0:
 		damage_this_round = true
 	var courage: int = sides[t.side].courage
-	var deserted := 0
-	var killed := 0
-	if mor > 0:
-		var mv := t.morale_val  # "calculate morale before damage"
-		t.mor += mor
-		var h := health(t)
-		while t.count > 0 and t.mor > t.count * cap(mv):
-			t.count -= 1; deserted += 1; t.deserters += 1
-			t.mor -= maxi(1, 2 * mv + courage)
-			if t.phys > 0:
-				t.phys = maxi(0, t.phys - cap(h))
-		if deserted:
-			t.mor = maxi(0, t.mor)
-	if phys != 0:
-		t.phys += phys
-		var h := health(t)
-		var extra: int = courage if t.sp("courageHealth") else 0
-		while t.count > 0 and t.phys > t.count * cap(h):
-			t.count -= 1; killed += 1; t.dead += 1
-			t.phys -= maxi(1, 2 * h + extra)
-		if killed:
-			t.phys = maxi(0, t.phys)
+	var mv := t.morale_val  # "calculate morale before damage"
+	var h := health(t)
+	var r := resolve_losses(t.count, t.phys, t.mor, phys, mor, h, mv, courage, courage if t.sp("courageHealth") else 0)
+	var deserted: int = r.deserted
+	var killed: int = r.killed
+	t.count = r.count; t.phys = r.phys; t.mor = r.mor
+	t.deserters += deserted; t.dead += killed
 	if fx.get("desertersDie", 0) and deserted:
 		t.deserters -= deserted; t.dead += deserted
 	t.last_loss_dead = killed > 0
@@ -710,14 +765,8 @@ func deal_damage(t: Stk, phys: int, mor: int, ctx: Dictionary = {}) -> Dictionar
 	return {"killed": killed, "deserted": deserted, "phys": phys, "mor": mor}
 
 func simulate_phys(t: Stk, phys: float) -> int:
-	var p: float = t.phys + phys
-	var c := t.count
-	var k := 0
-	var h := health(t)
-	var extra: int = sides[t.side].courage if t.sp("courageHealth") else 0
-	while c > 0 and p > c * cap(h):
-		c -= 1; k += 1; p -= maxi(1, 2 * h + extra)
-	return k
+	var cour: int = sides[t.side].courage
+	return resolve_losses(t.count, t.phys, 0, int(phys), 0, health(t), t.morale_val, cour, cour if t.sp("courageHealth") else 0).killed
 
 func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
 	var src = ctx.get("source", null)
@@ -1172,7 +1221,6 @@ func do_rally(a: Stk, t: Stk) -> void:
 		var q := mini(maxi(t.mor, 0), amt)
 		t.mor -= q
 		var rest := amt - q
-		if full_threshold(): rest = 0     # test casualty rule: no negative health damage from rallies
 		if rest > 0:
 			t.phys -= rest
 			say("%s rally %s (−%d morale damage, %d negative health damage)." % [a.name, "themselves" if t == a else t.name, q, rest], "good")
@@ -1515,18 +1563,8 @@ func expected_hit(a: Stk, t: Stk) -> Dictionary:
 	var mv := t.morale_val
 	var h := health(t)
 	var cour: int = sides[t.side].courage
-	var c := t.count
-	var m: int = t.mor + n.mor
-	var p: int = t.phys
-	var removed := 0
-	# same order as deal_damage: morale first (deserters shed health − 1 damage), then health
-	while n.mor > 0 and c > 0 and m > c * cap(mv):
-		c -= 1; removed += 1; m -= maxi(1, 2 * mv + cour)
-		if p > 0: p = maxi(0, p - cap(h))
-	p += n.phys
-	var extra: int = cour if t.sp("courageHealth") else 0
-	while c > 0 and p > c * cap(h):
-		c -= 1; removed += 1; p -= maxi(1, 2 * h + extra)
+	var r := resolve_losses(t.count, t.phys, t.mor, n.phys, n.mor, h, mv, cour, cour if t.sp("courageHealth") else 0)
+	var removed: int = r.killed + r.deserted
 	rng.set_state(save_rng)
 	log.resize(save_log)
 	damage_this_round = save_dmg

@@ -74,7 +74,7 @@ func decide(b: Battle, a) -> Dictionary:
 	for t in allies:
 		if b.check_rally(a, t) != null:
 			continue
-		var cap: float = maxf(1.0, t.count * maxf(0.5, Battle.cap(t.morale_val)))
+		var cap: float = maxf(1.0, float(b.mor_cap(t)))
 		var ratio: float = t.mor / cap
 		if ratio < 0.35:
 			continue
