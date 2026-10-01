@@ -15,7 +15,7 @@ func run(root) -> void:
 		var b := Battle.new({"seed": 5, "probe": true, "sides": [{"name": "A", "stacks": [{"key": L, "count": n}]}, {"name": "B", "stacks": [{"key": L, "count": 1}]}]})
 		print("  %d Leshi start with %d health damage" % [n, b.stacks[0].phys])
 	var b12 := Battle.new({"seed": 5, "probe": true, "sides": [{"name": "A", "stacks": [{"key": L, "count": 12}]}, {"name": "B", "stacks": [{"key": L, "count": 1}]}]})
-	ok(b12.stacks[0].phys == -15, "12 Leshi: -15")
+	ok(b12.stacks[0].phys == -13, "12 Leshi: -13")
 	# Draugr heal
 	var DR := Units.key("delta", 3, 0, "")
 	var bh := Battle.new({"seed": 5, "sides": [{"name": "A", "stacks": [{"key": DR, "count": 6}, {"key": Units.key("delta", 2, 0, ""), "count": 9}]}, {"name": "B", "stacks": [{"key": Units.key("alpha", 1, 0, ""), "count": 18}]}]})

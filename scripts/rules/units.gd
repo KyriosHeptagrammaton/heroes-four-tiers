@@ -198,7 +198,7 @@ func special_text(k: String, v) -> String:
 		"bigKillMorale": return "+1 morale for every tier 3+ creature it kills"
 		"keepAdvOnAttack": return "Does not lose advantage when attacking"
 		"negMoraleOverflow": return "Morale recovery with no morale damage becomes a buffer (half)"
-		"startNegPhys": return "Starts each battle with negative health damage = 2 × √(creatures) × creatures^0.3 (12 Leshi: 15)"
+		"startNegPhys": return "Starts each battle with negative health damage = 1.75 × creatures^0.8, rounded (12 Leshi: 13)"
 		"gainHealthOnKill": return "+1 health when it kills a creature with %s health" % (">=" if v == "ge" else "more")
 		"moralePerTurn": return "+%s morale at the start of each turn" % str(v)
 		"counterEngage": return "Engages anything that %s it" % ("attacks" if v == "any" else "melee-attacks")

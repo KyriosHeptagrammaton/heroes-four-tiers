@@ -18,7 +18,7 @@ func run(root) -> void:
 	var b := Battle.new({"seed": 5, "probe": true, "sides": [
 		{"name": "A", "hero": h, "stacks": [{"key": Units.key("gamma", 3, 0, ""), "count": 12}, {"key": Units.key("gamma", 1, 0, ""), "count": 18}, {"key": Units.key("gamma", 1, 0, ""), "count": 3}]},
 		{"name": "B", "stacks": [{"key": Units.key("beta", 1, 0, ""), "count": 18}]}]})
-	ok(b.stacks[0].phys == -15, "12 Leshi start with -15 health damage (got %d)" % b.stacks[0].phys)
+	ok(b.stacks[0].phys == -13, "12 Leshi start with -13 health damage (got %d)" % b.stacks[0].phys)
 	# courage
 	var c0: int = b.sides[0].courage
 	var pk_s = b.stacks[1]
