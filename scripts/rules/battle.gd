@@ -174,8 +174,8 @@ func setup_sides() -> void:
 				s.phys -= [0, 3, 6, 12][w]
 			if Heroes.skill(hs, "tactics") >= 3:
 				s.adv += 1
-		if s.sp("startNegPhys"):   # Leshi: negative health damage = X · n^0.8, X = 12^0.2 (= 12 at 12 Leshi)
-			s.phys -= U.jr(pow(12.0, 0.2) * pow(float(s.count), 0.8))
+		if s.sp("startNegPhys"):   # Leshi: negative health damage = 2.1 · n^0.7
+			s.phys -= U.jr(2.1 * pow(float(s.count), 0.7))
 		if fx.get("defAdv", 0) and s.side == 1:
 			s.adv += fx.defAdv
 		if s.count <= always_hero_n(s.side):
