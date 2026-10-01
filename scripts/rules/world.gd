@@ -493,15 +493,16 @@ func price_for(t: Dictionary, tier: int, n: int, markup: float = 1.0) -> int:
 	var total := 0
 	var pool: int = t.pool[str(tier)]
 	var extra: int = t.extra[str(tier)]
-	# the price steps (x2, x3 ...) use the normal growth: double growth (Leshi) only
-	# doubles the weekly batch sold at the base price
-	var g := maxi(1, int(D.CFG.growth[str(tier)]))
+	# double growth (Leshi): every batch is twice the size, but each price step past
+	# the weekly muster is twice as steep (x4, x6, x10, x16 ... instead of x2, x3, x5, x8 ...)
+	var g := maxi(1, growth(t, tier))
+	var dbl: int = 2 if D.UNIT_BASE[t.faction][str(tier)].get("sp", {}).get("doubleGrowth", false) else 1
 	var unit: int = U.jr(Units.base_price(t.faction, tier))
 	for i in n:
 		if pool > 0:
 			total += unit; pool -= 1
 		else:
-			total += unit * price_step(extra / g); extra += 1
+			total += unit * price_step(extra / g) * dbl; extra += 1
 	return U.jr(total * markup)
 
 ## price multiplier of the k-th batch past the weekly muster: Fibonacci from 2 — ×2, ×3, ×5, ×8, ×13 …
