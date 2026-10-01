@@ -424,7 +424,13 @@ func mor_cap(s: Stk) -> int:
 func _cap_for(n: int, v: int) -> int:
 	match casualty_mode():
 		"full": return maxi(0, n * v)
-		"ranks": return maxi(0, front_rank(n) * (v - 1))
+		"ranks":
+			# both ranks are tested against the same damage, so the safe amount is the
+			# lower limit (in small stacks the back rank's can be the smaller one)
+			var f := front_rank(n)
+			var c := f * (v - 1)
+			if n - f > 0: c = mini(c, (n - f) * v)
+			return maxi(0, c)
 	return maxi(0, n * (v - 1))
 
 func raw_health(s: Stk) -> int:
