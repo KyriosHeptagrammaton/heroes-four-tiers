@@ -341,7 +341,8 @@ static func probe_stats(o: Dictionary) -> Array:
 ##  "standard" (doc rule): count × (value − 1)
 ##  "full"     (experimental): count × value
 ##  "ranks"    (experimental): a front rank of ⌈√count⌉ creatures at the standard
-##             threshold, then a back rank (the rest) at the full threshold
+##             threshold, then a back rank (the rest) at the full threshold;
+##             stacks of 5 or fewer are all back rank
 const CASUALTY_MODES := [["standard", "Standard: creatures × (value − 1)"], ["full", "Experimental: creatures × full value"], ["ranks", "Experimental: front rank / back rank"]]
 static var _mode = null
 static func casualty_mode() -> String:
@@ -360,9 +361,10 @@ static func set_casualty_mode(m: String) -> void:
 	cf.set_value("rules", "casualty_mode", m)
 	cf.save("user://settings.cfg")
 
-## front rank size in the ranks rule
+## front rank size in the ranks rule: ⌈√n⌉; stacks of 5 or fewer are all back rank
 static func front_rank(n: int) -> int:
-	return mini(n, int(ceil(sqrt(float(maxi(0, n))))))
+	if n <= 5: return 0
+	return mini(n, int(ceil(sqrt(float(n)))))
 
 ## The one place casualties are worked out (real damage, previews, last stand).
 ## n creatures carrying P health / M morale damage receive add_p / add_m more.
@@ -428,9 +430,10 @@ func _cap_for(n: int, v: int) -> int:
 			# both ranks are tested against the same damage, so the safe amount is the
 			# lower limit (in small stacks the back rank's can be the smaller one)
 			var f := front_rank(n)
-			var c := f * (v - 1)
-			if n - f > 0: c = mini(c, (n - f) * v)
-			return maxi(0, c)
+			var limits := []
+			if f > 0: limits.append(f * (v - 1))
+			if n - f > 0: limits.append((n - f) * v)
+			return maxi(0, limits.min()) if limits.size() else 0
 	return maxi(0, n * (v - 1))
 
 func raw_health(s: Stk) -> int:

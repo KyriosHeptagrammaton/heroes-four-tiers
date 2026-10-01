@@ -39,5 +39,8 @@ func run(_root) -> void:
 	var exp := b3.resolve_losses(16, 0, 0, 0, 4 * (mv - 1) + 1, 2, mv, cour, 0)
 	print("  ranks morale: mv %d, %d morale damage on a front rank of 4 -> %s" % [mv, 4 * (mv - 1) + 1, exp])
 	ok(exp.deserted >= 1 and exp.count <= 15, "ranks: just over the front rank's morale threshold makes a front creature desert")
-	ok(Battle.front_rank(1) == 1 and Battle.front_rank(10) == 4 and Battle.front_rank(16) == 4 and Battle.front_rank(17) == 5, "front rank = ceil(sqrt(n))")
+	ok(Battle.front_rank(1) == 0 and Battle.front_rank(5) == 0 and Battle.front_rank(6) == 3 and Battle.front_rank(10) == 4 and Battle.front_rank(17) == 5, "front rank = ceil(sqrt(n)), none at 5 or fewer")
+	var b5 := Battle.new({"seed": 5, "probe": true, "sides": [{"name": "A", "stacks": [{"key": Units.key("alpha", 3, 0, ""), "count": 3}]}, {"name": "B", "stacks": [{"key": dw, "count": 1}]}]})
+	var r5 := b5.deal_damage(b5.stacks[0], 9, 0)
+	ok(r5.killed == 0 and b5.phys_cap(b5.stacks[0]) == 9, "3 Trolls are all back rank: hold 3 x 3 = 9 (killed %d, cap %d)" % [r5.killed, b5.phys_cap(b5.stacks[0])])
 	Battle._mode = "standard"
