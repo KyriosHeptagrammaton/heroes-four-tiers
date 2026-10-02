@@ -344,10 +344,11 @@ static func probe_stats(o: Dictionary) -> Array:
 ## ⌈√count⌉ at the standard threshold (front × (value − 1)) and a back rank (the rest)
 ## at the full threshold (back × value); stacks of 5 or fewer are all back rank, or all
 ## front rank if the army has another stack of exactly the same kind.
-## front rank size: ⌈√n⌉; a stack of 5 or fewer is all back rank, or all FRONT rank
+## front rank size: ⌈√n⌉ (6 creatures: 2); a stack of 5 or fewer is all back rank, or all FRONT rank
 ## when its army has another stack of exactly the same kind (no unified command)
 static func front_rank(n: int, small_all_front: bool = false) -> int:
 	if n <= 5: return n if small_all_front else 0
+	if n == 6: return 2      # 2 front / 4 back rather than 3 / 3
 	return mini(n, int(ceil(sqrt(float(n)))))
 
 ## a stack of 5 or fewer fights as all front rank if another living allied stack is
@@ -783,6 +784,7 @@ func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
 				g += int(floor(float(tier) / mini(4, int(o.def.tier))))
 			if g > 0:
 				o.count += g; o.gained += g
+				recalc_morale(o)   # a bigger stack has more morale right away
 				say("%s gains %d creature%s." % [o.name, g, "s" if g > 1 else ""], "good")
 	# killer effects
 	if src != null and src.count > 0 and src.side != t.side and killed > 0:

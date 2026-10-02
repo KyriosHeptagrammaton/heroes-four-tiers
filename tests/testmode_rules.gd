@@ -11,4 +11,4 @@ func run(_root) -> void:
 	ally.phys = 0; ally.mor = 0
 	b.do_rally(b.stacks[1], ally)
 	ok(b.stacks[0].phys == -12 and ally.phys < 0, "Leshi buffer -12 and Draugr negative health damage (%d)" % ally.phys)
-	ok(Battle.front_rank(1) == 0 and Battle.front_rank(5) == 0 and Battle.front_rank(6) == 3 and Battle.front_rank(10) == 4 and Battle.front_rank(17) == 5, "front rank = ceil(sqrt(n)), none at 5 or fewer")
+	ok(Battle.front_rank(1) == 0 and Battle.front_rank(5) == 0 and Battle.front_rank(6) == 2 and Battle.front_rank(10) == 4 and Battle.front_rank(17) == 5, "front rank = ceil(sqrt(n)), none at 5 or fewer")
