@@ -9,8 +9,7 @@
   "moraleShare": 0.75,
   "minDice": 3,
   "maxStacks": 6,
-  "heroUnitFraction": 0.3333333333333333,
-  "heroUnitAlways": 2,
+  "heroUnitAlways": 5,
   "heroUnitBonus": {
    "att": 1,
    "def": 1,
@@ -1090,9 +1089,9 @@
    "name": "Heroics",
    "cat": "martial",
    "tiers": [
-    "Stacks become heroes below 50%; 3 or fewer is always a hero",
-    "6 or fewer is always a hero",
-    "12 or fewer is always a hero"
+    "Stacks of 6 or fewer creatures are heroes (instead of 5)",
+    "9 or fewer are heroes",
+    "12 or fewer are heroes"
    ]
   },
   "warding": {

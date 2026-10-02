@@ -59,9 +59,9 @@ const RULES := """[font_size=18][color=#f0d68e][b]Combat quick reference[/b][/co
 
 [b]Critical.[/b] Adds to your roll while you are trying to roll the top face (maximum damage), so with 3 or fewer creatures a +2 critical always hits maximum — there are no natural 1s.
 
-[b]Casualties.[/b] When damage exceeds creatures × (value − 1), one creature is removed and damage drops by twice its value (+courage for morale). Morale casualties desert, health casualties die. Deserters also remove (health − 1) physical damage. (Options → Casualty rule has two experimental alternatives: creatures × full value, and front rank / back rank.) Every turn a stack recovers morale damage equal to its morale.
+[b]Casualties.[/b] A stack of more than 5 creatures fights in two ranks: a front rank of √creatures (rounded up) and a back rank of the rest; smaller stacks are all back rank. On each hit the stack's whole damage is checked against the front rank's limit, front × (value − 1) — health, then morale — losing at most the front rank; then against the back rank's limit, back × value — morale, then health. Each creature lost removes twice its value of damage (+courage for morale). Morale casualties desert, health casualties die; deserters also shed some health damage. The ranks re-form after the hit; damage over the new limit waits until the next hit. Every turn a stack recovers morale damage equal to its morale.
 
-[b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks at ≤ ⅓ of their start (or ≤ 2) become [b]heroes[/b]: +1 attack, defence, damage, morale; they rally; +1 courage.
+[b]Numbers.[/b] Each creature adds +5% base attack/defence and +10% morale. Stacks of 5 or fewer creatures (Heroics: 6 / 9 / 12) are [b]heroes[/b]: +1 attack, defence, damage, morale; they rally when they become heroes; +1 courage.
 
 [b]Courage[/b] = hero courage − (number of allied stacks + number of allied tier-4 creatures). Each point removes 1 extra morale damage when a creature deserts. Losing a stack costs 2 courage (3 if it had become heroes), losing the commander 4; courage may go negative. When a stack is lost, the army's other stacks of the same creature and upgrade path (e.g. Skeleton Ranged I and Ranged II) lose 1 morale for the rest of the fight.
 

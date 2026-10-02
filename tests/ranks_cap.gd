@@ -1,7 +1,6 @@
 extends RefCounted
 var failed := false
 func run(_root) -> void:
-	Battle._mode = "ranks"
 	var bad := 0
 	var checked := 0
 	for f in D.FACTION_IDS:
@@ -21,4 +20,3 @@ func run(_root) -> void:
 						if bad < 6: print("mismatch %s.%d n=%d %s cap=%d at=%s over=%s" % [f, t, n, kind, cap, at, over])
 	print("checked %d (unit, size, kind) cases; %d where the shown limit was wrong" % [checked, bad])
 	failed = bad != 0
-	Battle._mode = "standard"

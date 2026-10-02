@@ -5,8 +5,8 @@ func attempt(with_horn: bool):
 	h.stats.courage = 20
 	if with_horn: h.artifacts.append("horn")
 	var b := Battle.new({"seed": 3, "sides": [
-		{"name": "A", "hero": h, "stacks": [{"key": "alpha.1.0.", "count": 5}, {"key": "alpha.2.0.", "count": 3}]},
-		{"name": "B", "ai": true, "stacks": [{"key": "beta.1.0.", "count": 5}]}]})
+		{"name": "A", "hero": h, "stacks": [{"key": "alpha.1.0.", "count": 5}, {"key": "alpha.2.0.", "count": 30}]},
+		{"name": "B", "ai": true, "stacks": [{"key": "beta.3.0.", "count": 40}]}]})
 	var s = b.stacks[0]
 	s.deserters += s.count; s.count = 0; b.eliminated(s)
 	var n := 0
@@ -32,8 +32,8 @@ func run(_root) -> void:
 		h.stats.knowledge = 30; h.equipped = []
 		if lvl: h.skills["necromancy"] = lvl
 		var b := Battle.new({"seed": 3, "sides": [
-			{"name": "A", "hero": h, "stacks": [{"key": "alpha.1.0.", "count": 5}, {"key": "alpha.2.0.", "count": 3}]},
-			{"name": "B", "ai": true, "stacks": [{"key": "beta.1.0.", "count": 5}]}]})
+			{"name": "A", "hero": h, "stacks": [{"key": "alpha.1.0.", "count": 5}, {"key": "alpha.2.0.", "count": 30}]},
+			{"name": "B", "ai": true, "stacks": [{"key": "beta.3.0.", "count": 40}]}]})
 		var s = b.stacks[0]
 		s.dead += s.count; s.count = 0; b.eliminated(s)
 		var n := 0

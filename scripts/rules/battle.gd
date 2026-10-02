@@ -336,31 +336,10 @@ static func probe_stats(o: Dictionary) -> Array:
 		out.append(st.slice(0, n).map(func(x): return b.eff_stats(x)))
 	return out
 
-## ---------------------------------------------------------------- casualty rules
-## Options → Casualty rule picks how much damage a stack soaks before losing creatures:
-##  "standard" (doc rule): count × (value − 1)
-##  "full"     (experimental): count × value
-##  "ranks"    (experimental): a front rank of ⌈√count⌉ creatures at the standard
-##             threshold, then a back rank (the rest) at the full threshold;
-##             stacks of 5 or fewer are all back rank
-const CASUALTY_MODES := [["standard", "Standard: creatures × (value − 1)"], ["full", "Experimental: creatures × full value"], ["ranks", "Experimental: front rank / back rank"]]
-static var _mode = null
-static func casualty_mode() -> String:
-	if _mode == null:
-		var cf := ConfigFile.new()
-		_mode = "standard"
-		if cf.load("user://settings.cfg") == OK:
-			_mode = cf.get_value("rules", "casualty_mode", "full" if cf.get_value("rules", "full_threshold", false) else "standard")
-		if not (_mode in ["standard", "full", "ranks"]): _mode = "standard"
-	return _mode
-
-static func set_casualty_mode(m: String) -> void:
-	_mode = m
-	var cf := ConfigFile.new()
-	cf.load("user://settings.cfg")
-	cf.set_value("rules", "casualty_mode", m)
-	cf.save("user://settings.cfg")
-
+## ---------------------------------------------------------------- casualty rule
+## Front rank / back rank: a stack of more than 5 creatures has a front rank of
+## ⌈√count⌉ at the standard threshold (front × (value − 1)) and a back rank (the rest)
+## at the full threshold (back × value); stacks of 5 or fewer are all back rank.
 ## front rank size in the ranks rule: ⌈√n⌉; stacks of 5 or fewer are all back rank
 static func front_rank(n: int) -> int:
 	if n <= 5: return 0
@@ -372,46 +351,33 @@ static func front_rank(n: int) -> int:
 ## per death. Only the dimensions actually hit are checked ("only remove units in the
 ## dimension they are attacked in").
 func resolve_losses(n: int, P: int, M: int, add_p: int, add_m: int, h: int, mv: int, courage: int, extra: int) -> Dictionary:
-	var mode := casualty_mode()
 	var killed := 0
 	var deserted := 0
 	var do_m := add_m > 0
 	var do_p := add_p != 0
 	var dkill := maxi(1, 2 * h + extra)
 	var ddes := maxi(1, 2 * mv + courage)
-	if mode == "ranks":
-		if do_p: P += add_p
-		if do_m: M += add_m
-		var F := front_rank(n)
-		var Bk := n - F
-		# front rank: whole stack's damage vs the front's standard threshold — health, then morale
-		if do_p:
-			while F > 0 and P > F * (h - 1):
-				F -= 1; killed += 1; P -= dkill
-		if do_m:
-			while F > 0 and M > F * (mv - 1):
-				F -= 1; deserted += 1; M -= ddes
-				if P > 0: P = maxi(0, P - (h - 1))
-		# back rank (front not counted): full threshold — morale, then health
-		if do_m:
-			while Bk > 0 and M > Bk * mv:
-				Bk -= 1; deserted += 1; M -= ddes
-				if P > 0: P = maxi(0, P - h)
-		if do_p:
-			while Bk > 0 and P > Bk * h:
-				Bk -= 1; killed += 1; P -= dkill
-		n = F + Bk     # the ranks re-form next time (any excess waits for the next hit)
-	else:
-		var off := 0 if mode == "full" else 1
-		if do_m:
-			M += add_m
-			while n > 0 and M > n * (mv - off):
-				n -= 1; deserted += 1; M -= ddes
-				if P > 0: P = maxi(0, P - (h - off))
-		if do_p:
-			P += add_p
-			while n > 0 and P > n * (h - off):
-				n -= 1; killed += 1; P -= dkill
+	if do_p: P += add_p
+	if do_m: M += add_m
+	var F := front_rank(n)
+	var Bk := n - F
+	# front rank: whole stack's damage vs the front's standard threshold — health, then morale
+	if do_p:
+		while F > 0 and P > F * (h - 1):
+			F -= 1; killed += 1; P -= dkill
+	if do_m:
+		while F > 0 and M > F * (mv - 1):
+			F -= 1; deserted += 1; M -= ddes
+			if P > 0: P = maxi(0, P - (h - 1))
+	# back rank (front not counted): full threshold — morale, then health
+	if do_m:
+		while Bk > 0 and M > Bk * mv:
+			Bk -= 1; deserted += 1; M -= ddes
+			if P > 0: P = maxi(0, P - h)
+	if do_p:
+		while Bk > 0 and P > Bk * h:
+			Bk -= 1; killed += 1; P -= dkill
+	n = F + Bk     # the ranks re-form next time (any excess waits for the next hit)
 	if killed: P = maxi(0, P)
 	if deserted: M = maxi(0, M)
 	return {"count": n, "phys": P, "mor": M, "killed": killed, "deserted": deserted}
@@ -424,17 +390,12 @@ func mor_cap(s: Stk) -> int:
 	return _cap_for(s.count, s.morale_val)
 
 func _cap_for(n: int, v: int) -> int:
-	match casualty_mode():
-		"full": return maxi(0, n * v)
-		"ranks":
-			# both ranks are tested against the same damage, so the safe amount is the
-			# lower limit (in small stacks the back rank's can be the smaller one)
-			var f := front_rank(n)
-			var limits := []
-			if f > 0: limits.append(f * (v - 1))
-			if n - f > 0: limits.append((n - f) * v)
-			return maxi(0, limits.min()) if limits.size() else 0
-	return maxi(0, n * (v - 1))
+	# both ranks are tested against the same damage: the safe amount is the lower limit
+	var f := front_rank(n)
+	var limits := []
+	if f > 0: limits.append(f * (v - 1))
+	if n - f > 0: limits.append((n - f) * v)
+	return maxi(0, limits.min()) if limits.size() else 0
 
 func raw_health(s: Stk) -> int:
 	return maxi(1, int(s.def.hp) + s.extra_hp)
@@ -519,11 +480,9 @@ func hero_init(side: int) -> float:
 		v += fx.attackerInit
 	return v
 
+## a stack with this many creatures or fewer is heroes: 5, Heroics I / II / III 6 / 9 / 12
 func always_hero_n(side: int) -> int:
-	return [C.heroUnitAlways, 3, 6, 12][hero_skill(side, "heroics")]
-
-func hero_frac(side: int) -> float:
-	return 0.5 if hero_skill(side, "heroics") else C.heroUnitFraction
+	return [int(C.heroUnitAlways), 6, 9, 12][hero_skill(side, "heroics")]
 
 func strength(side: int) -> float:
 	var t := 0.0
@@ -852,7 +811,7 @@ func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
 func check_hero_unit(s: Stk) -> void:
 	if s.hero or s.count <= 0:
 		return
-	if s.count <= s.start * hero_frac(s.side) or s.count <= always_hero_n(s.side):
+	if s.count <= always_hero_n(s.side):
 		s.hero = true
 		sides[s.side].courage += 1
 		recalc_morale(s)
