@@ -190,6 +190,9 @@ func setup_sides() -> void:
 				say("%s loses 1 creature fleeing from %s." % [o.name, b.name])
 				if o.count <= 0:
 					eliminated(o)
+				else:
+					recalc_morale(o)
+					check_hero_unit(o)   # dropping to 5 makes them heroes
 
 func end_pre_combat() -> void:
 	pre_combat = false
@@ -1146,6 +1149,8 @@ func do_attack(a: Stk, t: Stk) -> void:
 		if t.count <= 0:
 			eliminated(t)
 			return
+		recalc_morale(t)
+		check_hero_unit(t)
 	var can_ret: bool = (t.retaliating or t.sp("alwaysRetaliate")) and not (ranged and not is_ranged(t) and not engaged)
 	if can_ret and t.sp("firstStrikeRetaliate"):
 		strike(t, a, {"ret": true})
