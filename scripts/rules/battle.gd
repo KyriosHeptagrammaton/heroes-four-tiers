@@ -339,18 +339,29 @@ static func probe_stats(o: Dictionary) -> Array:
 ## ---------------------------------------------------------------- casualty rule
 ## Front rank / back rank: a stack of more than 5 creatures has a front rank of
 ## ⌈√count⌉ at the standard threshold (front × (value − 1)) and a back rank (the rest)
-## at the full threshold (back × value); stacks of 5 or fewer are all back rank.
-## front rank size in the ranks rule: ⌈√n⌉; stacks of 5 or fewer are all back rank
-static func front_rank(n: int) -> int:
-	if n <= 5: return 0
+## at the full threshold (back × value); stacks of 5 or fewer are all back rank, or all
+## front rank if the army has another stack of exactly the same kind.
+## front rank size: ⌈√n⌉; a stack of 5 or fewer is all back rank, or all FRONT rank
+## when its army has another stack of exactly the same kind (no unified command)
+static func front_rank(n: int, small_all_front: bool = false) -> int:
+	if n <= 5: return n if small_all_front else 0
 	return mini(n, int(ceil(sqrt(float(n)))))
+
+## a stack of 5 or fewer fights as all front rank if another living allied stack is
+## exactly the same kind (same creature, path and level; same mount if mounted)
+func small_all_front(s: Stk) -> bool:
+	if s.count > 5: return false
+	for o in stacks:
+		if o != s and o.side == s.side and o.count > 0 and o.key == s.key:
+			return true
+	return false
 
 ## The one place casualties are worked out (real damage, previews, last stand).
 ## n creatures carrying P health / M morale damage receive add_p / add_m more.
 ## h = health, mv = morale before damage, ddes / dkill = damage removed per deserter /
 ## per death. Only the dimensions actually hit are checked ("only remove units in the
 ## dimension they are attacked in").
-func resolve_losses(n: int, P: int, M: int, add_p: int, add_m: int, h: int, mv: int, courage: int, extra: int) -> Dictionary:
+func resolve_losses(n: int, P: int, M: int, add_p: int, add_m: int, h: int, mv: int, courage: int, extra: int, small_front: bool = false) -> Dictionary:
 	var killed := 0
 	var deserted := 0
 	var do_m := add_m > 0
@@ -359,7 +370,7 @@ func resolve_losses(n: int, P: int, M: int, add_p: int, add_m: int, h: int, mv: 
 	var ddes := maxi(1, 2 * mv + courage)
 	if do_p: P += add_p
 	if do_m: M += add_m
-	var F := front_rank(n)
+	var F := front_rank(n, small_front)
 	var Bk := n - F
 	# front rank: whole stack's damage vs the front's standard threshold — health, then morale
 	if do_p:
@@ -384,14 +395,14 @@ func resolve_losses(n: int, P: int, M: int, add_p: int, add_m: int, h: int, mv: 
 
 ## damage a stack can hold before its next casualty (bars, AI)
 func phys_cap(s: Stk) -> int:
-	return _cap_for(s.count, health(s))
+	return _cap_for(s.count, health(s), small_all_front(s))
 
 func mor_cap(s: Stk) -> int:
-	return _cap_for(s.count, s.morale_val)
+	return _cap_for(s.count, s.morale_val, small_all_front(s))
 
-func _cap_for(n: int, v: int) -> int:
+func _cap_for(n: int, v: int, small_front: bool = false) -> int:
 	# both ranks are tested against the same damage: the safe amount is the lower limit
-	var f := front_rank(n)
+	var f := front_rank(n, small_front)
 	var limits := []
 	if f > 0: limits.append(f * (v - 1))
 	if n - f > 0: limits.append((n - f) * v)
@@ -720,7 +731,7 @@ func deal_damage(t: Stk, phys: int, mor: int, ctx: Dictionary = {}) -> Dictionar
 	var courage: int = sides[t.side].courage
 	var mv := t.morale_val  # "calculate morale before damage"
 	var h := health(t)
-	var r := resolve_losses(t.count, t.phys, t.mor, phys, mor, h, mv, courage, courage if t.sp("courageHealth") else 0)
+	var r := resolve_losses(t.count, t.phys, t.mor, phys, mor, h, mv, courage, courage if t.sp("courageHealth") else 0, small_all_front(t))
 	var deserted: int = r.deserted
 	var killed: int = r.killed
 	t.count = r.count; t.phys = r.phys; t.mor = r.mor
@@ -734,7 +745,7 @@ func deal_damage(t: Stk, phys: int, mor: int, ctx: Dictionary = {}) -> Dictionar
 
 func simulate_phys(t: Stk, phys: float) -> int:
 	var cour: int = sides[t.side].courage
-	return resolve_losses(t.count, t.phys, 0, int(phys), 0, health(t), t.morale_val, cour, cour if t.sp("courageHealth") else 0).killed
+	return resolve_losses(t.count, t.phys, 0, int(phys), 0, health(t), t.morale_val, cour, cour if t.sp("courageHealth") else 0, small_all_front(t)).killed
 
 func on_losses(t: Stk, killed: int, deserted: int, ctx: Dictionary) -> void:
 	var src = ctx.get("source", null)
@@ -1531,7 +1542,7 @@ func expected_hit(a: Stk, t: Stk) -> Dictionary:
 	var mv := t.morale_val
 	var h := health(t)
 	var cour: int = sides[t.side].courage
-	var r := resolve_losses(t.count, t.phys, t.mor, n.phys, n.mor, h, mv, cour, cour if t.sp("courageHealth") else 0)
+	var r := resolve_losses(t.count, t.phys, t.mor, n.phys, n.mor, h, mv, cour, cour if t.sp("courageHealth") else 0, small_all_front(t))
 	var removed: int = r.killed + r.deserted
 	rng.set_state(save_rng)
 	log.resize(save_log)
