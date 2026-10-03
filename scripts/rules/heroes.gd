@@ -106,7 +106,8 @@ func apply_primary_levels(h, rng: Rng, log: Array = []) -> void:
 				var cost := primary_cost(h, k)
 				if int(h.xp[k]) >= cost:
 					h.stats[k] = int(h.stats[k]) + 1
-					h.xp[k] = int(h.xp[k]) - cost
+					# leftover XP carries over only for the Paragon; everyone else drops to 0
+					h.xp[k] = int(h.xp[k]) - cost if D.CLASSES[h.cls].get("carryXP", false) else 0
 					log.append("%s: %s rises to %d" % [h.name, k, h.stats[k]])
 					if grp.size():
 						var tgt = grp[int(floor(rng.next() * grp.size()))]

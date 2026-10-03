@@ -18,6 +18,15 @@ func run(root) -> void:
 	for k in D.PRIMARY: total += int(p.xp[k])
 	print("  after: stats ", p.stats, " xp ", p.xp, " log ", lg)
 	check(lg.size() >= 1 and lg.size() < 6, "Paragon: bonus XP flows but no runaway (%d level-ups)" % lg.size())
+	# leftovers: Paragon keeps them, everyone else drops to 0
+	var pa := Heroes.create("paragon", "alpha", "Keep", Rng.new(1))
+	pa.stats.attack = 1; pa.xp.attack = 20
+	Heroes.apply_primary_levels(pa, Rng.new(1), [])
+	check(pa.stats.attack >= 3, "Paragon: 20 XP at attack 1 -> pays 6 then 9 and keeps the rest (attack %d, xp %d)" % [pa.stats.attack, pa.xp.attack])
+	var wl := Heroes.create("warlord", "alpha", "Drop", Rng.new(1))
+	wl.stats.attack = 1; wl.xp.attack = 20
+	Heroes.apply_primary_levels(wl, Rng.new(1), [])
+	check(wl.stats.attack == 2 and int(wl.xp.attack) <= 2, "Warlord: 20 XP at attack 1 -> attack 2 and the leftover is lost (xp %d, only level-up bonus can remain)" % wl.xp.attack)
 	# a big windfall stays bounded
 	var q := Heroes.create("paragon", "alpha", "Big", rng)
 	for k in D.PRIMARY: q.xp[k] = 500

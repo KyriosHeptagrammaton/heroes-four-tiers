@@ -1362,7 +1362,8 @@
    ],
    "skills": {},
    "noSecondary": true,
-   "desc": "Skilled in every primary skill (3 XP x the next level), but cannot learn secondary skills."
+   "desc": "Skilled in every primary skill (3 XP x the next level) and keeps leftover XP after a level-up, but cannot learn secondary skills.",
+   "carryXP": true
   },
   "scholar": {
    "name": "Scholar",
@@ -1863,7 +1864,7 @@
   {
    "id": "classes",
    "area": "Heroes",
-   "text": "Class names & skilled sets are invented. Paragon = doc \"Beta hero specialty\"; Scholar = doc \"Hero specialty learning\". Paragon: the doc's \"don't lose XP when increasing a skill\" was dropped (with level-up bonus XP it made primaries snowball without limit); Paragons now spend XP like everyone, with every primary skilled."
+   "text": "Class names & skilled sets are invented. Paragon = doc \"Beta hero specialty\"; Scholar = doc \"Hero specialty learning\". Paragon: the doc's \"don't lose XP when increasing a skill\" was dropped (with level-up bonus XP it made primaries snowball without limit); Paragons now pay 3 x the next level like a skilled primary and keep the leftover XP; every other hero's XP in that skill drops to 0 on a level-up."
   },
   {
    "id": "todo-captains",
