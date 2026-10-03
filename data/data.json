@@ -9,7 +9,7 @@
   "moraleShare": 0.75,
   "minDice": 3,
   "maxStacks": 6,
-  "heroUnitAlways": 5,
+  "heroUnitAlways": 3,
   "heroUnitBonus": {
    "att": 1,
    "def": 1,
@@ -1089,7 +1089,7 @@
    "name": "Heroics",
    "cat": "martial",
    "tiers": [
-    "Stacks of 6 or fewer creatures are heroes (instead of 5)",
+    "Stacks of 6 or fewer creatures are heroes (instead of 3)",
     "9 or fewer are heroes",
     "12 or fewer are heroes"
    ]

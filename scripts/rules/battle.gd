@@ -340,21 +340,24 @@ static func probe_stats(o: Dictionary) -> Array:
 	return out
 
 ## ---------------------------------------------------------------- casualty rule
-## Front rank / back rank: a stack of more than 5 creatures has a front rank of
-## ⌈√count⌉ at the standard threshold (front × (value − 1)) and a back rank (the rest)
-## at the full threshold (back × value); stacks of 5 or fewer are all back rank, or all
-## front rank if the army has another stack of exactly the same kind.
-## front rank size: ⌈√n⌉ (6 creatures: 2); a stack of 5 or fewer is all back rank, or all FRONT rank
-## when its army has another stack of exactly the same kind (no unified command)
+## Front rank / back rank: a stack of more than 3 creatures has a front rank
+## at the standard threshold (front × (value − 1)) and a back rank (the rest)
+## at the full threshold (back × value). Front rank: 4 → 1, 5 → 2, 6+ → ⌈√n⌉;
+## stacks of 3 or fewer are all back rank, or all front rank if the army has another
+## stack of exactly the same kind.
+## front rank size: 4 → 1, 5 → 2, 6+ → ⌈√n⌉; a stack of 3 or fewer is all back
+## rank, or all FRONT rank when its army has another stack of exactly the same kind
 static func front_rank(n: int, small_all_front: bool = false) -> int:
-	if n <= 5: return n if small_all_front else 0
-	if n == 6: return 2      # 2 front / 4 back rather than 3 / 3
+	if n <= 3: return n if small_all_front else 0
+	match n:
+		4: return 1
+		5: return 2
 	return mini(n, int(ceil(sqrt(float(n)))))
 
-## a stack of 5 or fewer fights as all front rank if another living allied stack is
+## a stack of 3 or fewer fights as all front rank if another living allied stack is
 ## exactly the same kind (same creature, path and level; same mount if mounted)
 func small_all_front(s: Stk) -> bool:
-	if s.count > 5: return false
+	if s.count > 3: return false
 	for o in stacks:
 		if o != s and o.side == s.side and o.count > 0 and o.key == s.key:
 			return true
@@ -495,7 +498,7 @@ func hero_init(side: int) -> float:
 		v += fx.attackerInit
 	return v
 
-## a stack with this many creatures or fewer is heroes: 5, Heroics I / II / III 6 / 9 / 12
+## a stack with this many creatures or fewer is heroes: 3, Heroics I / II / III 6 / 9 / 12
 func always_hero_n(side: int) -> int:
 	return [int(C.heroUnitAlways), 6, 9, 12][hero_skill(side, "heroics")]
 

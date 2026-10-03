@@ -22,13 +22,12 @@ func run(_root) -> void:
 	# hero units: 5 or fewer
 	var h := Heroes.create("warlord", "alpha", "Hero", Rng.new(3))
 	var b2 := Battle.new({"seed": 3, "probe": true, "sides": [
-		{"name": "A", "hero": h, "stacks": [{"key": dw, "count": 5}, {"key": dw, "count": 6}]},
+		{"name": "A", "hero": h, "stacks": [{"key": dw, "count": 3}, {"key": dw, "count": 4}]},
 		{"name": "B", "stacks": [{"key": Units.key("alpha", 1, 0, ""), "count": 1}]}]})
-	ok(b2.stacks[0].hero and not b2.stacks[1].hero, "5 creatures start as heroes, 6 do not")
+	ok(b2.stacks[0].hero and not b2.stacks[1].hero, "3 creatures start as heroes, 4 do not")
 	var s6 = b2.stacks[1]
-	b2.deal_damage(s6, 0, 0)
-	s6.count = 5; b2.check_hero_unit(s6)
-	ok(s6.hero, "a stack dropping to 5 becomes heroes")
+	s6.count = 3; b2.check_hero_unit(s6)
+	ok(s6.hero, "a stack dropping to 3 becomes heroes")
 	h.skills["heroics"] = 2
 	var b3 := Battle.new({"seed": 3, "probe": true, "sides": [
 		{"name": "A", "hero": h, "stacks": [{"key": dw, "count": 9}, {"key": dw, "count": 10}]},

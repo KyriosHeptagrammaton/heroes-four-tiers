@@ -19,4 +19,4 @@ func run(_root) -> void:
 	print("  magi now %d creatures: morale %d, a fresh stack of that size has %d" % [magi.count, stored, fresh.stacks[0].morale_val])
 	ok(magi.count > 5 and stored == fresh.stacks[0].morale_val, "grown Skeleton Magi have up-to-date morale")
 	var b6 := Battle.new({"seed": 5, "probe": true, "sides": [{"name": "A", "stacks": [{"key": Units.key("alpha", 2, 0, ""), "count": 6}]}, {"name": "B", "stacks": [{"key": Units.key("alpha", 1, 0, ""), "count": 1}]}]})
-	ok(Battle.front_rank(6) == 2 and b6.phys_cap(b6.stacks[0]) == 2, "6 Dire Wolves: 2 front (limit 2) / 4 back (limit 8)")
+	ok(Battle.front_rank(6) == 3 and b6.phys_cap(b6.stacks[0]) == 3, "6 Dire Wolves: 3 front (limit 3) / 3 back (limit 6)")
