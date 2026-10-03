@@ -42,6 +42,17 @@
    5
   ],
   "startGold": 2500,
+  "metals": {
+   "start": {
+    "gold": 1250,
+    "silver": 750,
+    "aurum": 0
+   },
+   "silverMines": 4,
+   "goldMines": 2,
+   "silverGuard": 3.0,
+   "goldGuard": 9.0
+  },
   "townIncome": 500,
   "heroCost": 1500,
   "trainCost": 300,
@@ -1391,7 +1402,7 @@
    "name": "Resource site",
    "glyph": "$",
    "color": "#f0d060",
-   "desc": "Pay the survey cost while standing here to claim it for daily gold."
+   "desc": "Pay the survey cost while standing here to claim it for daily income."
   },
   "monster": {
    "name": "Monsters",
@@ -1403,7 +1414,7 @@
    "name": "Treasure trove",
    "glyph": "◆",
    "color": "#ffd76a",
-   "desc": "Gold, or experience for the hero."
+   "desc": "Coin, or experience for the hero."
   },
   "buried": {
    "name": "Buried treasure",
@@ -1469,7 +1480,7 @@
    "name": "Arcane font",
    "glyph": "◎",
    "color": "#a0f0ff",
-   "desc": "Upgrade first-upgrade creatures into Magi (essence + gold)."
+   "desc": "Upgrade first-upgrade creatures into Magi (essence + coin)."
   },
   "cache": {
    "name": "Essence cache",
@@ -1487,7 +1498,7 @@
    "name": "The Holy Grail",
    "glyph": "♆",
    "color": "#fff2a0",
-   "desc": "Whoever claims it gains +1 to every primary skill and +1000 gold per week."
+   "desc": "Whoever claims it gains +1 to every primary skill and +1000 coin (gold, or copper with three metals) per week."
   }
  },
  "MINES": {
@@ -1505,6 +1516,18 @@
    "name": "Gold Vein",
    "income": 150,
    "cost": 750
+  },
+  "silver": {
+   "name": "Silver Mine",
+   "income": 40,
+   "cost": 750,
+   "metal": "silver"
+  },
+  "goldmine": {
+   "name": "Gold Mine",
+   "income": 60,
+   "cost": 1500,
+   "metal": "aurum"
   }
  },
  "BUILDINGS": {
@@ -1671,6 +1694,10 @@
    "id": "income",
    "area": "Economy",
    "text": "Town base income 500 gold/day, start with 2500 gold."
+  },
+  {
+   "id": "metals",
+   "text": "Three metals (new-game option, on by default): gold is renamed copper and buys tier 1 creatures and everything else (buildings, heroes, trains, treasury, mine surveys, mercenaries); tier 2 creatures cost silver and tiers 3 and 4 cost gold, at the old gold prices. Upgrading creatures costs the metal of their tier. Towns produce only copper. Start: 1250 copper, 750 silver, no gold. Silver Mines (+40 silver/day, survey 750 copper, 4 on the map, 3x a normal mine's guard) and Gold Mines (+60 gold/day, survey 1500 copper, 2 on the map, 9x guard). Tier 4 paying gold, upgrade fees in the tier's metal, mine incomes, survey costs and counts are assumptions."
   },
   {
    "id": "trainrules",

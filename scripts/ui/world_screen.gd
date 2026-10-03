@@ -325,7 +325,9 @@ func _draw_obj(o: Dictionary, c: int) -> void:
 	map.draw_circle(ctr, R, Color(0.063, 0.067, 0.086, 0.87))
 	var rc: Color = ring if ring != null else (Color("#ff7a6a") if o.has("guard") else Color.BLACK)
 	map.draw_arc(ctr, R, 0, TAU, 28, rc, 2.5 if (o.has("guard") or ring != null) else 1.0, true)
-	_text_c(map, UI.font, ctr + Vector2(0, 1), def.glyph, int(R * 1.2), Color(def.color))
+	var gc := Color(def.color)
+	if o.type == "mine" and World.mine_metal(o.kind) != "gold": gc = Color(World.metal_col(World.mine_metal(o.kind)))
+	_text_c(map, UI.font, ctr + Vector2(0, 1), def.glyph, int(R * 1.2), gc)
 	if o.has("guard"):
 		_text_c(map, UI.font_bold, ctr + Vector2(R * 0.85, -R * 0.75), "!", int(maxf(8, R * 0.6)), Color("#ff7a6a"))
 
@@ -570,7 +572,7 @@ func army_text(groups: Array, exact: bool) -> String:
 func obj_info(o: Dictionary) -> String:
 	var S = Game.state
 	var def: Dictionary = D.OBJ[o.type]
-	var title: String = D.MINES[o.kind].name if o.type == "mine" else (S.towns[o.town].name if o.type == "town" else def.name)
+	var title: String = World.mine_name(o.kind) if o.type == "mine" else (S.towns[o.town].name if o.type == "town" else def.name)
 	var s := "[b]%s %s[/b]\n%s" % [def.glyph, U.esc(title), UI.col(def.desc, "muted")]
 	if o.type == "town":
 		var t: Dictionary = S.towns[o.town]
@@ -578,13 +580,13 @@ func obj_info(o: Dictionary) -> String:
 		if t.garrison.size() and t.owner != S.cur: s += "\nGarrison: " + army_text(t.garrison, false)
 	if o.type == "mine":
 		var M: Dictionary = D.MINES[o.kind]
-		s += "\n+%d gold/day · claim cost %d · %s" % [M.income, M.cost, ("owned by " + S.players[o.owner].name) if o.owner >= 0 else "unclaimed"]
+		s += "\n+%s/day · claim cost %s · %s" % [World.cost_str(M.income, World.mine_metal(o.kind)), World.cost_str(M.cost), ("owned by " + S.players[o.owner].name) if o.owner >= 0 else "unclaimed"]
 	if o.type == "monster": s += "\n" + monster_text(o.army)
 	if o.has("guard"): s += "\n" + UI.col("Guarded:", "bad") + " " + monster_text(o.guard)
 	if o.type == "shrine": s += "\nSpell: " + D.SPELLS[o.spell].name
 	if o.type == "artifact" and not o.has("guard"): s += "\n" + D.ARTIFACTS[o.art].name
 	if o.type == "hermit": s += "\n+%d %s experience" % [o.amount, o.stat]
-	if o.has("join"): s += "\n%d × %s%s" % [o.join.count, Units.resolve(o.join.key).name, (" for %d gold" % o.price) if o.has("price") else ""]
+	if o.has("join"): s += "\n%d × %s%s" % [o.join.count, Units.resolve(o.join.key).name, (" for " + World.cost_str(o.price)) if o.has("price") else ""]
 	return s
 
 func monster_text(a: Dictionary) -> String:
@@ -677,8 +679,8 @@ func render_side() -> void:
 	var P: Dictionary = S.players[S.cur]
 	var week: int = (S.day - 1) / 7 + 1
 	var dow: int = (S.day - 1) % 7 + 1
-	var gold := UI.rich("● [b][color=#f0d68e]%s[/color][/b]  %s%s" % [U.fmt(P.gold), UI.col("+%d/day" % World.income(S.cur), "muted"), ("  " + UI.col("+%d/wk" % P.invest, "muted")) if P.invest else ""], 13)
-	UI.tip(gold, "Gold, income per day, and treasury pay per week")
+	var gold := UI.rich(UI.purse(P, S.cur) + (("  " + UI.col("+%d/wk" % P.invest, "muted")) if P.invest else ""), 13)
+	UI.tip(gold, UI.purse_tip() + (" Treasury pays %s per week." % World.cost_str(P.invest) if P.invest else ""))
 	var ess := UI.rich("  ".join([1, 2, 3, 4].map(func(t): return "⬡%d [b][color=#f0d68e]%s[/color][/b]" % [t, P.essence[str(t)]])), 13)
 	UI.tip(ess, "Upgrade essence by tier (from killing creatures of that tier)")
 	side.add_child(_sec([UI.hbox([UI.h2(P.name, Color(P.color)), UI.spacer(), UI.chip("Day %d · Week %d" % [dow, week])]), gold, ess]))

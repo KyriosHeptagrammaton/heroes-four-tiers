@@ -192,6 +192,22 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 		var xy: Array = r.pick(tl)
 		put.call(c, xy[0], xy[1], {"type": "mine", "kind": kind, "owner": -1, "guard": monster_army(r, level.call(c), 0.6 if d <= 4 else 1.0)})
 		placed_mines += 1
+	# three metals: Silver Mines and Gold Mines, far out and heavily guarded
+	# (3x / 9x a normal mine's guard). Generated after everything above so maps
+	# without the option are unchanged.
+	if opts.get("metals", false):
+		var MC: Dictionary = D.CFG.metals
+		for spec in [["goldmine", int(MC.goldMines), 7, float(MC.goldGuard)], ["silver", int(MC.silverMines), 5, float(MC.silverGuard)]]:
+			var left: int = spec[1]
+			for min_d in [spec[2], spec[2] - 1, spec[2] - 2, 3]:
+				for c in road_cards:
+					if left <= 0: break
+					if dist_start.call(c) < min_d: continue
+					var tl: Array = road_free.call(c)
+					if tl.is_empty(): continue
+					var xy: Array = r.pick(tl)
+					put.call(c, xy[0], xy[1], {"type": "mine", "kind": spec[0], "owner": -1, "guard": monster_army(r, level.call(c), spec[3])})
+					left -= 1
 	# sites on roads
 	var site_list := ["chest", "chest", "chest", "chest", "shrine", "shrine", "shrine", "hermit", "hermit", "academy", "academy", "tower", "tower", "fairy", "mercs", "mercs", "knight", "knight", "post", "post", "font", "cache", "cache", "artifact", "artifact", "artifact"]
 	for type in site_list:

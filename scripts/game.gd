@@ -13,7 +13,7 @@ func T(): return UI.screen("town")
 
 # ---------------------------------------------------------------- new game
 func new_game_dialog() -> void:
-	var cfg := {"names": ["Player 1", "Player 2"], "factions": ["alpha", "beta"], "cls": ["warlord", "mage"], "seed": randi() % 1000000 + 1}
+	var cfg := {"names": ["Player 1", "Player 2"], "factions": ["alpha", "beta"], "cls": ["warlord", "mage"], "seed": randi() % 1000000 + 1, "metals": true}
 	var box := UI.vbox([UI.h2("New hotseat game"), UI.label("Two players share this computer and take turns. The map is hidden between turns.", "muted")])
 	var fac := []
 	for f in D.FACTION_IDS: fac.append([f, D.FACTIONS[f].name])
@@ -29,6 +29,9 @@ func new_game_dialog() -> void:
 		box.add_child(UI.panel(UI.flow([dot, nm, UI.label("Faction", "muted"), UI.option(fac, cfg.factions[p], func(v): cfg.factions[p] = v),
 			UI.label("Hero", "muted"), UI.option(cls, cfg.cls[p], func(v): cfg.cls[p] = v)], 8)))
 	box.add_child(UI.hbox([UI.label("Map seed", "muted"), UI.spin(cfg.seed, 1, 999999999, func(v): cfg.seed = maxi(1, v), 130)]))
+	var mt := UI.check("Three metals: copper, silver and gold", true, func(v): cfg.metals = v)
+	UI.tip(mt, "On: towns make copper, which buys tier 1 creatures, buildings and everything else. Tier 2 creatures cost silver and tiers 3-4 cost gold — dig them from guarded Silver and Gold Mines. You start with 1250 copper and 750 silver.\nOff: one currency, gold, buys everything.")
+	box.add_child(mt)
 	box.add_child(UI.row_end([UI.button("Cancel", UI.close_modal), UI.button("Start", func():
 		if cfg.factions[0] == cfg.factions[1]:
 			UI.toast("Pick two different factions")
@@ -38,14 +41,15 @@ func new_game_dialog() -> void:
 	UI.modal(box, false, 560)
 
 func new_game(cfg: Dictionary) -> void:
-	var gen := WorldGen.generate(cfg.seed, {"factions": cfg.factions})
+	var gen := WorldGen.generate(cfg.seed, {"factions": cfg.factions, "metals": cfg.get("metals", true)})
 	rng = Rng.new(cfg.seed * 7 + 13)
 	var N: int = gen.map.cards.size()
-	var S := {"v": 1, "seed": cfg.seed, "day": 1, "cur": 0, "map": gen.map, "center": gen.center, "winner": null, "log": [], "towns": {}, "heroes": {}, "players": []}
+	var metals: bool = cfg.get("metals", true)
+	var S := {"v": 1, "metals": metals, "seed": cfg.seed, "day": 1, "cur": 0, "map": gen.map, "center": gen.center, "winner": null, "log": [], "towns": {}, "heroes": {}, "players": []}
 	for p in 2:
 		var seen := []; seen.resize(N); seen.fill(0)
 		var tm := []; tm.resize(N); tm.fill(0)
-		S.players.append({"name": cfg.names[p], "faction": cfg.factions[p], "color": PCOLORS[p], "gold": D.CFG.startGold, "essence": {"1": 0, "2": 0, "3": 0, "4": 0}, "alive": true,
+		S.players.append({"name": cfg.names[p], "faction": cfg.factions[p], "color": PCOLORS[p], "gold": D.CFG.metals.start.gold if metals else D.CFG.startGold, "silver": D.CFG.metals.start.silver if metals else 0, "aurum": D.CFG.metals.start.aurum if metals else 0, "essence": {"1": 0, "2": 0, "3": 0, "4": 0}, "alive": true,
 			"seen": seen, "tmask": tm, "seenSub": {}, "trans": {"cards": gen.trans[p], "spent": [], "links": [], "lines": [], "active": null}, "invest": 0, "grail": false, "skipMove": {}, "capital": null})
 	state = S
 	World.reset_cache()
@@ -304,7 +308,7 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 	match o.type:
 		"chest":
 			var i := await UI.pick_cards("◆ Treasure trove", "Take the gold, or study the maps and journals inside?",
-				["[b]%d gold[/b]" % o.gold, "[b]%d experience[/b]\n[color=#a39f94]in a primary skill of your choice[/color]" % o.xp])
+				["[b]%s[/b]" % World.cost_str(o.gold), "[b]%d experience[/b]\n[color=#a39f94]in a primary skill of your choice[/color]" % o.xp])
 			if i == 0:
 				P.gold += o.gold
 			else:
@@ -313,7 +317,7 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 			return
 		"buried":
 			P.gold += o.gold; remove.call(); done.call()
-			UI.alert("✕ Buried treasure", "You dig up %d gold." % o.gold)
+			UI.alert("✕ Buried treasure", "You dig up %s." % World.cost_str(o.gold))
 			return
 		"artifact":
 			hero.artifacts.append(o.art); remove.call(); done.call()
@@ -384,7 +388,7 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 			P.grail = true
 			for k in D.PRIMARY: hero.stats[k] += 1
 			done.call()
-			UI.alert("♆ The Holy Grail", "%s claims the Grail: +1 to every primary skill, and %s gains 1000 gold every week." % [U.esc(hero.name), U.esc(P.name)])
+			UI.alert("♆ The Holy Grail", "%s claims the Grail: +1 to every primary skill, and %s gains %s every week." % [U.esc(hero.name), U.esc(P.name), World.cost_str(1000)])
 			return
 	done.call()
 
@@ -396,27 +400,27 @@ func use_site(hero: Dictionary, o: Dictionary) -> void:
 		"mine":
 			var M: Dictionary = D.MINES[o.kind]
 			if o.owner == hero.owner:
-				UI.toast("%s: yours (+%d/day)" % [M.name, M.income]); return
+				UI.toast("%s: yours (+%s/day)" % [World.mine_name(o.kind), World.cost_str(M.income, World.mine_metal(o.kind))]); return
 			if o.owner >= 0:
-				World.log_msg("%s raids %s's %s." % [hero.name, S.players[o.owner].name, M.name])
+				World.log_msg("%s raids %s's %s." % [hero.name, S.players[o.owner].name, World.mine_name(o.kind)])
 				o.owner = -1
 			done.call()
-			if await UI.confirm("%s: pay %d gold to survey and claim it (+%d gold per day)?" % [M.name, M.cost, M.income]):
+			if await UI.confirm("%s: pay %s to survey and claim it (+%s per day)?" % [World.mine_name(o.kind), World.cost_str(M.cost), World.cost_str(M.income, World.mine_metal(o.kind))]):
 				if P.gold < M.cost:
-					UI.toast("Not enough gold"); return
+					UI.toast("Not enough " + World.metal_name("gold")); return
 				P.gold -= M.cost
 				o.owner = hero.owner
-				World.log_msg("%s claims a %s." % [hero.name, M.name])
+				World.log_msg("%s claims a %s." % [hero.name, World.mine_name(o.kind)])
 				done.call()
 		"mercs":
 			if o.get("hired", false):
 				UI.toast("The camp is empty"); return
 			var d := Units.resolve(o.join.key)
-			var box := UI.vbox([UI.h2("♞ Mercenary camp"), UI.hbox([UI.sym(d, 36), UI.rich("%d × [b]%s[/b]\nfor %d gold" % [o.join.count, U.esc(d.name), o.price])]),
+			var box := UI.vbox([UI.h2("♞ Mercenary camp"), UI.hbox([UI.sym(d, 36), UI.rich("%d × [b]%s[/b]\nfor %s" % [o.join.count, U.esc(d.name), World.cost_str(o.price)])]),
 				UI.panel(UI.rich(UI.unit_tip(d), 12))])
 			box.add_child(UI.row_end([UI.button("Leave", UI.close_modal), UI.button("Hire", func():
 				if P.gold < o.price:
-					UI.toast("Not enough gold"); return
+					UI.toast("Not enough " + World.metal_name("gold")); return
 				if not Army.can_add(hero.army, o.join.key):
 					UI.toast("No room in your army"); return
 				P.gold -= o.price

@@ -58,8 +58,8 @@ func recruit(p: int) -> void:
 			var cost := World.price_for(t, tier, n)
 			var key := Units.key(t.faction, tier, 0, "")
 			var army: Array = h.army if (h != null and h.owner == p) else t.garrison
-			if P.gold >= cost and Army.can_add(army, key):
-				P.gold -= cost; World.buy(t, tier, n); Army.add(army, key, n)
+			if World.can_pay(P, World.tier_metal(tier), cost) and Army.can_add(army, key):
+				World.pay(P, World.tier_metal(tier), cost); World.buy(t, tier, n); Army.add(army, key, n)
 
 func run(r) -> void:
 	root = r
@@ -135,7 +135,7 @@ func run(r) -> void:
 		for p in 2:
 			var P = S.players[p]
 			var hs := World.heroes_of(p)
-			print(P.name, ": gold ", P.gold, " heroes ", hs.size(), " towns ", World.towns_of(p).size(), " essence ", P.essence,
+			print(P.name, ": gold ", P.gold, " silver ", P.get("silver", 0), " aurum ", P.get("aurum", 0), " heroes ", hs.size(), " towns ", World.towns_of(p).size(), " essence ", P.essence,
 				" armies ", hs.map(func(h): return Army.value(h.army)))
 	print("PLAYTHROUGH DONE")
 

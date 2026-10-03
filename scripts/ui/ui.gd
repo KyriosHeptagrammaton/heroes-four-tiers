@@ -687,6 +687,25 @@ func spin(v: int, lo: int, hi: int, on_change: Callable, width: float = 80) -> S
 	s.value_changed.connect(func(x): on_change.call(int(x)))
 	return s
 
+## the player's purse as BBCode: one coloured coin per metal, with income per day
+func purse(P: Dictionary, p: int, income: bool = true) -> String:
+	var parts := []
+	var ms: Array = World.METALS if World.metals_on() else ["gold"]
+	for m in ms:
+		var inc: int = World.income(p, m) if income else 0
+		var tail := ""
+		if income:
+			if inc: tail = " " + col(("+%d" if World.metals_on() else "+%d/day") % inc, "muted")
+		elif World.metals_on():
+			tail = " " + col(World.metal_name(m), "muted")
+		parts.append("[color=%s]●[/color] [b][color=%s]%s[/color][/b]%s" % [World.metal_col(m), World.metal_col(m), U.fmt(World.purse(P, m)), tail])
+	return "   ".join(parts)
+
+func purse_tip() -> String:
+	if World.metals_on():
+		return "Copper · silver · gold (+ income per day).\nCopper buys tier 1 creatures, buildings, heroes and everything else; silver buys tier 2 creatures; gold buys tiers 3 and 4. Upgrades cost the metal of the creature's tier."
+	return "Gold and income per day"
+
 func check(text: String, on: bool, cb: Callable) -> CheckBox:
 	var c := CheckBox.new()
 	c.text = text

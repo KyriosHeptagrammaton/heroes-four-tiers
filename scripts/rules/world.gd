@@ -444,14 +444,62 @@ func blob(a: int, n: int) -> Array:
 				out.append(x); q.append(x)
 	return out
 
+# ---------------------------------------------------------------- money
+# Three metals (S.metals, the default): the old "gold" purse is copper and pays
+# for tier 1 creatures and everything else; tier 2 creatures cost silver and
+# tiers 3-4 gold (purse key "aurum"). With the option off there is only gold.
+const METALS := ["gold", "silver", "aurum"]
+const METAL_COL := {"gold": "#f0d68e", "silver": "#d5dde4", "aurum": "#f0d68e"}
+const METAL_COPPER_COL := "#e09a62"
+
+func metals_on() -> bool:
+	return Game.state != null and Game.state.get("metals", false)
+
+## the purse a creature of this tier is bought (and upgraded) with
+func tier_metal(tier: int) -> String:
+	if not metals_on(): return "gold"
+	return "gold" if tier <= 1 else ("silver" if tier == 2 else "aurum")
+
+func metal_name(m: String) -> String:
+	if not metals_on(): return "gold"
+	return {"gold": "copper", "silver": "silver", "aurum": "gold"}[m]
+
+func metal_col(m: String) -> String:
+	if metals_on() and m == "gold": return METAL_COPPER_COL
+	return METAL_COL[m]
+
+func purse(P: Dictionary, m: String) -> int:
+	return int(P.get(m, 0))
+
+func can_pay(P: Dictionary, m: String, amt: int) -> bool:
+	return purse(P, m) >= amt
+
+func pay(P: Dictionary, m: String, amt: int) -> void:
+	P[m] = purse(P, m) - amt
+
+func earn(P: Dictionary, m: String, amt: int) -> void:
+	P[m] = purse(P, m) + amt
+
+## "30 copper" / "80 silver" / "200 gold"
+func cost_str(amt: int, m: String = "gold") -> String:
+	return "%s %s" % [U.fmt(amt), metal_name(m)]
+
+func mine_metal(kind: String) -> String:
+	return D.MINES[kind].get("metal", "gold")
+
+func mine_name(kind: String) -> String:
+	if kind == "vein" and metals_on(): return "Copper Vein"
+	return D.MINES[kind].name
+
 # ---------------------------------------------------------------- days
-func income(p: int) -> int:
+func income(p: int, m: String = "gold") -> int:
 	var g := 0
-	for t in towns_of(p):
-		g += D.CFG.townIncome if t.capital else U.jr(D.CFG.townIncome * 0.6)
+	if m == "gold":
+		for t in towns_of(p):
+			g += D.CFG.townIncome if t.capital else U.jr(D.CFG.townIncome * 0.6)
 	for c in S().map.cards:
 		for o in c.objs:
-			if o.type == "mine" and o.owner == p:
+			if o.type == "mine" and o.owner == p and mine_metal(o.kind) == m:
 				g += D.MINES[o.kind].income
 	return g
 
@@ -462,7 +510,9 @@ func new_day() -> bool:
 	for p in s.players.size():
 		var P: Dictionary = s.players[p]
 		if not P.alive: continue
-		P.gold += income(p)
+		for m in METALS:
+			var inc := income(p, m)
+			if inc: earn(P, m, inc)
 		if week: P.gold += P.invest + (1000 if P.grail else 0)
 		for h in heroes_of(p):
 			h.mp = mp_max(h)
@@ -554,7 +604,7 @@ func upgrade_options(k: String, ctx: Dictionary) -> Array:
 func upgrade_cost(from_k: String, to_k: String, n: int) -> Dictionary:
 	var tier := mini(4, int(Units.resolve(from_k).tier))
 	var fee := maxi(0, U.jr(Units.variant_value(to_k) - Units.variant_value(from_k)))
-	return {"gold": fee * n, "essence": n, "tier": tier}
+	return {"gold": fee * n, "metal": tier_metal(tier), "essence": n, "tier": tier}
 
 # ---------------------------------------------------------------- battle aftermath
 ## side_stacks: summary stacks of this army with uids "gi:k"

@@ -55,8 +55,9 @@ func render() -> void:
 	var fchip := UI.chip(D.FACTIONS[t.faction].name)
 	fchip.get_child(0).add_theme_color_override("font_color", Color(D.FACTIONS[t.faction].color))
 	var bar := UI.hbox([UI.button("◂ Map", close), title, fchip, UI.chip("Capital", "warn", "If this town falls, you lose the game.") if t.capital else null, UI.spacer(),
-		UI.rich("● [b][color=#f0d68e]%s[/color][/b]   %s" % [U.fmt(P.gold), UI.col("   ".join([1, 2, 3, 4].map(func(k): return "⬡%d %s" % [k, P.essence[str(k)]])), "muted")], 14)], 10)
-	bar.get_child(bar.get_child_count() - 1).custom_minimum_size.x = 300
+		UI.rich(UI.purse(P, S.cur, false) + "      " + UI.col("   ".join([1, 2, 3, 4].map(func(k): return "⬡%d %s" % [k, P.essence[str(k)]])), "muted"), 14)], 10)
+	bar.get_child(bar.get_child_count() - 1).custom_minimum_size.x = 470 if World.metals_on() else 300
+	UI.tip(bar.get_child(bar.get_child_count() - 1), UI.purse_tip())
 	root.add_child(UI.panel(bar, UI.stone("bar")))
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -84,13 +85,14 @@ func render() -> void:
 		var d := Units.resolve(Units.key(t.faction, tier, 0, ""))
 		var nm := _t(d.name)
 		UI.tip(nm, UI.unit_tip(d))
-		var head := UI.hbox([UI.sym(d, 32), UI.vbox([nm, UI.label("Tier %d · base %d gold · growth %d/week" % [tier, U.jr(Units.base_price(t.faction, tier)), World.growth(t, tier)], "muted", 12)], 0)])
+		var mt := World.tier_metal(tier)
+		var head := UI.hbox([UI.sym(d, 32), UI.vbox([nm, UI.label("Tier %d · base %s · growth %d/week" % [tier, World.cost_str(U.jr(Units.base_price(t.faction, tier)), mt), World.growth(t, tier)], "muted", 12)], 0)])
 		if not t.built.get(bk, false):
 			grid.add_child(_card([head, UI.label("Build the dwelling first.", "muted", 12)]))
 			continue
 		var price := UI.label("", "muted")
 		var st := {"n": maxi(1, t.pool[str(tier)])}
-		var upd := func(): price.text = "%d gold" % World.price_for(t, tier, st.n)
+		var upd := func(): price.text = World.cost_str(World.price_for(t, tier, st.n), mt)
 		var sp := UI.spin(st.n, 1, 999, func(v):
 			st.n = maxi(1, v)
 			upd.call(), 80)
@@ -98,12 +100,12 @@ func render() -> void:
 		var buy := func(dest: String):
 			var n: int = st.n
 			var cost := World.price_for(t, tier, n)
-			if P.gold < cost:
-				UI.toast("Not enough gold"); return
+			if not World.can_pay(P, mt, cost):
+				UI.toast("Not enough " + World.metal_name(mt)); return
 			var army: Array = hero.army if dest == "hero" else t.garrison
 			if not Army.can_add(army, d.key):
 				UI.toast("No free stack slot"); return
-			P.gold -= cost
+			World.pay(P, mt, cost)
 			World.buy(t, tier, n)
 			Army.add(army, d.key, n)
 			UI.toast("Recruited %d %s" % [n, d.name])
@@ -140,7 +142,7 @@ func render() -> void:
 				row.add_child(UI.label("needs " + ", ".join(B.req.map(func(r): return D.BUILDINGS[r].name if D.BUILDINGS.has(r) else r)), "muted", 12))
 			kids.append(row)
 		bgrid.add_child(_card(kids, built))
-	body.add_child(UI.panel(UI.vbox([UI.h3("Build " + ("(already built today)" if t.builtToday else "(one per day)")), bgrid])))
+	body.add_child(UI.panel(UI.vbox([UI.h3("Build " + ("(already built today)" if t.builtToday else "(one per day)") + (" · prices in copper" if World.metals_on() else "")), bgrid])))
 	# treasury / tavern / wagons
 	var misc := UI.flow([], 10)
 	var inv := UI.button("Invest 300", func():
@@ -148,7 +150,7 @@ func render() -> void:
 		P.invest += 100
 		render(), "Small")
 	inv.disabled = P.gold < 300
-	misc.add_child(_card([_t("Treasury"), _desc("\"A wise king invests in his town: 3 gold now for 1 gold forever.\" Invest 300 gold for +100 gold every week."), UI.hbox([UI.label("Weekly return: %d" % P.invest), inv])]))
+	misc.add_child(_card([_t("Treasury"), _desc("\"A wise king invests in his town: 3 gold now for 1 gold forever.\" Invest %s for +%s every week." % [World.cost_str(300), World.cost_str(100)]), UI.hbox([UI.label("Weekly return: %s" % World.cost_str(P.invest)), inv])]))
 	var occupied = World.hero_at(t.c, t.x, t.y)
 	var tav := UI.flow([], 4)
 	for c in D.CLASSES:
@@ -164,7 +166,7 @@ func render() -> void:
 			render(), "Small", D.CLASSES[c].desc + ("\n[b]A hero is already standing in town.[/b]" if occupied != null else ""))
 		hb.disabled = P.gold < D.CFG.heroCost or occupied != null
 		tav.add_child(hb)
-	misc.add_child(_card([_t("Tavern"), _desc("Hire a new hero (%d gold). They arrive with a few recruits and a supply train." % D.CFG.heroCost), tav]))
+	misc.add_child(_card([_t("Tavern"), _desc("Hire a new hero (%s). They arrive with a few recruits and a supply train." % World.cost_str(D.CFG.heroCost)), tav]))
 	if in_town and (hero.train == null or hero.train.state == "none"):
 		var wb := UI.button("Buy supply train · %d" % D.CFG.trainCost, func():
 			P.gold -= D.CFG.trainCost
@@ -190,7 +192,7 @@ func upgrade_modal(h_id: String, t_id: String, font: bool = false) -> void:
 	var draw := [null]
 	draw[0] = func():
 		var box := UI.vbox([UI.h2("◎ Arcane font" if font else "Upgrade creatures"),
-			UI.rich(UI.col("Cost per creature: 1 essence of its tier + the difference in gold value between the two kinds. You have %d gold and essence %s." % [P.gold, " ".join([1, 2, 3, 4].map(func(k): return "T%d:%d" % [k, P.essence[str(k)]]))], "muted"))])
+			UI.rich(UI.col("Cost per creature: 1 essence of its tier + the difference in value between the two kinds%s. You have %s and essence %s." % [" (paid in the metal of its tier)" if World.metals_on() else "", UI.purse(P, S.cur, false), " ".join([1, 2, 3, 4].map(func(k): return "T%d:%d" % [k, P.essence[str(k)]]))], "muted"))])
 		var any := false
 		for A in armies:
 			box.add_child(UI.h3(A.label))
@@ -203,9 +205,9 @@ func upgrade_modal(h_id: String, t_id: String, font: bool = false) -> void:
 				for k in opts:
 					var nd := Units.resolve(k)
 					var cost := World.upgrade_cost(g.key, k, g.count)
-					var can: bool = P.gold >= cost.gold and P.essence[str(cost.tier)] >= cost.essence
+					var can: bool = World.can_pay(P, cost.metal, cost.gold) and P.essence[str(cost.tier)] >= cost.essence
 					var bt := UI.button(nd.name + (" ⚑" if nd.placeholder else ""), func():
-						P.gold -= cost.gold
+						World.pay(P, cost.metal, cost.gold)
 						P.essence[str(cost.tier)] -= cost.essence
 						var ex = null
 						for x in A.groups:
@@ -218,7 +220,7 @@ func upgrade_modal(h_id: String, t_id: String, font: bool = false) -> void:
 							g.key = k
 						if hero != null: Heroes.add_skill_xp(hero, "craft", 1)
 						draw[0].call()
-						UI.screen("world").render_side(), "Small", UI.unit_tip(nd, "\nCost for all %d: %d gold + %d tier-%d essence" % [g.count, cost.gold, cost.essence, cost.tier]))
+						UI.screen("world").render_side(), "Small", UI.unit_tip(nd, "\nCost for all %d: %s + %d tier-%d essence" % [g.count, World.cost_str(cost.gold, cost.metal), cost.essence, cost.tier]))
 					bt.disabled = not can
 					row.add_child(UI.hbox([UI.sym(nd, 18), bt], 2))
 				box.add_child(row)
@@ -255,13 +257,14 @@ func remote_recruit(h_id: String) -> void:
 				var row := UI.hbox([UI.sym(d, 22), UI.label("%s (%d at base)" % [d.name, t.pool[str(tier)]]), UI.spacer()])
 				for n in [1, 5]:
 					var c := World.price_for(t, tier, n, 1.25)
-					var bt := UI.button("+%d · %d" % [n, c], func():
-						P.gold -= c
+					var mt := World.tier_metal(tier)
+					var bt := UI.button("+%d · %s" % [n, World.cost_str(c, mt) if World.metals_on() else str(c)], func():
+						World.pay(P, mt, c)
 						World.buy(t, tier, n)
 						Army.add(hero.army, d.key, n)
 						draw[0].call()
 						UI.screen("world").render_side(), "Small")
-					bt.disabled = P.gold < c or not Army.can_add(hero.army, d.key)
+					bt.disabled = not World.can_pay(P, mt, c) or not Army.can_add(hero.army, d.key)
 					row.add_child(bt)
 				box.add_child(row)
 		box.add_child(UI.row_end([UI.button("Done", UI.close_modal, "Primary")]))
