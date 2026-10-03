@@ -32,6 +32,12 @@ func run(root) -> void:
 	var sm := mines("silver")
 	var gm := mines("goldmine")
 	check(sm.size() == 4 and gm.size() == 2, "map has 4 silver and 2 gold mines (%d, %d)" % [sm.size(), gm.size()])
+	var sv := mines("silvervein")
+	check(sv.size() == 4 and World.mine_metal("silvervein") == "silver", "map has 4 silver veins producing silver (%d)" % sv.size())
+	var gv := mines("goldvein")
+	check(gv.size() == 2 and World.mine_metal("goldvein") == "aurum" and World.mine_name("goldvein") == "Gold Vein" and World.mine_name("vein") == "Copper Vein", "map has 2 gold veins producing gold; the old vein reads Copper Vein (%d)" % gv.size())
+	print("gold vein guard per level %.0f" % (guard_size(gv[0]) / maxf(1, gv[0].guard.level)))
+	print("silver vein guard per level %.0f" % (guard_size(sv[0]) / maxf(1, sv[0].guard.level)))
 	var norm := []
 	for k in ["timber", "quarry", "vein"]: norm += mines(k)
 	var avg := func(a: Array) -> float:

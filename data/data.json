@@ -51,7 +51,10 @@
    "silverMines": 4,
    "goldMines": 2,
    "silverGuard": 3.0,
-   "goldGuard": 9.0
+   "goldGuard": 9.0,
+   "silverVeins": 4,
+   "goldVeins": 2,
+   "goldVeinGuard": 3.0
   },
   "townIncome": 500,
   "heroCost": 1500,
@@ -1517,6 +1520,18 @@
    "income": 150,
    "cost": 750
   },
+  "silvervein": {
+   "name": "Silver Vein",
+   "income": 15,
+   "cost": 450,
+   "metal": "silver"
+  },
+  "goldvein": {
+   "name": "Gold Vein",
+   "income": 20,
+   "cost": 900,
+   "metal": "aurum"
+  },
   "silver": {
    "name": "Silver Mine",
    "income": 40,
@@ -1697,7 +1712,7 @@
   },
   {
    "id": "metals",
-   "text": "Three metals (new-game option, on by default): gold is renamed copper and buys tier 1 creatures and everything else (buildings, heroes, trains, treasury, mine surveys, mercenaries); tier 2 creatures cost silver and tiers 3 and 4 cost gold, at the old gold prices. Upgrading creatures costs the metal of their tier. Towns produce only copper. Start: 1250 copper, 750 silver, no gold. Silver Mines (+40 silver/day, survey 750 copper, 4 on the map, 3x a normal mine's guard) and Gold Mines (+60 gold/day, survey 1500 copper, 2 on the map, 9x guard). Tier 4 paying gold, upgrade fees in the tier's metal, mine incomes, survey costs and counts are assumptions."
+   "text": "Three metals (new-game option, on by default): gold is renamed copper and buys tier 1 creatures and everything else (buildings, heroes, trains, treasury, mine surveys, mercenaries); tier 2 creatures cost silver and tiers 3 and 4 cost gold, at the old gold prices. Upgrading creatures costs the metal of their tier. Towns produce only copper. Start: 1250 copper, 750 silver, no gold. Silver Veins (+15 silver/day, survey 450 copper, 4 on the map, a normal mine's guard), Silver Mines (+40 silver/day, survey 750 copper, 4 on the map, 3x a normal mine's guard), Gold Veins (+20 gold/day, survey 900 copper, 2 on the map, 3x guard) and Gold Mines (+60 gold/day, survey 1500 copper, 2 on the map, 9x guard). The single-currency Gold Vein reads Copper Vein. Tier 4 paying gold, upgrade fees in the tier's metal, mine incomes, survey costs and counts are assumptions."
   },
   {
    "id": "trainrules",

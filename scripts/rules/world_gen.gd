@@ -192,12 +192,12 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 		var xy: Array = r.pick(tl)
 		put.call(c, xy[0], xy[1], {"type": "mine", "kind": kind, "owner": -1, "guard": monster_army(r, level.call(c), 0.6 if d <= 4 else 1.0)})
 		placed_mines += 1
-	# three metals: Silver Mines and Gold Mines, far out and heavily guarded
-	# (3x / 9x a normal mine's guard). Generated after everything above so maps
+	# three metals: Gold Mines and Silver Mines, far out and heavily guarded
+	# (9x / 3x a normal mine's guard), Gold Veins (3x) and Silver Veins (normal guard). Generated after everything above so maps
 	# without the option are unchanged.
 	if opts.get("metals", false):
 		var MC: Dictionary = D.CFG.metals
-		for spec in [["goldmine", int(MC.goldMines), 7, float(MC.goldGuard)], ["silver", int(MC.silverMines), 5, float(MC.silverGuard)]]:
+		for spec in [["goldmine", int(MC.goldMines), 7, float(MC.goldGuard)], ["silver", int(MC.silverMines), 5, float(MC.silverGuard)], ["goldvein", int(MC.goldVeins), 6, float(MC.goldVeinGuard)], ["silvervein", int(MC.silverVeins), 4, 1.0]]:
 			var left: int = spec[1]
 			for min_d in [spec[2], spec[2] - 1, spec[2] - 2, 3]:
 				for c in road_cards:
