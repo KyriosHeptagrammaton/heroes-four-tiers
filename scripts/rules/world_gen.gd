@@ -122,7 +122,8 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 		if best != null and bd >= 2 and bd < 5:
 			road(cards, W, H, i, best, r)
 			cards[i].spur = true
-	var map := {"W": W, "H": H, "cards": cards}
+	join_touching_roads(cards, W, H)
+	var map :={"W": W, "H": H, "cards": cards}
 	# ---- objects -------------------------------------------------------------
 	var factions: Array = opts.factions
 	var towns := []
@@ -358,6 +359,53 @@ func road_tiles(card: Dictionary) -> Array:
 	if card.road[1]:
 		for x in range(m, s): out["%d,%d" % [x, m]] = [x, m]
 	return out.values()
+
+## Roads on neighbouring cards whose tiles touch across the shared edge (a
+## road tile on the border facing a road tile where a hero crossing would land)
+## are joined: both cards get the facing edge flag, so the drawn roads meet and
+## the supply train can follow them. Repeats until nothing changes, since a new
+## road arm can bring a card's road up against another neighbour.
+func join_touching_roads(cards: Array, W: int, H: int) -> int:
+	var added := 0
+	var changed := true
+	while changed:
+		changed = false
+		for i in cards.size():
+			if not _has_road(cards[i]):
+				continue
+			for e in [1, 2]:   # east and south; each shared edge once
+				var nx: int = i % W + D.DX[e]
+				var ny: int = i / W + D.DY[e]
+				if nx >= W or ny >= H:
+					continue
+				var j := ny * W + nx
+				var o := D.opp(e)
+				if not _has_road(cards[j]) or (cards[i].road[e] and cards[j].road[o]):
+					continue
+				if _roads_touch(cards[i], e, cards[j]) or _roads_touch(cards[j], o, cards[i]):
+					cards[i].road[e] = true
+					cards[j].road[o] = true
+					added += 1
+					changed = true
+	return added
+
+## Does a road tile on card a's edge e land on a road tile of card b when crossed?
+func _roads_touch(a: Dictionary, e: int, b: Dictionary) -> bool:
+	var s: int = a.size
+	var s2: int = b.size
+	var mine := {}
+	for p in road_tiles(a): mine["%d,%d" % [p[0], p[1]]] = true
+	var theirs := {}
+	for p in road_tiles(b): theirs["%d,%d" % [p[0], p[1]]] = true
+	for along in s:
+		var t: Array = [[along, 0], [s - 1, along], [along, s - 1], [0, along]][e]
+		if not mine.has("%d,%d" % [t[0], t[1]]):
+			continue
+		var mapped := mini(s2 - 1, int(floor((along + 0.5) / s * s2)))
+		var t2: Array = [[mapped, 0], [s2 - 1, mapped], [mapped, s2 - 1], [0, mapped]][D.opp(e)]
+		if theirs.has("%d,%d" % [t2[0], t2[1]]):
+			return true
+	return false
 
 ## A* on the card grid; the open list keeps insertion order and takes the first
 ## minimum (the prototype's stable sort), so roads match the JS version.

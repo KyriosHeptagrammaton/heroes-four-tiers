@@ -4,7 +4,7 @@ func run(root) -> void:
 	Main.boot()
 	for st in Sfx.STYLES:
 		print(st, " ", Sfx._sets[st].map(func(s): return s != null and s.get_length() > 0.05))
-	Sfx.set_style("door")
+	Sfx.set_style("pick")
 	await root.get_tree().process_frame
 	var playing := 0
 	for p in Sfx._pool:

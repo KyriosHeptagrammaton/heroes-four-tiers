@@ -1,5 +1,5 @@
 # ============================================================================
-# Sfx — UI sound effects. Buttons play a heavy stone/door "ba-DOOM" when
+# Sfx — UI sound effects. Buttons play a heavy stone "ba-DOOM" or a rock knock when
 # pressed (style selectable); checkboxes and drop-downs a lighter stone tick.
 # Button sounds are built from Kenney's CC0 packs by tools/build_kenney_sfx.py;
 # the tick is synthesised by tools/make_sfx.py.
@@ -13,7 +13,7 @@ var cheers := true
 var _cheer: Array = []
 var _cheer_pool: Array = []
 var _cheer_next := 0
-const STYLES := {"stone": ["Stone", 3], "pick": ["Rock knock", 3], "door": ["Heavy door", 2]}
+const STYLES := {"stone": ["Stone", 3], "pick": ["Rock knock", 3]}
 var _sets := {}
 var _tick: AudioStream
 var _pool: Array = []

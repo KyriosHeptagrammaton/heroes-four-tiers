@@ -17,7 +17,7 @@ func run(root) -> void:
 	for step in [0, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1]:
 		if step != 0: bs.review_step(step)
 		for i in 3: await root.get_tree().process_frame
-		var card = bs._rows[0].get_child(0)
+		var card = bs._rows[0].get_child(0).get_child(0)
 		hs.append(card.size.y)
 		sides.append(bs._info.global_position.y)
 	print("hero card heights: ", hs)

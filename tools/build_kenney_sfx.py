@@ -64,7 +64,4 @@ for i, (m, w) in enumerate([("000", "001"), ("003", "003"), ("004", "004")]):
 # "pick": the rock knock on its own
 for i, m in enumerate(["000", "003", "004"]):
     save(f"button_pick_{i + 1}.ogg", finish(load("impactMining_" + m)))
-# "door": a heavy door swung shut
-for i, d in enumerate(["4", "2"]):
-    save(f"button_door_{i + 1}.ogg", finish(load("doorClose_" + d)))
 print("ok")

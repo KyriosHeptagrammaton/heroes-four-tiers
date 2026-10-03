@@ -8,6 +8,8 @@ extends Control
 var b: Battle = null
 var on_end: Callable
 var mode = null      # action id while targeting
+var _last_mode := {}  # stack id -> the targeting action it last used, re-selected on its next turn
+var _mode_turn := ""  # which turn the current selection belongs to
 var sel = null       # selected stack id (details panel)
 var spell = null     # {side, id, t1}
 var cmd = null       # {side, id, label}
@@ -77,6 +79,7 @@ func start(battle: Battle, end_cb: Callable) -> void:
 	b = battle
 	on_end = end_cb
 	mode = null; sel = null; spell = null; cmd = null; ended = false; busy = false
+	_last_mode = {}; _mode_turn = ""
 	_log_n = 0
 	_ev_n = b.events.size()
 	_hist = []; _rev = -1; _live = null
@@ -262,6 +265,8 @@ func pick_action(id: String) -> void:
 		return
 	spell = null; cmd = null
 	if id in ["seek", "retaliate", "fallback", "wait"]:
+		if id != "wait": _last_mode.erase(a.id)
+		elif mode != null: _last_mode[a.id] = mode   # waiting keeps the selection for later this round
 		var err = b.act(id)
 		if err != null: UI.toast(err)
 		mode = null
@@ -318,8 +323,23 @@ func click_stack(s) -> void:
 	sel = s.id
 	render()
 
+## when one of your stacks' turns begins, re-select the action it used last time
+func _restore_mode() -> void:
+	var a := b.turn_stack()
+	var cur = b.current()
+	if a == null or cur == null or cur.type == "hero" or not human_turn():
+		_mode_turn = ""
+		return
+	var key := "%d:%d:%d" % [b.round_n, b.qi, a.id]
+	if key == _mode_turn: return
+	_mode_turn = key
+	if spell == null and cmd == null:
+		mode = _last_mode.get(a.id, null)
+
 func do_act(action: String, target, opt = null) -> void:
 	if reviewing(): return
+	var actor := b.turn_stack()
+	if actor != null: _last_mode[actor.id] = action
 	var err = b.act(action, target, opt)
 	if err != null:
 		UI.toast(err)
@@ -376,6 +396,7 @@ func review_step(d: int) -> void:
 func go_live() -> void:
 	if not reviewing(): return
 	_rev = -1
+	_mode_turn = ""   # re-select the live stack's remembered action
 	b = _live
 	_live = null
 	render()
@@ -394,6 +415,7 @@ func render() -> void:
 		return
 	if not reviewing():
 		_snapshot()
+		_restore_mode()
 	_render_nav()
 	# status chips
 	UI.clear(_top_status)
@@ -437,18 +459,30 @@ func render() -> void:
 	for side in 2:
 		var row: HBoxContainer = _rows[side]
 		UI.clear(row)
-		row.add_child(hero_card(side))
+		# the commander card sits in a fixed-width holder that adds no height to
+		# the row, so its size never pushes the stacks around: the defender's
+		# card hangs down from the top, the attacker's grows up from the bottom
+		var holder := Control.new()
+		holder.custom_minimum_size.x = HERO_W
+		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var hc := hero_card(side)
+		holder.add_child(hc)
+		hc.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT if side == 0 else Control.PRESET_TOP_LEFT, Control.PRESET_MODE_MINSIZE)
+		hc.grow_vertical = Control.GROW_DIRECTION_BEGIN if side == 0 else Control.GROW_DIRECTION_END
+		row.add_child(holder)
 		var st := HFlowContainer.new()
 		st.alignment = FlowContainer.ALIGNMENT_CENTER
 		st.add_theme_constant_override("h_separation", 10)
 		st.add_theme_constant_override("v_separation", 10)
 		st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		st.size_flags_vertical = Control.SIZE_SHRINK_END if side == 0 else Control.SIZE_SHRINK_BEGIN
 		st.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		if side == 1 and b.wall != null:
 			st.add_child(wall_card())
 		for s in b.stacks:
 			if s.side == side:
 				var c := stack_card(s)
+				c.size_flags_vertical = Control.SIZE_SHRINK_END if side == 0 else Control.SIZE_SHRINK_BEGIN
 				_cards[s.id] = c
 				st.add_child(c)
 		row.add_child(st)
@@ -498,12 +532,14 @@ func _hero_sb(cur: bool) -> StoneBox:
 		s.halo = UI.C.gold; s.trim = UI.C.gold2
 	return s
 
+const HERO_W := 196    # commander card width (fixed, so nothing shifts)
+const STACK_W := 150   # stack card width (fixed)
+
 func hero_card(side: int) -> Control:
 	var sd = b.sides[side]
 	var box := UI.vbox([], 3)
 	var card := UI.panel(box)
-	card.custom_minimum_size.x = 176
-	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	card.custom_minimum_size.x = HERO_W
 	if sd.hero == null:
 		card.add_theme_stylebox_override("panel", _hero_sb(false))
 		var n := UI.label(sd.name, "gold2", 13)
@@ -525,6 +561,7 @@ func hero_card(side: int) -> Control:
 	card.add_theme_stylebox_override("panel", _hero_sb(b.hero_turn_now(side) or (b.pre_combat and hs.freeCast > 0)))
 	var nm := UI.label("♛ " + hero.name, "gold2", 13)
 	nm.add_theme_font_override("font", UI.font_bold)
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	UI.tip(nm, hero_tip(side))
 	box.add_child(nm)
 	var sn := UI.label(sd.name, "muted", 11)
@@ -532,7 +569,9 @@ func hero_card(side: int) -> Control:
 	sn.custom_minimum_size.x = 150
 	box.add_child(sn)
 	var init := Heroes.init_str(Heroes.stat(hero, "initiative") - hs.pips)
-	box.add_child(UI.label("%s · Atk %d Def %d Pow %d Init %s" % [D.CLASSES[hero.cls].name, Heroes.stat(hero, "attack"), Heroes.stat(hero, "defence"), b.hero_stat(side, "power"), init], "muted", 11))
+	var hl := UI.label("%s · Atk %d Def %d Pow %d Init %s" % [D.CLASSES[hero.cls].name, Heroes.stat(hero, "attack"), Heroes.stat(hero, "defence"), b.hero_stat(side, "power"), init], "muted", 11)
+	hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(hl)
 	if hs.gone:
 		box.add_child(UI.label("Fallen in battle" if hs.gone == "dead" else "Fled the field", "bad", 12))
 		return card
@@ -554,6 +593,7 @@ func hero_card(side: int) -> Control:
 		var sel_now: bool = spell != null and spell.id == id and spell.side == side
 		var bt := UI.button("%s   %s" % [S.name, uses], func(): pick_spell(side, id), "SmallSel" if sel_now else "Small")
 		bt.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		bt.clip_text = true
 		bt.disabled = not can_act or left[id] <= 0
 		var tp: String = "[b]%s[/b] (%s, cost %s)\n%s" % [S.name, S.kind, S.cost, S.desc]
 		if S.kind == "damage":
@@ -734,7 +774,7 @@ func stack_card(s) -> Control:
 	var nm := UI.label(s.name, "muted", 11)
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nm.max_lines_visible = 2
-	nm.custom_minimum_size.x = 76
+	nm.custom_minimum_size.x = 58 if (s.hero and s.count > 0) else 76   # room for the ♛ within the fixed width
 	var topr := UI.hbox([UI.sym(s.def, 44), UI.vbox([cnt, nm], 0)], 6)
 	if s.hero and s.count > 0:
 		var cr := UI.label("♛", "gold2", 14)
@@ -748,8 +788,7 @@ func stack_card(s) -> Control:
 		badges], 2)
 	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var card := UI.panel(body, st)
-	card.custom_minimum_size.x = 138
-	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	card.custom_minimum_size.x = STACK_W
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if s.count > 0 else Control.CURSOR_ARROW
 	if s.count <= 0: card.modulate = Color(0.8, 0.8, 0.8, 0.75) if state == "valid" else Color(0.6, 0.6, 0.6, 0.3)
 	elif state == "invalid" and not active: card.modulate.a = 0.45
