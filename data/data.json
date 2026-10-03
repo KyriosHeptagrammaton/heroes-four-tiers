@@ -1710,17 +1710,17 @@
   {
    "id": "price",
    "area": "Economy",
-   "text": "Unit gold prices (T1 30, T2 80, T3 200, T4 800) are placeholders."
+   "text": "Creature values (UNIT_VALUES) are placeholders: base 30 / 80 / 200 / 800 by tier, first upgrade 50 / 130 / 320 / 1200, second 70 / 180 / 440 (Beta about 4% more; Lion 82, Archon 210, Metatron 835; Leshi 125 / 200 / 275). Value is the recruit price."
   },
   {
    "id": "escalation",
    "area": "Economy",
-   "text": "Buying past the weekly growth: each further \"week-sized batch\" costs x2, x3, x4... Doc only says \"doubles then triples or whatever\"."
+   "text": "Buying past the weekly muster: each further week-sized batch costs x2, x3, x5, x8, x13 ... (each step adds the previous two); the Leshi's double batches go x4, x6, x10, x16 ... Prices reset each week."
   },
   {
    "id": "upgradefee",
    "area": "Economy",
-   "text": "Upgrade gold fee per creature (T1 20, T2 50, T3 120, T4 400) plus 1 essence of that tier per creature."
+   "text": "Upgrade cost per creature = the difference in value between the two kinds (in the metal of its tier with three metals) plus 1 essence of its tier."
   },
   {
    "id": "income",
@@ -1790,16 +1790,6 @@
    "id": "alpha3regen",
    "area": "Units",
    "text": "Alpha T3 \"remove damage equal to number of units at start of turn\" removes PHYSICAL damage."
-  },
-  {
-   "id": "magi-invented",
-   "area": "Units",
-   "text": "Magi effects NOT in the doc (taken from the doc's ability list): Alpha1 rally also heals physical = stack size; Alpha2 attacks all engaged units; Alpha4 double bonuses from numbers & advantage; Beta1 deals damage = its stack size when attacked; Beta2 deny strips (advantage+1) advantages; Beta4 lethal physical converts to morale; Gamma4 each kill recovers a deserter; Delta2 morale +50% for rallying; Delta4 clears all morale damage at turn start."
-  },
-  {
-   "id": "magi-stats",
-   "area": "Units",
-   "text": "Magi (and Ranged) versions use the Melee I stats + their modifier. T4 Magi uses T4 base stats + effect."
   },
   {
    "id": "secondup-choice",
