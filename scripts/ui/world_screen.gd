@@ -216,13 +216,28 @@ func _paint_map(ci: Control, S: Dictionary) -> void:
 		if card.road[0] or card.road[1] or card.road[2] or card.road[3]:
 			var m := s >> 1
 			var cc := Vector2(x + (m + 0.5) * B / s, y + (m + 0.5) * B / s)
-			var ends := [Vector2(cc.x, y), Vector2(x + B, cc.y), Vector2(cc.x, y + B), Vector2(x, cc.y)]
+			var ex: Array = World.road_exits(c)
+			var near := 0.5 * B / s        # centre of the tile row / column along an edge
+			var far := B - near
+			var arms := []
+			for e in 4:
+				if not card.road[e]: continue
+				var f: float = ex[e][1] * B   # where the road meets the edge
+				# straight out to the edge tiles, along them to the meeting point, then to the edge
+				match e:
+					0: arms.append([cc, Vector2(cc.x, y + near), Vector2(x + f, y + near), Vector2(x + f, y)])
+					1: arms.append([cc, Vector2(x + far, cc.y), Vector2(x + far, y + f), Vector2(x + B, y + f)])
+					2: arms.append([cc, Vector2(cc.x, y + far), Vector2(x + f, y + far), Vector2(x + f, y + B)])
+					3: arms.append([cc, Vector2(x + near, cc.y), Vector2(x + near, y + f), Vector2(x, y + f)])
 			for pass_i in 2:
 				var col := Color("#8a6d45") if pass_i == 0 else Color("#c9a877")
 				var wdt := B * (0.09 if pass_i == 0 else 0.035)
-				for e in 4:
-					if card.road[e]:
-						ci.draw_line(cc, ends[e], col, wdt, true)
+				for a in arms:
+					for i in 3:
+						if a[i] != a[i + 1]:
+							ci.draw_line(a[i], a[i + 1], col, wdt, true)
+					for i in range(1, 3):
+						ci.draw_circle(a[i], wdt / 2, col)
 				ci.draw_circle(cc, wdt / 2, col)
 		ci.draw_rect(Rect2(x + 0.75, y + 0.75, B - 1.5, B - 1.5), Color(0, 0, 0, 0.33), false, 1.5)
 

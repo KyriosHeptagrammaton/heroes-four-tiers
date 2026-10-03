@@ -159,10 +159,10 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 	var road_free := func(c: int) -> Array:
 		if cards[c].objs.size():
 			return []
-		return road_tiles(cards[c]).filter(func(p): return not obj_on.call(c, p[0], p[1]))
+		return road_tiles(cards[c], road_exits(cards, W, H, c)).filter(func(p): return not obj_on.call(c, p[0], p[1]))
 	var off_tiles := func(c: int) -> Array:
 		var rt := {}
-		for p in road_tiles(cards[c]):
+		for p in road_tiles(cards[c], road_exits(cards, W, H, c)):
 			rt["%d,%d" % p] = true
 		var out := []
 		var s: int = cards[c].size
@@ -372,22 +372,57 @@ func fill_site(o: Dictionary, r: Rng) -> void:
 			var t := r.rint(1, 3)
 			o.essence = {"tier": t, "n": r.rint(3, 8)}
 
-func road_tiles(card: Dictionary) -> Array:
+## Road tiles of a card: its centre tile plus an arm to each road edge. exits
+## (from road_exits) gives, per edge, the tile along that edge where the road
+## leaves; when that isn't the centre line the arm turns along the edge tiles
+## to it, so roads meet neighbours whose tiles are a different size.
+func road_tiles(card: Dictionary, exits: Array = []) -> Array:
 	var s: int = card.size
 	var m := s >> 1
 	if not _has_road(card):
 		return []
 	var out := {}
-	out["%d,%d" % [m, m]] = [m, m]
-	if card.road[0]:
-		for y in range(0, m + 1): out["%d,%d" % [m, y]] = [m, y]
-	if card.road[2]:
-		for y in range(m, s): out["%d,%d" % [m, y]] = [m, y]
-	if card.road[3]:
-		for x in range(0, m + 1): out["%d,%d" % [x, m]] = [x, m]
-	if card.road[1]:
-		for x in range(m, s): out["%d,%d" % [x, m]] = [x, m]
+	var add := func(x: int, y: int): out["%d,%d" % [x, y]] = [x, y]
+	add.call(m, m)
+	for e in 4:
+		if not card.road[e]: continue
+		var k: int = exits[e][0] if exits.size() == 4 else m
+		var edge: int = 0 if e == 0 or e == 3 else s - 1     # the row / column along the edge
+		for i in range(mini(m, edge), maxi(m, edge) + 1):    # straight out to the edge
+			if e == 0 or e == 2: add.call(m, i)
+			else: add.call(i, m)
+		for i in range(mini(m, k), maxi(m, k) + 1):          # then along the edge to the exit
+			if e == 0 or e == 2: add.call(i, edge)
+			else: add.call(edge, i)
 	return out.values()
+
+## where a card of size s runs its road through the middle (0..1 along an edge)
+func road_frac(s: int) -> float:
+	return ((s >> 1) + 0.5) / float(s)
+
+## Per edge, [tile index along the edge, position 0..1 along it] where card c's road
+## meets the neighbour. The card with the bigger tiles (smaller size) keeps its
+## road straight; the card with finer tiles bends to meet it.
+func road_exits(cards: Array, W: int, H: int, c: int) -> Array:
+	var card: Dictionary = cards[c]
+	var s: int = card.size
+	var m := s >> 1
+	var out := []
+	for e in 4:
+		var ex := [m, road_frac(s)]
+		var nx: int = c % W + D.DX[e]
+		var ny: int = c / W + D.DY[e]
+		if card.road[e] and nx >= 0 and ny >= 0 and nx < W and ny < H:
+			var s2: int = cards[ny * W + nx].size
+			if s2 < s:
+				var f := road_frac(s2)
+				var at := f * s
+				var k := int(floor(at))
+				if absf(at - roundf(at)) < 0.001 and k > 0 and absi(k - 1 - m) < absi(k - m):
+					k -= 1     # exactly on a tile boundary: use the tile nearer the centre line
+				ex = [clampi(k, 0, s - 1), f]
+		out.append(ex)
+	return out
 
 ## Roads on neighbouring cards whose tiles touch across the shared edge (a
 ## road tile on the border facing a road tile where a hero crossing would land)

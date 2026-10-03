@@ -6,10 +6,12 @@
 extends Node
 
 var _rs := {}       # card -> {"x,y": true} road tile cache
+var _rx := {}       # card -> road exits per edge (WorldGen.road_exits)
 var vmask := [{}, {}]  # per player: card -> bitmask of tiles visible right now
 
 func reset_cache() -> void:
 	_rs = {}
+	_rx = {}
 	vmask = [{}, {}]
 
 func S() -> Dictionary: return Game.state
@@ -38,10 +40,15 @@ func log_msg(t: String) -> void:
 func road_set(c: int) -> Dictionary:
 	if not _rs.has(c):
 		var d := {}
-		for p in WorldGen.road_tiles(card(c)):
+		for p in WorldGen.road_tiles(card(c), road_exits(c)):
 			d["%d,%d" % p] = true
 		_rs[c] = d
 	return _rs[c]
+
+func road_exits(c: int) -> Array:
+	if not _rx.has(c):
+		_rx[c] = WorldGen.road_exits(Game.state.map.cards, W(), H(), c)
+	return _rx[c]
 
 func is_road(c: int, x: int, y: int) -> bool:
 	return road_set(c).has("%d,%d" % [x, y])
@@ -108,12 +115,10 @@ func cross(p: int, h, c: int, x: int, y: int, e: int):
 			c2 = ny * W() + nx; e2 = D.opp(e)
 	var card2 := card(c2)
 	var s2: int = card2.size
-	var m := s >> 1
-	var m2 := s2 >> 1
 	var along := x if (e == 0 or e == 2) else y
 	var mapped: int
-	if cd.road[e] and along == m and card2.road[e2]:
-		mapped = m2
+	if cd.road[e] and along == road_exits(c)[e][0] and card2.road[e2]:
+		mapped = road_exits(c2)[e2][0]
 	else:
 		mapped = mini(s2 - 1, int(floor((along + 0.5) / s * s2)))
 	var pos: Array = [[mapped, 0], [s2 - 1, mapped], [mapped, s2 - 1], [0, mapped]][e2]
