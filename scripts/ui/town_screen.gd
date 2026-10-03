@@ -132,12 +132,13 @@ func render() -> void:
 			kids.append(UI.label("✓ Built", "good"))
 		else:
 			var bm := World.building_metal(k)
-			var bb := UI.button("Build · %s" % (World.cost_str(B.cost, bm) if bm != "gold" else str(B.cost)), func():
-				World.pay(P, bm, B.cost)
+			var bc := World.building_cost(k)
+			var bb := UI.button("Build · %s" % (World.cost_str(bc, bm) if bm != "gold" else str(bc)), func():
+				World.pay(P, bm, bc)
 				t.built[k] = true
 				t.builtToday = true
 				render(), "Small")
-			bb.disabled = t.builtToday or not req_ok or not World.can_pay(P, bm, B.cost)
+			bb.disabled = t.builtToday or not req_ok or not World.can_pay(P, bm, bc)
 			var row := UI.hbox([bb])
 			if not req_ok:
 				row.add_child(UI.label("needs " + ", ".join(B.req.map(func(r): return D.BUILDINGS[r].name if D.BUILDINGS.has(r) else r)), "muted", 12))

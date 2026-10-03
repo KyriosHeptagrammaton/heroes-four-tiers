@@ -477,6 +477,11 @@ func in_metal(value: float, m: String) -> int:
 func building_metal(k: String) -> String:
 	return D.BUILDINGS[k].get("metal", "gold") if metals_on() else "gold"
 
+## what a building costs in its purse (the Tier 4 lair is 400 gold with three metals)
+func building_cost(k: String) -> int:
+	var B: Dictionary = D.BUILDINGS[k]
+	return int(B.get("metalCost", B.cost)) if metals_on() else int(B.cost)
+
 func purse(P: Dictionary, m: String) -> int:
 	return int(P.get(m, 0))
 
