@@ -28,8 +28,16 @@ def trim(x, lead=0.15, tail=0.02):
     b = np.where(np.abs(x) > tail)[0]
     return x[max(0, a[0] - 40): b[-1] + 1] if len(a) else x
 
-def finish(x, peak_db=-2.0, fade_ms=25):
-    x = trim(x)
+def soften(x, cutoff=1800.0):
+    """muffle: a gentle zero-phase low-pass that removes the sharp, high ping"""
+    from scipy.signal import butter, sosfiltfilt
+    sos = butter(4, cutoff, btype="low", fs=SR, output="sos")
+    return sosfiltfilt(sos, x)
+
+def finish(x, peak_db=-7.0, fade_ms=25, attack_ms=4, cutoff=1800.0):
+    x = soften(trim(x), cutoff)
+    a = int(attack_ms / 1000 * SR)
+    x[:a] *= np.linspace(0, 1, a)          # no instant click at the very start
     f = int(fade_ms / 1000 * SR)
     x[-f:] *= np.linspace(1, 0, f)
     return x / np.max(np.abs(x)) * 10 ** (peak_db / 20)
