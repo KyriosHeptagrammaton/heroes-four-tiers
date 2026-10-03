@@ -164,6 +164,9 @@ func setup_sides() -> void:
 			}
 			if Heroes.stat(h, "knowledge") <= Heroes.equipped_cost(h, equipped):
 				side.st.knowledgeXP += 3
+			# Necromancy I/II/III: +3/6/9 knowledge XP when the commander goes in with no spells
+			if equipped.is_empty() and Heroes.skill(h, "necromancy") >= 1:
+				side.st.knowledgeXP += 3 * Heroes.skill(h, "necromancy")
 		else:
 			side.courage = 0
 	for s in stacks:
@@ -1422,6 +1425,8 @@ func command(side: int, cmd: String, t_id = null):
 			if t.dead <= 0: return "No dead to revive"
 			if hs.spareKnowledge < tier: return "Not enough spare knowledge"
 			hs.spareKnowledge -= tier; t.dead -= 1
+			# Necromancy: +1 knowledge XP per knowledge spent on revives
+			if Heroes.skill(h, "necromancy") >= 1: sd.st.knowledgeXP += tier
 			_return_one(t)
 			var raised := 1
 			# Necromancy +25 / 50 / 100%: the fraction carries over between revives

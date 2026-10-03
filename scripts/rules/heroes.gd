@@ -88,7 +88,7 @@ func auto_equip(h) -> Array:
 # ---- primary XP: "3 (skilled) or 4 (unskilled) x the next level" -------------
 func primary_cost(h, k: String) -> int:
 	var c: Dictionary = D.CLASSES[h.cls]
-	var skilled: bool = (c.skilled as Array).has(k) or c.get("flatPrimary", false)
+	var skilled: bool = (c.skilled as Array).has(k)
 	return (3 if skilled else 4) * (int(h.stats[k]) + 1)
 
 ## Skilled skills first, then unskilled. On level up add XP equal to the new level
@@ -106,9 +106,7 @@ func apply_primary_levels(h, rng: Rng, log: Array = []) -> void:
 				var cost := primary_cost(h, k)
 				if int(h.xp[k]) >= cost:
 					h.stats[k] = int(h.stats[k]) + 1
-					# Paragon (doc "Beta hero specialty") does not lose XP: level N needs 3N total
-					if not D.CLASSES[h.cls].get("flatPrimary", false):
-						h.xp[k] = int(h.xp[k]) - cost
+					h.xp[k] = int(h.xp[k]) - cost
 					log.append("%s: %s rises to %d" % [h.name, k, h.stats[k]])
 					if grp.size():
 						var tgt = grp[int(floor(rng.next() * grp.size()))]

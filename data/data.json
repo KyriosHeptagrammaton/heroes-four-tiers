@@ -1227,9 +1227,9 @@
    "name": "Necromancy",
    "cat": "magic",
    "tiers": [
-    "Revive fallen can raise the dead of a stack that was wiped out; +25% revival (every 4th revive raises one extra)",
-    "+50% revival (every 2nd revive raises one extra)",
-    "+100% revival (each revive raises two)"
+    "Revive fallen can raise the dead of a stack that was wiped out; +25% revival (every 4th revive raises one extra). +1 knowledge XP per knowledge spent reviving; +3 knowledge XP when you start a battle with no spells equipped",
+    "+50% revival (every 2nd revive raises one extra); +6 knowledge XP with no spells equipped",
+    "+100% revival (each revive raises two); +9 knowledge XP with no spells equipped"
    ]
   }
  },
@@ -1362,8 +1362,7 @@
    ],
    "skills": {},
    "noSecondary": true,
-   "flatPrimary": true,
-   "desc": "All primary skills cost 3 XP/level and never lose XP, but cannot learn secondary skills."
+   "desc": "Skilled in every primary skill (3 XP x the next level), but cannot learn secondary skills."
   },
   "scholar": {
    "name": "Scholar",
@@ -1864,7 +1863,7 @@
   {
    "id": "classes",
    "area": "Heroes",
-   "text": "Class names & skilled sets are invented. Paragon = doc \"Beta hero specialty\"; Scholar = doc \"Hero specialty learning\"."
+   "text": "Class names & skilled sets are invented. Paragon = doc \"Beta hero specialty\"; Scholar = doc \"Hero specialty learning\". Paragon: the doc's \"don't lose XP when increasing a skill\" was dropped (with level-up bonus XP it made primaries snowball without limit); Paragons now spend XP like everyone, with every primary skilled."
   },
   {
    "id": "todo-captains",
