@@ -46,7 +46,8 @@
    "start": {
     "gold": 1250,
     "silver": 750,
-    "aurum": 0
+    "aurum": 0,
+    "gems": 0
    },
    "silverMines": 4,
    "goldMines": 2,
@@ -54,7 +55,15 @@
    "goldGuard": 9.0,
    "silverVeins": 4,
    "goldVeins": 2,
-   "goldVeinGuard": 3.0
+   "goldVeinGuard": 3.0,
+   "gemValue": 100,
+   "gemHoards": 3,
+   "gemHoardGuard": 6.0,
+   "gemHoardSize": [
+    6,
+    8,
+    10
+   ]
   },
   "townIncome": 500,
   "heroCost": 1500,
@@ -1419,6 +1428,12 @@
    "color": "#ffd76a",
    "desc": "Coin, or experience for the hero."
   },
+  "gems": {
+   "name": "Jewel hoard",
+   "glyph": "❖",
+   "color": "#7fd8ff",
+   "desc": "A rare, heavily guarded hoard of gems — the only way to pay for tier 4 creatures."
+  },
   "buried": {
    "name": "Buried treasure",
    "glyph": "✕",
@@ -1566,7 +1581,8 @@
    "req": [
     "dwell3"
    ],
-   "desc": "Recruit tier 4 creatures (each costs 1 courage in battle; your hero must fight beside them)."
+   "desc": "Recruit tier 4 creatures (each costs 1 courage in battle; your hero must fight beside them).",
+   "metal": "aurum"
   },
   "up1_1": {
    "name": "T1 drill yard",
@@ -1712,7 +1728,7 @@
   },
   {
    "id": "metals",
-   "text": "Three metals (new-game option, on by default): gold is renamed copper and buys tier 1 creatures and everything else (buildings, heroes, trains, treasury, mine surveys, mercenaries); tier 2 creatures cost silver and tiers 3 and 4 cost gold, at the old gold prices. Upgrading creatures costs the metal of their tier. Towns produce only copper. Start: 1250 copper, 750 silver, no gold. Silver Veins (+15 silver/day, survey 450 copper, 4 on the map, a normal mine's guard), Silver Mines (+40 silver/day, survey 750 copper, 4 on the map, 3x a normal mine's guard), Gold Veins (+20 gold/day, survey 900 copper, 2 on the map, 3x guard) and Gold Mines (+60 gold/day, survey 1500 copper, 2 on the map, 9x guard). The single-currency Gold Vein reads Copper Vein. Tier 4 paying gold, upgrade fees in the tier's metal, mine incomes, survey costs and counts are assumptions."
+   "text": "Three metals (new-game option, on by default): gold is renamed copper and buys tier 1 creatures and everything else (buildings, heroes, trains, treasury, mine surveys, mercenaries); tier 2 creatures cost silver and tiers 3 and 4 cost gold, at the old gold prices. Upgrading creatures costs the metal of their tier. Towns produce only copper. Start: 1250 copper, 750 silver, no gold. Silver Veins (+15 silver/day, survey 450 copper, 4 on the map, a normal mine's guard), Silver Mines (+40 silver/day, survey 750 copper, 4 on the map, 3x a normal mine's guard), Gold Veins (+20 gold/day, survey 900 copper, 2 on the map, 3x guard) and Gold Mines (+60 gold/day, survey 1500 copper, 2 on the map, 9x guard). The single-currency Gold Vein reads Copper Vein. Tier 4 paying gold, upgrade fees in the tier's metal, mine incomes, survey costs and counts are assumptions. Tier 4 lairs cost gold (same number as before: 4000). Tier 4 creatures (and their upgrades) cost gems: 1 gem per 100 of value (Titan 8, upgrade 4), found only in Jewel hoards (3 per map, 6/8/10 gems each, 6x a normal mine's guard) — counts, sizes and the 100:1 rate are assumptions."
   },
   {
    "id": "trainrules",

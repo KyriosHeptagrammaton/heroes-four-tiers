@@ -27,7 +27,17 @@ func run(root) -> void:
 	P = Game.state.players[0]
 	check(Game.state.metals, "three metals is the default")
 	check(P.gold == 1250 and P.silver == 750 and P.aurum == 0, "start: 1250 copper, 750 silver, 0 gold")
-	check([1, 2, 3, 4].map(func(t): return World.tier_metal(t)) == ["gold", "silver", "aurum", "aurum"], "tier metals copper/silver/gold/gold")
+	check([1, 2, 3, 4].map(func(t): return World.tier_metal(t)) == ["gold", "silver", "aurum", "gems"], "tier metals copper/silver/gold/gems")
+	check(P.gems == 0 and World.building_metal("dwell4") == "aurum" and World.building_metal("dwell3") == "gold", "tier 4 lair costs gold, other buildings copper; no starting gems")
+	var hoards := []
+	for c in Game.state.map.cards:
+		for o in c.objs:
+			if o.type == "gems": hoards.append(o)
+	check(hoards.size() == 3 and hoards.all(func(o): return o.has("guard") and o.gems in [6, 8, 10]), "3 guarded Jewel hoards with 6/8/10 gems")
+	var t4 = World.towns_of(0)[0]
+	check(World.price_for(t4, 4, 1) == 8, "a Titan costs 8 gems (%d)" % World.price_for(t4, 4, 1))
+	var uc4 := World.upgrade_cost("beta.4.0.", "beta.4.1.m", 1)
+	check(uc4.metal == "gems" and uc4.gold == 4, "Titan -> Magi upgrade: 4 gems (%s)" % uc4)
 	check(World.metal_name("gold") == "copper" and World.metal_name("aurum") == "gold", "names: copper and gold")
 	var sm := mines("silver")
 	var gm := mines("goldmine")
@@ -71,4 +81,5 @@ func run(root) -> void:
 	for i in 6: await root.get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	root.get_viewport().get_texture().get_image().save_png("/tmp/claude-0/shots/metals_town.png")
+	# the build button for the lair names gold
 	print("metals_check ", "FAILED" if failed else "OK")

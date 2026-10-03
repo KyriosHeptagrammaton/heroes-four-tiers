@@ -208,6 +208,19 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 					var xy: Array = r.pick(tl)
 					put.call(c, xy[0], xy[1], {"type": "mine", "kind": spec[0], "owner": -1, "guard": monster_army(r, level.call(c), spec[3])})
 					left -= 1
+	# three metals: a few rare, heavily guarded Jewel hoards (gems buy tier 4 creatures)
+	if opts.get("metals", false):
+		var MC: Dictionary = D.CFG.metals
+		var left := int(MC.gemHoards)
+		for min_d in [7, 6, 5, 3]:
+			for c in road_cards:
+				if left <= 0: break
+				if dist_start.call(c) < min_d: continue
+				var tl: Array = road_free.call(c)
+				if tl.is_empty(): continue
+				var xy: Array = r.pick(tl)
+				put.call(c, xy[0], xy[1], {"type": "gems", "gems": int(r.pick(MC.gemHoardSize)), "guard": monster_army(r, level.call(c), float(MC.gemHoardGuard))})
+				left -= 1
 	# sites on roads
 	var site_list := ["chest", "chest", "chest", "chest", "shrine", "shrine", "shrine", "hermit", "hermit", "academy", "academy", "tower", "tower", "fairy", "mercs", "mercs", "knight", "knight", "post", "post", "font", "cache", "cache", "artifact", "artifact", "artifact"]
 	for type in site_list:

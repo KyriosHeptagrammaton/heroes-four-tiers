@@ -698,12 +698,12 @@ func purse(P: Dictionary, p: int, income: bool = true) -> String:
 			if inc: tail = " " + col(("+%d" if World.metals_on() else "+%d/day") % inc, "muted")
 		elif World.metals_on():
 			tail = " " + col(World.metal_name(m), "muted")
-		parts.append("[color=%s]●[/color] [b][color=%s]%s[/color][/b]%s" % [World.metal_col(m), World.metal_col(m), U.fmt(World.purse(P, m)), tail])
+		parts.append("[color=%s]%s[/color] [b][color=%s]%s[/color][/b]%s" % [World.metal_col(m), "❖" if m == "gems" else "●", World.metal_col(m), U.fmt(World.purse(P, m)), tail])
 	return "   ".join(parts)
 
 func purse_tip() -> String:
 	if World.metals_on():
-		return "Copper · silver · gold (+ income per day).\nCopper buys tier 1 creatures, buildings, heroes and everything else; silver buys tier 2 creatures; gold buys tiers 3 and 4. Upgrades cost the metal of the creature's tier."
+		return "Copper · silver · gold (+ income per day).\nCopper buys tier 1 creatures, buildings, heroes and everything else; silver buys tier 2 creatures; gold buys tier 3 creatures and the Tier 4 lair; gems (from rare Jewel hoards) buy tier 4 creatures. Upgrades cost the metal of the creature's tier."
 	return "Gold and income per day"
 
 func check(text: String, on: bool, cb: Callable) -> CheckBox:

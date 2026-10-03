@@ -56,7 +56,7 @@ func render() -> void:
 	fchip.get_child(0).add_theme_color_override("font_color", Color(D.FACTIONS[t.faction].color))
 	var bar := UI.hbox([UI.button("◂ Map", close), title, fchip, UI.chip("Capital", "warn", "If this town falls, you lose the game.") if t.capital else null, UI.spacer(),
 		UI.rich(UI.purse(P, S.cur, false) + "      " + UI.col("   ".join([1, 2, 3, 4].map(func(k): return "⬡%d %s" % [k, P.essence[str(k)]])), "muted"), 14)], 10)
-	bar.get_child(bar.get_child_count() - 1).custom_minimum_size.x = 470 if World.metals_on() else 300
+	bar.get_child(bar.get_child_count() - 1).custom_minimum_size.x = 560 if World.metals_on() else 300
 	UI.tip(bar.get_child(bar.get_child_count() - 1), UI.purse_tip())
 	root.add_child(UI.panel(bar, UI.stone("bar")))
 	var sc := ScrollContainer.new()
@@ -86,7 +86,7 @@ func render() -> void:
 		var nm := _t(d.name)
 		UI.tip(nm, UI.unit_tip(d))
 		var mt := World.tier_metal(tier)
-		var head := UI.hbox([UI.sym(d, 32), UI.vbox([nm, UI.label("Tier %d · base %s · growth %d/week" % [tier, World.cost_str(U.jr(Units.base_price(t.faction, tier)), mt), World.growth(t, tier)], "muted", 12)], 0)])
+		var head := UI.hbox([UI.sym(d, 32), UI.vbox([nm, UI.label("Tier %d · base %s · growth %d/week" % [tier, World.cost_str(World.in_metal(Units.base_price(t.faction, tier), mt), mt), World.growth(t, tier)], "muted", 12)], 0)])
 		if not t.built.get(bk, false):
 			grid.add_child(_card([head, UI.label("Build the dwelling first.", "muted", 12)]))
 			continue
@@ -131,18 +131,19 @@ func render() -> void:
 		if built:
 			kids.append(UI.label("✓ Built", "good"))
 		else:
-			var bb := UI.button("Build · %d" % B.cost, func():
-				P.gold -= B.cost
+			var bm := World.building_metal(k)
+			var bb := UI.button("Build · %s" % (World.cost_str(B.cost, bm) if bm != "gold" else str(B.cost)), func():
+				World.pay(P, bm, B.cost)
 				t.built[k] = true
 				t.builtToday = true
 				render(), "Small")
-			bb.disabled = t.builtToday or not req_ok or P.gold < B.cost
+			bb.disabled = t.builtToday or not req_ok or not World.can_pay(P, bm, B.cost)
 			var row := UI.hbox([bb])
 			if not req_ok:
 				row.add_child(UI.label("needs " + ", ".join(B.req.map(func(r): return D.BUILDINGS[r].name if D.BUILDINGS.has(r) else r)), "muted", 12))
 			kids.append(row)
 		bgrid.add_child(_card(kids, built))
-	body.add_child(UI.panel(UI.vbox([UI.h3("Build " + ("(already built today)" if t.builtToday else "(one per day)") + (" · prices in copper" if World.metals_on() else "")), bgrid])))
+	body.add_child(UI.panel(UI.vbox([UI.h3("Build " + ("(already built today)" if t.builtToday else "(one per day)") + (" · prices in copper unless marked" if World.metals_on() else "")), bgrid])))
 	# treasury / tavern / wagons
 	var misc := UI.flow([], 10)
 	var inv := UI.button("Invest 300", func():

@@ -448,8 +448,8 @@ func blob(a: int, n: int) -> Array:
 # Three metals (S.metals, the default): the old "gold" purse is copper and pays
 # for tier 1 creatures and everything else; tier 2 creatures cost silver and
 # tiers 3-4 gold (purse key "aurum"). With the option off there is only gold.
-const METALS := ["gold", "silver", "aurum"]
-const METAL_COL := {"gold": "#f0d68e", "silver": "#d5dde4", "aurum": "#f0d68e"}
+const METALS := ["gold", "silver", "aurum", "gems"]
+const METAL_COL := {"gold": "#f0d68e", "silver": "#d5dde4", "aurum": "#f0d68e", "gems": "#7fd8ff"}
 const METAL_COPPER_COL := "#e09a62"
 
 func metals_on() -> bool:
@@ -458,15 +458,24 @@ func metals_on() -> bool:
 ## the purse a creature of this tier is bought (and upgraded) with
 func tier_metal(tier: int) -> String:
 	if not metals_on(): return "gold"
-	return "gold" if tier <= 1 else ("silver" if tier == 2 else "aurum")
+	return ["gold", "gold", "silver", "aurum", "gems"][clampi(tier, 0, 4)]
 
 func metal_name(m: String) -> String:
 	if not metals_on(): return "gold"
-	return {"gold": "copper", "silver": "silver", "aurum": "gold"}[m]
+	return {"gold": "copper", "silver": "silver", "aurum": "gold", "gems": "gems"}[m]
 
 func metal_col(m: String) -> String:
 	if metals_on() and m == "gold": return METAL_COPPER_COL
 	return METAL_COL[m]
+
+## a gold-scale value expressed in metal m (gems are worth gemValue each)
+func in_metal(value: float, m: String) -> int:
+	if m == "gems": return maxi(1, U.jr(value / float(D.CFG.metals.gemValue)))
+	return U.jr(value)
+
+## the purse a building is paid from (the Tier 4 lair costs gold with three metals)
+func building_metal(k: String) -> String:
+	return D.BUILDINGS[k].get("metal", "gold") if metals_on() else "gold"
 
 func purse(P: Dictionary, m: String) -> int:
 	return int(P.get(m, 0))
@@ -547,7 +556,7 @@ func price_for(t: Dictionary, tier: int, n: int, markup: float = 1.0) -> int:
 	# the weekly muster is twice as steep (x4, x6, x10, x16 ... instead of x2, x3, x5, x8 ...)
 	var g := maxi(1, growth(t, tier))
 	var dbl: int = 2 if D.UNIT_BASE[t.faction][str(tier)].get("sp", {}).get("doubleGrowth", false) else 1
-	var unit: int = U.jr(Units.base_price(t.faction, tier))
+	var unit: int = in_metal(Units.base_price(t.faction, tier), tier_metal(tier))
 	for i in n:
 		if pool > 0:
 			total += unit; pool -= 1
@@ -603,7 +612,8 @@ func upgrade_options(k: String, ctx: Dictionary) -> Array:
 ## values (UNIT_VALUES) plus 1 essence of their tier per creature
 func upgrade_cost(from_k: String, to_k: String, n: int) -> Dictionary:
 	var tier := mini(4, int(Units.resolve(from_k).tier))
-	var fee := maxi(0, U.jr(Units.variant_value(to_k) - Units.variant_value(from_k)))
+	var diff := Units.variant_value(to_k) - Units.variant_value(from_k)
+	var fee := in_metal(diff, tier_metal(tier)) if diff > 0 else 0
 	return {"gold": fee * n, "metal": tier_metal(tier), "essence": n, "tier": tier}
 
 # ---------------------------------------------------------------- battle aftermath

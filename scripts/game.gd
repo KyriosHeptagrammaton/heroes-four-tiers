@@ -30,7 +30,7 @@ func new_game_dialog() -> void:
 			UI.label("Hero", "muted"), UI.option(cls, cfg.cls[p], func(v): cfg.cls[p] = v)], 8)))
 	box.add_child(UI.hbox([UI.label("Map seed", "muted"), UI.spin(cfg.seed, 1, 999999999, func(v): cfg.seed = maxi(1, v), 130)]))
 	var mt := UI.check("Three metals: copper, silver and gold", true, func(v): cfg.metals = v)
-	UI.tip(mt, "On: towns make copper, which buys tier 1 creatures, buildings and everything else. Tier 2 creatures cost silver and tiers 3-4 cost gold — dig them from guarded Silver and Gold Mines. You start with 1250 copper and 750 silver.\nOff: one currency, gold, buys everything.")
+	UI.tip(mt, "On: towns make copper, which buys tier 1 creatures, buildings and everything else. Tier 2 creatures cost silver and tier 3 gold — dig them from guarded veins and mines. Tier 4 lairs cost gold and tier 4 creatures cost gems from rare Jewel hoards. You start with 1250 copper and 750 silver.\nOff: one currency, gold, buys everything.")
 	box.add_child(mt)
 	box.add_child(UI.row_end([UI.button("Cancel", UI.close_modal), UI.button("Start", func():
 		if cfg.factions[0] == cfg.factions[1]:
@@ -49,7 +49,7 @@ func new_game(cfg: Dictionary) -> void:
 	for p in 2:
 		var seen := []; seen.resize(N); seen.fill(0)
 		var tm := []; tm.resize(N); tm.fill(0)
-		S.players.append({"name": cfg.names[p], "faction": cfg.factions[p], "color": PCOLORS[p], "gold": D.CFG.metals.start.gold if metals else D.CFG.startGold, "silver": D.CFG.metals.start.silver if metals else 0, "aurum": D.CFG.metals.start.aurum if metals else 0, "essence": {"1": 0, "2": 0, "3": 0, "4": 0}, "alive": true,
+		S.players.append({"name": cfg.names[p], "faction": cfg.factions[p], "color": PCOLORS[p], "gold": D.CFG.metals.start.gold if metals else D.CFG.startGold, "silver": D.CFG.metals.start.silver if metals else 0, "aurum": D.CFG.metals.start.aurum if metals else 0, "gems": D.CFG.metals.start.gems if metals else 0, "essence": {"1": 0, "2": 0, "3": 0, "4": 0}, "alive": true,
 			"seen": seen, "tmask": tm, "seenSub": {}, "trans": {"cards": gen.trans[p], "spent": [], "links": [], "lines": [], "active": null}, "invest": 0, "grail": false, "skipMove": {}, "capital": null})
 	state = S
 	World.reset_cache()
@@ -369,6 +369,11 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 			return
 		"mercs", "post", "font", "mine":
 			use_site(hero, o)
+			return
+		"gems":
+			World.earn(P, "gems", o.gems)
+			remove.call(); done.call()
+			UI.alert("❖ Jewel hoard", "+%d gems — the price of tier 4 creatures." % o.gems)
 			return
 		"cache":
 			P.essence[str(o.essence.tier)] += o.essence.n

@@ -45,12 +45,12 @@ func recruit(p: int) -> void:
 	for t in World.towns_of(p):
 		var h = World.hero_at(t.c, t.x, t.y)
 		for k in ["dwell2", "up1_1", "dwell3", "up1_2"]:
-			if not t.builtToday and not t.built.get(k, false) and P.gold >= D.BUILDINGS[k].cost + 400:
+			if not t.builtToday and not t.built.get(k, false) and World.can_pay(P, World.building_metal(k), D.BUILDINGS[k].cost + (400 if World.building_metal(k) == "gold" else 0)):
 				var ok := true
 				for r in D.BUILDINGS[k].req:
 					if not t.built.get(r, false): ok = false
 				if ok:
-					P.gold -= D.BUILDINGS[k].cost; t.built[k] = true; t.builtToday = true
+					World.pay(P, World.building_metal(k), D.BUILDINGS[k].cost); t.built[k] = true; t.builtToday = true
 		for tier in range(1, 4):
 			if not t.built.get("dwell%d" % tier, false): continue
 			var n: int = t.pool[str(tier)]
