@@ -350,7 +350,12 @@ func encounter_strength(d: int) -> float:
 func monster_army(r: Rng, level: int, scale: float, strength: float = -1.0) -> Dictionary:
 	var f: String = r.pick(D.FACTION_IDS)
 	var stacks := []
-	var n := r.rint(1, 3 if level >= 3 else 2)
+	# number of stacks 1-6, weighted by itself: 6 stacks is six times as likely as 1
+	var roll := r.rint(1, 21)
+	var n := 1
+	while roll > n:
+		roll -= n
+		n += 1
 	for k in n:
 		var hi := mini(3, 1 + int(floor(level / 2.0)) + (1 if r.next() < 0.3 else 0))
 		var tier := r.rint(1, hi)
