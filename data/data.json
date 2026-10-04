@@ -1829,11 +1829,6 @@
    "text": "Only \"damage\" spells (Flame, Dread, Ward, Mend) scale with Power (+10%/pt). Everything else scales with creature numbers."
   },
   {
-   "id": "commander",
-   "area": "Combat",
-   "text": "Commander actions (instead of a spell): Recall (spend courage = tier to return 1 deserter), Revive (spend spare knowledge = tier to revive 1 dead), Embolden (spend an initiative pip for +1 advantage), Steel (+1 courage; the doc asked about +0.5, raised to 1 so all numbers stay whole)."
-  },
-  {
    "id": "terrain-names",
    "area": "Terrain",
    "text": "Terrain names for the unnamed doc effects are invented (Ashlands, Haunted Moor, Steppe, Badlands, Escarpment, Bluffs, Tundra, Dreamwood, Standing Stones, Village, Watchfort, Crossroads, Sacred Grove, Old Arena, Ley Nexus). Card sizes/sight numbers are placeholders except mountain (+6 / seen from 9) and forest (-1)."
