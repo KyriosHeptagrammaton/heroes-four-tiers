@@ -49,8 +49,9 @@ Unit portraits and weapon marks: hand-drawn for the game (source sheets cut up b
 `tools/extract_icons.py` into `art/`).
 
 Music: The Path Winds True, The Woods Weep, Water Familiar Song, Sad Ages (two
-versions), We Stand, Pachelbel's Canon, Driving Underwater, In Hebrew con Epic and
-Untitled are the game author's own tracks. Each map setting plays a playlist
+versions), We Stand, Pachelbel's Canon, Driving Underwater, In Hebrew con Epic, Untitled,
+Morning Dew, Evening Breeze, Night Mist, A Red Sun Sets, Dust and Shadows and
+Panda Power are the game author's own tracks. Each map setting plays a playlist
 (`data/data.json` → `MUSIC.THEMES`).
 
 Button sound effects are built from Kenney's [Impact Sounds](https://kenney.nl/assets/impact-sounds) and

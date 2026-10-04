@@ -1705,22 +1705,50 @@
    "untitled": {
     "file": "music/untitled.mp3",
     "name": "Untitled"
+   },
+   "morning": {
+    "file": "music/morning-dew.mp3",
+    "name": "Morning Dew"
+   },
+   "evening": {
+    "file": "music/evening-breeze.mp3",
+    "name": "Evening Breeze"
+   },
+   "night": {
+    "file": "music/night-mist.mp3",
+    "name": "Night Mist"
+   },
+   "redsun": {
+    "file": "music/a-red-sun-sets.mp3",
+    "name": "A Red Sun Sets"
+   },
+   "dust": {
+    "file": "music/dust-and-shadows.mp3",
+    "name": "Dust and Shadows"
+   },
+   "panda": {
+    "file": "music/panda-power.mp3",
+    "name": "Panda Power"
    }
   },
   "THEMES": {
    "path": [
     "path",
-    "untitled"
+    "untitled",
+    "morning"
    ],
    "woods": [
-    "woods"
+    "woods",
+    "evening"
    ],
    "water": [
     "water",
-    "driving"
+    "driving",
+    "night"
    ],
    "sad": [
-    "sad"
+    "sad",
+    "redsun"
    ],
    "sad2": [
     "sad2"
@@ -1730,7 +1758,9 @@
     "canon"
    ],
    "battle": [
-    "epic"
+    "epic",
+    "dust",
+    "panda"
    ],
    "menu": [
     "path",
@@ -1853,7 +1883,7 @@
   {
    "id": "music",
    "area": "Audio",
-   "text": "Music by setting (your tracks; each setting is a playlist that moves on to another track when one ends): open land & roads = The Path Winds True, Untitled; forest, dreamwood, sacred grove, tundra = The Woods Weep; swamp & haunted moor = Water Familiar Song, Driving Underwater; ashlands, badlands, box canyon, chasm = Sad Ages; mountains, escarpment, bluffs = Sad Ages (second version); towns = We Stand, Pachelbel's Canon. Battles play the battlefield's playlist plus In Hebrew con Epic (sieges: the town playlist plus it). Menus play The Path Winds True and Pachelbel's Canon."
+   "text": "Music by setting (your tracks; each setting is a playlist that moves on to another track when one ends): open land & roads = The Path Winds True, Untitled, Morning Dew; forest, dreamwood, sacred grove, tundra = The Woods Weep, Evening Breeze; swamp & haunted moor = Water Familiar Song, Driving Underwater, Night Mist; ashlands, badlands, box canyon, chasm = Sad Ages, A Red Sun Sets; mountains, escarpment, bluffs = Sad Ages (second version); towns = We Stand, Pachelbel's Canon. Battles play the battlefield's playlist plus the combat songs In Hebrew con Epic, Dust and Shadows and Panda Power (sieges: the town playlist plus them). Menus play The Path Winds True and Pachelbel's Canon."
   },
   {
    "id": "mines",
