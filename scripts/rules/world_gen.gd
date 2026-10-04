@@ -145,6 +145,7 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 	var level := func(c: int) -> int:
 		var d: int = dist_start.call(c)
 		return 1 if d <= 3 else (2 if d <= 6 else (3 if d <= 9 else 4))
+	var power := func(c: int) -> float: return encounter_strength(dist_start.call(c))
 	var oid := [1]
 	var put := func(c: int, x: int, y: int, o: Dictionary) -> Dictionary:
 		o.id = "o%d" % oid[0]; oid[0] += 1
@@ -190,7 +191,7 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 			continue
 		var kind: String = r.pick(["timber", "quarry"]) if d <= 4 else r.pick(mine_kinds)
 		var xy: Array = r.pick(tl)
-		put.call(c, xy[0], xy[1], {"type": "mine", "kind": kind, "owner": -1, "guard": monster_army(r, level.call(c), 0.6 if d <= 4 else 1.0)})
+		put.call(c, xy[0], xy[1], {"type": "mine", "kind": kind, "owner": -1, "guard": monster_army(r, level.call(c), 0.6 if d <= 4 else 1.0, power.call(c))})
 		placed_mines += 1
 	# three metals: Gold Mines and Silver Mines, far out and heavily guarded
 	# (9x / 3x a normal mine's guard), Gold Veins (3x) and Silver Veins (normal guard). Generated after everything above so maps
@@ -206,7 +207,7 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 					var tl: Array = road_free.call(c)
 					if tl.is_empty(): continue
 					var xy: Array = r.pick(tl)
-					put.call(c, xy[0], xy[1], {"type": "mine", "kind": spec[0], "owner": -1, "guard": monster_army(r, level.call(c), spec[3])})
+					put.call(c, xy[0], xy[1], {"type": "mine", "kind": spec[0], "owner": -1, "guard": monster_army(r, level.call(c), spec[3], power.call(c))})
 					left -= 1
 	# three metals: a few rare, heavily guarded Jewel hoards (gems buy tier 4 creatures)
 	if opts.get("metals", false):
@@ -219,10 +220,12 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 				var tl: Array = road_free.call(c)
 				if tl.is_empty(): continue
 				var xy: Array = r.pick(tl)
-				put.call(c, xy[0], xy[1], {"type": "gems", "gems": int(r.pick(MC.gemHoardSize)), "guard": monster_army(r, level.call(c), float(MC.gemHoardGuard))})
+				put.call(c, xy[0], xy[1], {"type": "gems", "gems": int(r.pick(MC.gemHoardSize)), "guard": monster_army(r, level.call(c), float(MC.gemHoardGuard), power.call(c))})
 				left -= 1
 	# sites on roads
-	var site_list := ["chest", "chest", "chest", "chest", "shrine", "shrine", "shrine", "hermit", "hermit", "academy", "academy", "tower", "tower", "fairy", "mercs", "mercs", "knight", "knight", "post", "post", "font", "cache", "cache", "artifact", "artifact", "artifact"]
+	var site_list := ["ley"].duplicate()
+	for i in int(D.CFG.get("leyStones", 6)) - 1: site_list.append("ley")
+	site_list += ["chest", "chest", "chest", "chest", "shrine", "shrine", "shrine", "hermit", "hermit", "academy", "academy", "tower", "tower", "fairy", "mercs", "mercs", "knight", "knight", "post", "post", "font", "cache", "cache", "artifact", "artifact", "artifact"]
 	for type in site_list:
 		for tries in 40:
 			var c: int = r.pick(road_cards)
@@ -232,7 +235,7 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 			var xy: Array = r.pick(tl)
 			var o := {"type": type}
 			if dist_start.call(c) >= 3 and (type in ["artifact", "shrine", "fairy", "knight", "cache"] or (type == "chest" and r.next() < 0.5)):
-				o.guard = monster_army(r, level.call(c), 0.8)
+				o.guard = monster_army(r, level.call(c), 0.8, power.call(c))
 			fill_site(o, r)
 			put.call(c, xy[0], xy[1], o)
 			break
@@ -245,7 +248,7 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 		if tl.is_empty():
 			continue
 		var xy: Array = r.pick(tl)
-		put.call(c, xy[0], xy[1], {"type": "monster", "army": monster_army(r, level.call(c), 1.0)})
+		put.call(c, xy[0], xy[1], {"type": "monster", "army": monster_army(r, level.call(c), 1.0, power.call(c))})
 	# hidden things: larger cards hide more
 	for c in cards.size():
 		var cd: Dictionary = cards[c]
@@ -272,7 +275,7 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 				type = "chest"
 			var o := {"type": type, "hidden": true}
 			if type == "artifact" and r.next() < 0.5:
-				o.guard = monster_army(r, level.call(c), 0.7)
+				o.guard = monster_army(r, level.call(c), 0.7, power.call(c))
 			fill_site(o, r)
 			put.call(c, xy[0], xy[1], o)
 		if cd.t == "dreamwood" and r.next() < 0.3:
@@ -282,7 +285,7 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 				put.call(c, xy[0], xy[1], {"type": "forget"})
 	# grail in the centre, heavily guarded
 	var cm: int = cards[center].size >> 1
-	put.call(center, cm, cm, {"type": "grail", "guard": monster_army(r, 6, 1.0)})
+	put.call(center, cm, cm, {"type": "grail", "guard": monster_army(r, 6, 1.0, power.call(center))})
 	# ---- transcendent cards per player ---------------------------------------
 	var trans := []
 	for p in 2:
@@ -313,7 +316,13 @@ func town_name(r: Rng) -> String:
 	return s + r.pick(b)
 
 ## "Level 1 fight = 3 weeks growth of an un-upgraded tier 1; one week less per tier, and per upgrade"
-func monster_army(r: Rng, level: int, scale: float) -> Dictionary:
+## how strong map encounters are at d cards from the nearest starting town:
+## twice the old level-1 strength, growing 15% per card
+func encounter_strength(d: int) -> float:
+	return float(D.CFG.get("encounterBase", 2.0)) * pow(1.0 + float(D.CFG.get("encounterGrowthPerCard", 0.15)), d)
+
+## level picks the tiers; strength (when given) replaces level as the size multiplier
+func monster_army(r: Rng, level: int, scale: float, strength: float = -1.0) -> Dictionary:
 	var f: String = r.pick(D.FACTION_IDS)
 	var stacks := []
 	var n := r.rint(1, 3 if level >= 3 else 2)
@@ -331,7 +340,8 @@ func monster_army(r: Rng, level: int, scale: float) -> Dictionary:
 			var b: Dictionary = D.UNIT_BASE[f][str(tier)]
 			growth = D.CFG.growth[str(tier)] * (2 if b.get("sp", {}).get("doubleGrowth", false) else 1)
 		var sc: float = scale if scale else 1.0
-		var count := maxi(1, U.jr(weeks * growth * level * sc / n * (0.8 + r.next() * 0.4)))
+		var mult: float = strength if strength >= 0.0 else float(level)
+		var count := maxi(1, U.jr(weeks * growth * mult * sc / n * (0.8 + r.next() * 0.4)))
 		if tier == 4:
 			count = maxi(1, U.jr(level / 3.0))
 		var mod := "r" if (up and tier < 4 and r.next() < 0.3) else ""

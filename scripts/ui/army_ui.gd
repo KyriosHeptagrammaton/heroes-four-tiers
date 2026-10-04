@@ -207,12 +207,17 @@ func hero_screen(h_id: String) -> void:
 		var cost := Heroes.equipped_cost(hero, hero.equipped)
 		var sp := UI.vbox([UI.hbox([UI.h3("Spells"), UI.spacer(), UI.chip("Knowledge %d / %d" % [cost, know], "warn" if (cost > know and hero.equipped.size() > 1) else "")]),
 			UI.rich(UI.col("Equip spells up to your knowledge (copies allowed; any single spell is always allowed). Casts per round: %s; uses per copy per battle: %s. Spells refresh after every battle." % [U.fmt(Heroes.casts_per_round(hero)), U.fmt(Heroes.uses_per_spell(hero))], "muted"), 12)], 6)
+		var can_swap := World.can_swap_spells(hero)
+		if not can_swap:
+			sp.add_child(UI.rich(UI.col("Spells can only be changed in one of your towns or at a ◈ Ley stone.", "bad"), 12))
 		var eq := UI.flow([_bold("Equipped:")], 4)
 		for i in hero.equipped.size():
 			var id: String = hero.equipped[i]
-			eq.add_child(UI.button("%s (%d)  ✕" % [D.SPELLS[id].name, Heroes.spell_cost(hero, id)], func():
+			var xb := UI.button("%s (%d)  ✕" % [D.SPELLS[id].name, Heroes.spell_cost(hero, id)], func():
 				hero.equipped.remove_at(i)
-				draw[0].call(), "Small", D.SPELLS[id].desc))
+				draw[0].call(), "Small", D.SPELLS[id].desc)
+			xb.disabled = not can_swap
+			eq.add_child(xb)
 		sp.add_child(eq)
 		var book := UI.flow([_bold("Spellbook:")], 4)
 		for id in hero.spellbook:
@@ -221,7 +226,7 @@ func hero_screen(h_id: String) -> void:
 			var bt := UI.button("+ " + D.SPELLS[id].name, func():
 				hero.equipped.append(id)
 				draw[0].call(), "Small", "[b]%s[/b] (%s) cost %d\n%s" % [D.SPELLS[id].name, D.SPELLS[id].kind, Heroes.spell_cost(hero, id), D.SPELLS[id].desc])
-			bt.disabled = not Heroes.can_equip(hero, nxt)
+			bt.disabled = not can_swap or not Heroes.can_equip(hero, nxt)
 			book.add_child(bt)
 		sp.add_child(book)
 		box.add_child(UI.panel(sp))

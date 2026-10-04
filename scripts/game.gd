@@ -61,7 +61,12 @@ func new_game(cfg: Dictionary) -> void:
 		t.builtToday = false
 		for k in range(1, 5): t.pool[str(k)] = World.growth(t, k)
 		if t.owner < 0:
-			var a := WorldGen.monster_army(rng, 2, 1.0)
+			# neutral towns: map-encounter strength for their distance from the starting towns
+			var dmin := 1 << 30
+			for t2 in gen.towns:
+				if t2.owner >= 0:
+					dmin = mini(dmin, maxi(absi(t.c % N_W(gen) - t2.c % N_W(gen)), absi(t.c / N_W(gen) - t2.c / N_W(gen))))
+			var a := WorldGen.monster_army(rng, 2, 1.0, WorldGen.encounter_strength(dmin))
 			t.garrison = a.stacks.map(func(s): return {"key": s.key, "count": s.count, "splits": 1, "name": ""})
 			t.built.dwell2 = true
 			t.built.up1_1 = true
@@ -74,6 +79,8 @@ func new_game(cfg: Dictionary) -> void:
 	World.log_msg("A new world takes shape.")
 	W().reset_view()
 	handoff(0)
+
+func N_W(gen: Dictionary) -> int: return int(gen.map.W)
 
 func spawn_hero(p: int, cls: String, town: Dictionary, starter: bool) -> Dictionary:
 	var f: String = state.players[p].faction
@@ -328,7 +335,7 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 				UI.toast("%s already knows %s" % [hero.name, D.SPELLS[o.spell].name])
 				done.call(); return
 			hero.spellbook.append(o.spell); done.call()
-			UI.alert("✦ Spell shrine", "%s learns [b]%s[/b]: %s\n%s" % [U.esc(hero.name), D.SPELLS[o.spell].name, D.SPELLS[o.spell].desc, UI.col("Equip it from the Hero screen.", "muted")])
+			UI.alert("✦ Spell shrine", "%s learns [b]%s[/b]: %s\n%s" % [U.esc(hero.name), D.SPELLS[o.spell].name, D.SPELLS[o.spell].desc, UI.col("Equip it from the Hero screen in one of your towns or at a ◈ Ley stone.", "muted")])
 			return
 		"hermit":
 			if hero.visited.get(o.id, false):
@@ -367,7 +374,7 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 			remove.call(); done.call()
 			UI.alert(D.OBJ[o.type].name, "%d %s join your army." % [o.join.count, d.name])
 			return
-		"mercs", "post", "font", "mine":
+		"mercs", "post", "font", "mine", "ley":
 			use_site(hero, o)
 			return
 		"gems":
@@ -436,6 +443,19 @@ func use_site(hero: Dictionary, o: Dictionary) -> void:
 			UI.modal(box, false, 420)
 		"post":
 			T().remote_recruit(hero.id)
+		"ley":
+			# each hero's first visit: +5 experience in knowledge, power or courage
+			if not hero.visited.get(o.id, false):
+				hero.visited[o.id] = true
+				var xp := int(D.CFG.get("leyXp", 5))
+				var picks := ["knowledge", "power", "courage"]
+				var i := await UI.choose("◈ Ley stone", "The stone hums with old power. Draw on it for +%d experience in:" % xp, picks.map(func(k): return {"label": k.capitalize()}))
+				hero.xp[picks[maxi(0, i)]] += xp
+				var lg := []
+				Heroes.apply_primary_levels(hero, rng, lg)
+				if lg.size(): await UI.alert("Level up", "\n".join(lg))
+				done.call()
+			ArmyUI.hero_screen(hero.id)
 		"font":
 			T().upgrade_modal(hero.id, "", true)
 

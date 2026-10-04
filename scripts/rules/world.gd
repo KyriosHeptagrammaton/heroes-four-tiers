@@ -545,12 +545,41 @@ func new_day() -> bool:
 				if g.count <= 0: h.army.erase(g)
 				else: Army.normalize(g)
 				log_msg("%s's army suffers attrition away from its supply train (-1)." % h.name)
+	if week:
+		grow_neutrals()
 	for t in s.towns.values():
 		t.builtToday = false
 		if week:
 			for k in range(1, 5):
 				t.pool[str(k)] = growth(t, k); t.extra[str(k)] = 0
 	return week
+
+## End of every week: every neutral army on the map (monsters, site guards and
+## neutral town garrisons) grows 25%; fractions carry over week to week.
+func grow_neutrals() -> void:
+	var g := 1.0 + float(D.CFG.get("neutralWeeklyGrowth", 0.25))
+	var grow := func(stacks: Array):
+		for st in stacks:
+			var v: float = float(st.count) * g + float(st.get("frac", 0.0))
+			st.count = int(floor(v + 0.000001))
+			st.frac = v - st.count
+	for c in S().map.cards:
+		for o in c.objs:
+			if o.type == "monster" and o.has("army"): grow.call(o.army.stacks)
+			if o.has("guard"): grow.call(o.guard.stacks)
+	for t in S().towns.values():
+		if t.owner < 0 and t.garrison.size():
+			grow.call(t.garrison)
+			for gr in t.garrison: Army.normalize(gr)
+	log_msg("A new week: neutral armies grow stronger.")
+
+## spells can only be changed in one of your towns or at a Ley stone
+func can_swap_spells(h) -> bool:
+	if Game.state == null or h == null or not h.has("pos"): return true
+	var o = obj_at(h.pos.c, h.pos.x, h.pos.y)
+	if o == null: return false
+	if o.type == "ley": return true
+	return o.type == "town" and S().towns[o.town].owner == h.owner
 
 func growth(t: Dictionary, tier: int) -> int:
 	var f: Dictionary = D.UNIT_BASE[t.faction][str(tier)]

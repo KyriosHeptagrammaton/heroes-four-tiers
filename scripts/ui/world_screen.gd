@@ -698,7 +698,7 @@ func render_side() -> void:
 	UI.tip(gold, UI.purse_tip() + (" Treasury pays %s per week." % World.cost_str(P.invest) if P.invest else ""))
 	var ess := UI.rich("  ".join([1, 2, 3, 4].map(func(t): return "⬡%d [b][color=#f0d68e]%s[/color][/b]" % [t, P.essence[str(t)]])), 13)
 	UI.tip(ess, "Upgrade essence by tier (from killing creatures of that tier)")
-	side.add_child(_sec([UI.hbox([UI.h2(P.name, Color(P.color)), UI.spacer(), UI.chip("Day %d · Week %d" % [dow, week])]), gold, ess]))
+	side.add_child(_sec([UI.hbox([UI.h2(P.name, Color(P.color)), UI.spacer(), UI.chip("Day %d · Week %d · Month %d" % [dow, (week - 1) % int(D.CFG.get("weeksPerMonth", 4)) + 1, (week - 1) / int(D.CFG.get("weeksPerMonth", 4)) + 1], "", "7 days to a week, %d weeks to a month. Towns refresh their musters and neutral armies grow 25%% at the start of each week." % int(D.CFG.get("weeksPerMonth", 4)))]), gold, ess]))
 	side.add_child(UI.sep_line())
 	# heroes
 	var hs := World.heroes_of(S.cur)
@@ -743,7 +743,7 @@ func render_side() -> void:
 		var o = World.obj_at(hero.pos.c, hero.pos.x, hero.pos.y)
 		if o != null and o.type == "town" and S.towns[o.town].owner == S.cur:
 			btns.add_child(UI.button("Town", func(): UI.screen("town").open(o.town, hero.id), "Small"))
-		if o != null and o.type in ["post", "font", "mine", "mercs"]:
+		if o != null and o.type in ["post", "font", "mine", "mercs", "ley"]:
 			btns.add_child(UI.button("Use " + D.OBJ[o.type].name, func(): Game.use_site(hero, o), "Small"))
 		btns.add_child(UI.button("◎", center_on_sel, "Small", "Centre on hero"))
 		side.add_child(_sec([UI.hbox([_bold(hero.name, "gold2"), UI.spacer(), UI.label(stat_line, "muted", 12)]), mini_army, tl, btns]))

@@ -69,6 +69,12 @@
   "heroCost": 1500,
   "trainCost": 300,
   "monsterFlee": true,
+  "encounterBase": 2.0,
+  "encounterGrowthPerCard": 0.15,
+  "neutralWeeklyGrowth": 0.25,
+  "weeksPerMonth": 4,
+  "leyStones": 6,
+  "leyXp": 5,
   "essenceMinusXP": false,
   "heroStart": {
    "warlord": {
@@ -1500,6 +1506,12 @@
    "color": "#a0f0ff",
    "desc": "Upgrade first-upgrade creatures into Magi (essence + coin)."
   },
+  "ley": {
+   "name": "Ley stone",
+   "glyph": "◈",
+   "color": "#8fd8ff",
+   "desc": "Change your equipped spells here (otherwise only in a town). Each hero's first visit grants +5 experience in knowledge, power or courage."
+  },
   "cache": {
    "name": "Essence cache",
    "glyph": "⬡",
@@ -1945,6 +1957,10 @@
    "id": "herodeath",
    "area": "Overworld",
    "text": "A defeated hero is removed; the winner takes their spell book (doc) and artifacts (assumed). If a commander dies with its tier-4 stack but its army wins, the survivors walk to the nearest own town garrison."
+  },
+  {
+   "id": "encounters",
+   "text": "Map encounters (monsters, site guards, neutral towns, the Grail): strength = 2 x 1.15^(cards from the nearest starting town) x the usual site multiplier; the distance band still picks the tiers. Neutral armies grow 25% at the end of every week (fractions carry over)."
   }
  ],
  "UNIT_VALUES": {
