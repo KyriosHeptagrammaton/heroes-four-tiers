@@ -266,6 +266,24 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 			continue
 		var xy: Array = r.pick(tl)
 		put.call(c, xy[0], xy[1], {"type": "monster", "army": monster_army(r, level.call(c), 1.0, power.call(c))})
+	# metal caches: mostly unguarded, half on the roads and half off them
+	if opts.get("metals", false):
+		var CC: Dictionary = D.CFG.metals.caches
+		for kind in CC:
+			for i in int(CC[kind].n):
+				for tries in 40:
+					var c: int = r.rint(0, cards.size() - 1)
+					if cards[c].t in ["town", "chasm"] or dist_start.call(c) < 2:
+						continue
+					var tl: Array = road_free.call(c) if i % 2 == 0 else off_tiles.call(c)
+					if tl.is_empty():
+						continue
+					var xy: Array = r.pick(tl)
+					var o := {"type": kind, "metal": CC[kind].metal, "amount": int(r.pick(CC[kind].amounts))}
+					if dist_start.call(c) >= 3 and r.next() < float(CC[kind].guard):
+						o.guard = monster_army(r, level.call(c), 0.6, power.call(c))
+					put.call(c, xy[0], xy[1], o)
+					break
 	# road junctions (3+ roads meeting) are often held by a neutral army
 	for c in road_cards:
 		var arms := 0

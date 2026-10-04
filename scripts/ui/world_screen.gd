@@ -589,6 +589,7 @@ func obj_info(o: Dictionary) -> String:
 	if o.type == "mine":
 		var M: Dictionary = D.MINES[o.kind]
 		s += "\n+%s/day · claim cost %s · %s" % [World.cost_str(M.income, World.mine_metal(o.kind)), World.cost_str(M.cost), ("owned by " + S.players[o.owner].name) if o.owner >= 0 else "unclaimed"]
+	if o.has("amount") and o.has("metal"): s += "\n" + World.cost_str(o.amount, o.metal)
 	if o.type == "monster": s += "\n" + monster_text(o.army)
 	if o.has("guard"): s += "\n" + UI.col("Guarded:", "bad") + " " + monster_text(o.guard)
 	if o.type == "shrine": s += "\nSpell: " + D.SPELLS[o.spell].name

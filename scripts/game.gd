@@ -29,9 +29,6 @@ func new_game_dialog() -> void:
 		box.add_child(UI.panel(UI.flow([dot, nm, UI.label("Faction", "muted"), UI.option(fac, cfg.factions[p], func(v): cfg.factions[p] = v),
 			UI.label("Hero", "muted"), UI.option(cls, cfg.cls[p], func(v): cfg.cls[p] = v)], 8)))
 	box.add_child(UI.hbox([UI.label("Map seed", "muted"), UI.spin(cfg.seed, 1, 999999999, func(v): cfg.seed = maxi(1, v), 130)]))
-	var mt := UI.check("Three metals: copper, silver and gold", true, func(v): cfg.metals = v)
-	UI.tip(mt, "On: towns make copper, which buys tier 1 creatures, buildings and everything else. Tier 2 creatures cost silver and tier 3 gold — dig them from guarded veins and mines. Tier 4 lairs cost gold and tier 4 creatures cost gems from rare Jewel hoards. You start with 1250 copper and 750 silver.\nOff: one currency, gold, buys everything.")
-	box.add_child(mt)
 	box.add_child(UI.row_end([UI.button("Cancel", UI.close_modal), UI.button("Start", func():
 		if cfg.factions[0] == cfg.factions[1]:
 			UI.toast("Pick two different factions")
@@ -390,6 +387,11 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 			World.earn(P, "gems", o.gems)
 			remove.call(); done.call()
 			UI.alert("❖ Jewel hoard", "+%d gems — the price of tier 4 creatures." % o.gems)
+			return
+		"copperCache", "silverCache", "goldCache":
+			World.earn(P, o.metal, o.amount)
+			remove.call(); done.call()
+			UI.alert("● " + D.OBJ[o.type].name, "You collect %s." % World.cost_str(o.amount, o.metal))
 			return
 		"cache":
 			P.essence[str(o.essence.tier)] += o.essence.n
