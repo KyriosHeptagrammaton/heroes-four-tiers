@@ -28,7 +28,7 @@ func run(root) -> void:
 	check(Game.state.metals, "three metals is the default")
 	check(P.gold == 1250 and P.silver == 750 and P.aurum == 0, "start: 1250 copper, 750 silver, 0 gold")
 	check([1, 2, 3, 4].map(func(t): return World.tier_metal(t)) == ["gold", "silver", "aurum", "gems"], "tier metals copper/silver/gold/gems")
-	check(P.gems == 0 and World.building_metal("dwell4") == "aurum" and World.building_metal("dwell3") == "gold" and World.building_cost("dwell4") == 400, "tier 4 lair costs gold, other buildings copper; no starting gems")
+	check(P.gems == 0 and World.building_metal("dwell4") == "aurum" and World.building_metal("dwell3") == "silver" and World.building_metal("dwell2") == "gold" and World.building_cost("dwell4") == 400, "tier 4 lair costs gold, other buildings copper; no starting gems")
 	var hoards := []
 	for c in Game.state.map.cards:
 		for o in c.objs:

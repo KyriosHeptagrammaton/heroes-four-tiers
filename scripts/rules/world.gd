@@ -551,7 +551,7 @@ func new_day() -> bool:
 		t.builtToday = false
 		if week:
 			for k in range(1, 5):
-				t.pool[str(k)] = growth(t, k); t.extra[str(k)] = 0
+				restock(t, k)
 	return week
 
 ## End of every week: every neutral army on the map (monsters, site guards and
@@ -580,6 +580,17 @@ func can_swap_spells(h) -> bool:
 	if o == null: return false
 	if o.type == "ley": return true
 	return o.type == "town" and S().towns[o.town].owner == h.owner
+
+## A week's growth first backfills what was bought past the muster (each week of
+## growth takes the price back down one window: bought into the x5 window, the next
+## creatures cost x3 after a week); whatever is left joins the muster at base price,
+## which keeps piling up while nobody buys.
+func restock(t: Dictionary, tier: int) -> void:
+	var g := growth(t, tier)
+	var k := str(tier)
+	var paid_down := mini(int(t.extra[k]), g)
+	t.extra[k] = int(t.extra[k]) - paid_down
+	t.pool[k] = int(t.pool[k]) + (g - paid_down)
 
 func growth(t: Dictionary, tier: int) -> int:
 	var f: Dictionary = D.UNIT_BASE[t.faction][str(tier)]

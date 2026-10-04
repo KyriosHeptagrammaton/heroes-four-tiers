@@ -114,7 +114,7 @@ func render() -> void:
 		if in_town: row.add_child(UI.button("→ Hero", func(): buy.call("hero"), "SmallPrimary"))
 		row.add_child(UI.button("→ Garrison", func(): buy.call("garrison"), "Small"))
 		grid.add_child(_card([head, UI.label("At base price: %d" % t.pool[str(tier)]), row], true))
-	body.add_child(UI.panel(UI.vbox([UI.h3("Recruit"), _wide(_desc("The weekly muster is sold at the base price. You may keep buying beyond it: the next week-sized batch costs ×2, then ×3, ×5, ×8, ×13 … (each step adds the previous two). Creatures with double growth (the Leshi) come in double-size batches, but each step costs twice as much: ×4, ×6, ×10, ×16 … Prices reset each week.")), grid])))
+	body.add_child(UI.panel(UI.vbox([UI.h3("Recruit"), _wide(_desc("The weekly muster is sold at the base price. You may keep buying beyond it: the next week-sized batch costs ×2, then ×3, ×5, ×8, ×13 … (each step adds the previous two). Creatures with double growth (the Leshi) come in double-size batches, but each step costs twice as much: ×4, ×6, ×10, ×16 … Each week's growth first pays back what you bought past the muster (one price step per week), and whatever is left joins the muster at base price, which keeps building up while you don't buy.")), grid])))
 	# buildings
 	var bgrid := UI.flow([], 10)
 	for k in D.BUILDINGS:

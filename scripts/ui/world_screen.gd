@@ -626,8 +626,7 @@ func on_click(pos: Vector2, btn: int) -> void:
 	if btn != MOUSE_BUTTON_LEFT: return
 	var hh = World.hero_at(n.c, n.x, n.y)
 	if hh != null and hh.owner == S.cur and hh.id != sel_hero:
-		sel_hero = hh.id
-		path = null
+		select_hero(hh.id)
 		render_side()
 		return
 	var o = World.obj_at(n.c, n.x, n.y)
@@ -675,10 +674,35 @@ func next_hero() -> void:
 	var i := -1
 	for k in hs.size():
 		if hs[k].id == sel_hero: i = k
-	sel_hero = hs[(i + 1) % hs.size()].id
-	path = null
+	select_hero(hs[(i + 1) % hs.size()].id)
 	center_on_sel()
 	render_side()
+
+## Each hero keeps its planned route (the green/orange dots) while you look at
+## another hero and across turns; it is re-planned from where the hero stands.
+func stash_plan() -> void:
+	var h = World.hero(sel_hero) if sel_hero != "" else null
+	if h == null: return
+	if path != null and path.size():
+		var g: Dictionary = path[path.size() - 1]
+		h.plan = {"c": g.c, "x": g.x, "y": g.y}
+	else:
+		h.erase("plan")
+
+func restore_plan() -> void:
+	path = null
+	var h = World.hero(sel_hero) if sel_hero != "" else null
+	if h == null or not h.has("plan"): return
+	var p = World.path(h, h.plan)
+	if p == null or p.is_empty():
+		h.erase("plan")
+		return
+	path = p
+
+func select_hero(id: String) -> void:
+	stash_plan()
+	sel_hero = id
+	restore_plan()
 
 # ------------------------------------------------------------------ side panel
 func _sec(kids: Array, expand: bool = false) -> Control:
@@ -706,8 +730,7 @@ func render_side() -> void:
 	for hr in hs:
 		var tab := _tab([UI.label("♛"), _bold(hr.name), UI.label(D.CLASSES[hr.cls].name, "muted"), UI.spacer(), UI.chip("%d/%d" % [hr.mp, World.mp_max(hr)], "", "Movement left today"),
 			UI.chip("★", "gold", "Skill choice waiting") if hr.pendingSkillChoice != null else null], hr.id == sel_hero, func():
-				sel_hero = hr.id
-				path = null
+				select_hero(hr.id)
 				center_on_sel()
 				render_side())
 		tab.get_child(0).get_child(0).add_theme_color_override("font_color", Color(P.color))

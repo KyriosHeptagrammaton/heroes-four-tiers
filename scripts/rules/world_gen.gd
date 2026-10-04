@@ -266,6 +266,32 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 			continue
 		var xy: Array = r.pick(tl)
 		put.call(c, xy[0], xy[1], {"type": "monster", "army": monster_army(r, level.call(c), 1.0, power.call(c))})
+	# road junctions (3+ roads meeting) are often held by a neutral army
+	for c in road_cards:
+		var arms := 0
+		for e in 4:
+			if cards[c].road[e]: arms += 1
+		if arms < 3 or dist_start.call(c) < 3 or cards[c].objs.size() or r.next() >= 0.4:
+			continue
+		var mj: int = cards[c].size >> 1
+		put.call(c, mj, mj, {"type": "monster", "army": monster_army(r, level.call(c), 1.0, power.call(c)), "junction": true})
+	# sites off the roads: worth parking the supply train for
+	var off_list := ["chest", "chest", "chest", "hermit", "academy", "shrine", "artifact", "artifact", "cache", "cache", "fairy", "knight", "ley", "tower"]
+	for type in off_list:
+		for tries in 40:
+			var c: int = r.rint(0, cards.size() - 1)
+			if cards[c].t in ["town", "chasm"] or dist_start.call(c) < 2:
+				continue
+			var tl: Array = off_tiles.call(c)
+			if tl.is_empty():
+				continue
+			var xy: Array = r.pick(tl)
+			var o := {"type": type, "offroad": true}
+			if dist_start.call(c) >= 3 and (type in ["artifact", "shrine", "fairy", "knight", "cache"] or (type == "chest" and r.next() < 0.5)):
+				o.guard = monster_army(r, level.call(c), 0.8, power.call(c))
+			fill_site(o, r)
+			put.call(c, xy[0], xy[1], o)
+			break
 	# hidden things: larger cards hide more
 	for c in cards.size():
 		var cd: Dictionary = cards[c]
@@ -356,27 +382,60 @@ func monster_army(r: Rng, level: int, scale: float, strength: float = -1.0) -> D
 	while roll > n:
 		roll -= n
 		n += 1
+	var used := {}
 	for k in n:
-		var hi := mini(3, 1 + int(floor(level / 2.0)) + (1 if r.next() < 0.3 else 0))
-		var tier := r.rint(1, hi)
-		if level >= 5 and r.next() < 0.4:
-			tier = 4
-		var up := 1 if (level >= 3 and r.next() < 0.4) else 0
-		var weeks := maxi(1, 3 - (tier - 1) - up)
-		var growth: int
-		if tier == 4:
-			growth = 1
-		else:
-			var b: Dictionary = D.UNIT_BASE[f][str(tier)]
-			growth = D.CFG.growth[str(tier)] * (2 if b.get("sp", {}).get("doubleGrowth", false) else 1)
-		var sc: float = scale if scale else 1.0
-		var mult: float = strength if strength >= 0.0 else float(level)
-		var count := maxi(1, U.jr(weeks * growth * mult * sc / n * (0.8 + r.next() * 0.4)))
-		if tier == 4:
-			count = maxi(1, U.jr(level / 3.0))
-		var mod := "r" if (up and tier < 4 and r.next() < 0.3) else ""
-		stacks.append({"key": Units.key(f, tier, up, mod), "count": count})
+		# up to 4 tries for a stack the army doesn't already have
+		var st: Dictionary = {}
+		for attempt in 4:
+			st = _monster_stack(r, f, level, scale, strength, n)
+			if not used.has(st.key): break
+		used[st.key] = true
+		stacks.append(st)
 	return {"faction": f, "level": level, "stacks": stacks}
+
+## One neutral stack. Mostly the army's own faction (1 in 8 from another);
+## upgrades get likelier with distance and split between melee and ranged (Magi
+## rarely; second upgrades far out); tier 1-2 creatures sometimes ride a mount.
+func _monster_stack(r: Rng, f: String, level: int, scale: float, strength: float, n: int) -> Dictionary:
+	var sf := f
+	if r.next() < 0.125:
+		sf = r.pick(D.FACTION_IDS.filter(func(x): return x != f))
+	var hi := mini(3, 1 + int(floor(level / 2.0)) + (1 if r.next() < 0.3 else 0))
+	var tier := r.rint(1, hi)
+	if level >= 5 and r.next() < 0.4:
+		tier = 4
+	var up_chance: float = [0.0, 0.2, 0.35, 0.5, 0.6, 0.6, 0.6][clampi(level, 0, 6)]
+	var up := 1 if r.next() < up_chance else 0
+	var mod := ""
+	if up and tier < 4:
+		var m := r.next()
+		mod = "r" if m < 0.45 else ("m" if m > 0.9 else "")
+		if mod != "m" and level >= 4 and r.next() < 0.3:
+			up = 2
+	elif up and tier == 4 and r.next() < 0.2:
+		mod = "m"
+	var weeks := maxi(1, 3 - (tier - 1) - up)
+	var growth: int
+	if tier == 4:
+		growth = 1
+	else:
+		var b: Dictionary = D.UNIT_BASE[sf][str(tier)]
+		growth = D.CFG.growth[str(tier)] * (2 if b.get("sp", {}).get("doubleGrowth", false) else 1)
+	var sc: float = scale if scale else 1.0
+	var mult: float = strength if strength >= 0.0 else float(level)
+	var count := maxi(1, U.jr(weeks * growth * mult * sc / n * (0.8 + r.next() * 0.4)))
+	if tier == 4:
+		count = maxi(1, U.jr(level / 3.0))
+	var key := Units.key(sf, tier, up, mod)
+	# mounted stacks: tier 1-2 riders on a tier 2 cavalry beast (own faction's if it has one)
+	if tier <= 2 and level >= 2 and r.next() < 0.25:
+		var mounts := D.FACTION_IDS.filter(func(x): return Units.resolve(Units.key(x, 2, 0, "")).ab.get("cavalry", false))
+		if mounts.size():
+			var mf: String = sf if mounts.has(sf) else r.pick(mounts)
+			var combo := key + "@" + Units.key(mf, 2, 0, "")
+			count = maxi(1, U.jr(count * Units.variant_value(key) / maxf(1.0, Units.unit_price(combo))))
+			key = combo
+	return {"key": key, "count": count}
 
 func fill_site(o: Dictionary, r: Rng) -> void:
 	match o.type:

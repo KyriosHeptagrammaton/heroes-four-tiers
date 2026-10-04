@@ -22,7 +22,7 @@ func run(root) -> void:
 		for o in S.map.cards[c].objs:
 			if o.type == "ley": leys.append([c, o])
 			if o.type == "monster": monsters.append([c, o])
-	check(leys.size() == int(D.CFG.leyStones), "%d ley stones placed" % leys.size())
+	check(leys.size() == int(D.CFG.leyStones) + 1, "%d ley stones placed (6 on roads, 1 off-road)" % leys.size())
 	# monsters further out are bigger on average (same tier mix aside)
 	var near := []; var far := []
 	for m in monsters:

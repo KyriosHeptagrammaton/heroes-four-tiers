@@ -143,7 +143,13 @@ func handoff(p: int) -> void:
 
 func begin_turn() -> void:
 	World.compute_visible(state.cur)
+	# come back to the hero (and planned route) you left at the end of your last turn
+	var last = World.hero(state.players[state.cur].get("lastSel", ""))
+	if last != null and last.owner == state.cur and last.alive:
+		W().sel_hero = last.id
 	W().enter()
+	W().restore_plan()
+	W().redraw()
 	check_skill_choices()
 
 func resume() -> void:
@@ -170,6 +176,8 @@ func end_turn_confirm() -> void:
 
 func end_turn() -> void:
 	var S = state
+	W().stash_plan()
+	S.players[S.cur].lastSel = W().sel_hero
 	var nxt: int = S.cur
 	var wrapped := false
 	while true:
