@@ -150,6 +150,7 @@ func exchange(h1: String, h2: String) -> void:
 func hero_screen(h_id: String) -> void:
 	var hero = World.hero(h_id)
 	var draw := [null]
+	var all_skills := [false]   # secondary skills: learned only, or every skill's progress
 	draw[0] = func():
 		var box := UI.vbox([], 8)
 		var title := UI.h2("♛ " + hero.name)
@@ -177,13 +178,19 @@ func hero_screen(h_id: String) -> void:
 		# secondary skills (shown below the spells)
 		var sec := UI.vbox([], 8)
 		if not D.CLASSES[hero.cls].get("noSecondary", false):
-			sec.add_child(UI.h3("Secondary skills"))
-			sec.add_child(UI.rich(UI.col("All skills gather XP by use. When two or more are ready you choose one; the other loses XP equal to its cost. Every skill you know makes the others cost more.", "muted"), 12))
+			var known: Array = D.SKILLS.keys().filter(func(k): return Heroes.skill(hero, k) > 0)
+			var shown: Array = D.SKILLS.keys() if all_skills[0] else known
+			sec.add_child(UI.hbox([UI.h3("Secondary skills"), UI.spacer(), UI.button("Show learned only" if all_skills[0] else "Show all skills' progress", func():
+				all_skills[0] = not all_skills[0]
+				draw[0].call(), "Small", "All skills gather XP by use. When two or more are ready you choose one; the other loses XP equal to its cost. Every skill you know makes the others cost more.")]))
+			if shown.is_empty():
+				sec.add_child(UI.label("No secondary skills learned yet.", "muted", 12))
 			var st := GridContainer.new()
 			st.columns = 4
 			st.add_theme_constant_override("h_separation", 16)
-			for hd in ["Skill", "Tier", "XP / next", "Next tier"]: st.add_child(UI.label(hd, "muted", 12))
-			for k in D.SKILLS:
+			if shown.size():
+				for hd in ["Skill", "Tier", "XP / next", "Next tier"]: st.add_child(UI.label(hd, "muted", 12))
+			for k in shown:
 				var S: Dictionary = D.SKILLS[k]
 				var tier := Heroes.skill(hero, k)
 				var maxed := Heroes.skill_maxed(hero, k)
