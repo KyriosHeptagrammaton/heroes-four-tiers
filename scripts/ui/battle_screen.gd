@@ -449,9 +449,11 @@ func render() -> void:
 		t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		t.add_theme_color_override("font_color", UI.C.gold2 if curq else UI.C.muted)
 		var box := UI.vbox([symc, t], 0)
-		var p := UI.panel(box, UI.sb(Color("#3a3120") if curq else Color(0, 0, 0, 0), UI.C.gold if curq else Color(0, 0, 0, 0), 6, 1, 4, 2))
+		var done_q: bool = i < b.qi and not b.pre_combat
+		var p := UI.panel(box, UI.sb(Color("#3a3120") if curq else (ACTED_BG if done_q else Color(0, 0, 0, 0)), UI.C.gold if curq else Color(0, 0, 0, 0), 6, 1, 4, 2))
 		p.custom_minimum_size.x = 38
-		if i < b.qi: p.modulate.a = 0.35
+		if done_q: p.modulate = ACTED_TINT     # already acted this round: dark purple, not faded
+		if done_q: lbl += " (has acted)"
 		UI.tip(p, "%s — initiative %s (%s)" % [U.esc(lbl), iv, "defender" if e.side else "attacker"])
 		_queue.add_child(p)
 	# rows
@@ -709,6 +711,20 @@ func _badge(text: String, fg: Color, border: Color, tp: String) -> Control:
 	UI.tip(p, tp)
 	return p
 
+const ACTED_TINT := Color(0.66, 0.52, 0.86)   # stacks (and queue slots) that already acted this round
+const ACTED_BG := Color("#2a1d3d")
+
+## has this stack taken its turn this round (and has no later turn still to come)?
+func has_acted(s) -> bool:
+	if b.pre_combat or b.over != null: return false
+	var before := false
+	for i in b.queue.size():
+		var e: Dictionary = b.queue[i]
+		if e.type != "stack" or e.id != s.id: continue
+		if i < b.qi: before = true
+		else: return false
+	return before
+
 func stack_card(s) -> Control:
 	var cur := b.turn_stack()
 	var reason = null
@@ -791,8 +807,10 @@ func stack_card(s) -> Control:
 	card.custom_minimum_size.x = STACK_W
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if s.count > 0 else Control.CURSOR_ARROW
 	if s.count <= 0: card.modulate = Color(0.8, 0.8, 0.8, 0.75) if state == "valid" else Color(0.6, 0.6, 0.6, 0.3)
-	elif state == "invalid" and not active: card.modulate.a = 0.45
-	elif s.fallen_back: card.modulate.a = 0.7
+	else:
+		if has_acted(s) and not active: card.modulate = ACTED_TINT   # done for this round: dark purple
+		if state == "invalid" and not active: card.modulate.a = 0.45
+		elif s.fallen_back: card.modulate.a = 0.7
 	# tooltip
 	var tp := UI.unit_tip(s.def, live_tip(s), b.eff_stats(s))
 	if reason != null and reason != "first target":
