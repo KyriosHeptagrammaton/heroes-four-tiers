@@ -1771,16 +1771,6 @@
    "text": "Creature values (UNIT_VALUES) are placeholders: base 30 / 80 / 200 / 800 by tier, first upgrade 50 / 130 / 320 / 1200, second 70 / 180 / 440 (Beta about 4% more; Lion 82, Archon 210, Metatron 835; Leshi 125 / 200 / 275). Value is the recruit price."
   },
   {
-   "id": "escalation",
-   "area": "Economy",
-   "text": "Buying past the weekly muster: each further week-sized batch costs x2, x3, x5, x8, x13 ... (each step adds the previous two); the Leshi's double batches go x4, x6, x10, x16 ... Prices reset each week."
-  },
-  {
-   "id": "upgradefee",
-   "area": "Economy",
-   "text": "Upgrade cost per creature = the difference in value between the two kinds (in the metal of its tier with three metals) plus 1 essence of its tier."
-  },
-  {
    "id": "income",
    "area": "Economy",
    "text": "Town base income 500 gold/day, start with 2500 gold."
@@ -1796,61 +1786,6 @@
    "text": "Supply train: with train you may only walk on roads and have -1 movement. Parking the train lets you go off-road (still -1 movement) but your units get -1 morale and lose 1 creature from the largest stack per day (attrition) until you return to it. Wounded ride in the train; if an enemy walks over a parked train it is destroyed with its wounded. A new train costs 300 gold in town."
   },
   {
-   "id": "essence",
-   "area": "Economy",
-   "text": "Upgrade essence: +1 essence of tier N per tier-N enemy creature killed. The doc also says \"-1 per primary skill experience gained\" but attack XP alone equals kills x tier, which would cancel essence completely, so that subtraction is OFF (toggle G.CFG.essenceMinusXP)."
-  },
-  {
-   "id": "herostart",
-   "area": "Heroes",
-   "text": "Starting primary stats per class are placeholders (courage ~5 because every stack costs 1 courage in battle)."
-  },
-  {
-   "id": "neutralcourage",
-   "area": "Combat",
-   "text": "Neutral armies (no hero) fight with courage 0 and do not pay the -1 courage per stack."
-  },
-  {
-   "id": "villageX",
-   "area": "Terrain",
-   "text": "Village: defender gains a militia stack of 6 tier-1s of its faction. Crossroads: both sides gain 4 tier-1 mercenaries. (\"X\" was open in the doc.)"
-  },
-  {
-   "id": "wallX",
-   "area": "Terrain",
-   "text": "Town walls: wall has 12 HP per defending stack; every 12 damage it protects one fewer defender (bottom first)."
-  },
-  {
-   "id": "gamma3dmg",
-   "area": "Units",
-   "text": "Gamma T3 damage written \"546\" / Melee I \"646\": read as min-mid-max 4-5-6 and 4-6-6."
-  },
-  {
-   "id": "delta2mi",
-   "area": "Units",
-   "text": "Delta T2 Melee I damage \"23.55\" read as 2 / 3.5 / 5."
-  },
-  {
-   "id": "delta4rally",
-   "area": "Units",
-   "text": "Delta T4 \"rallying applies negative morale instead of positive\": its Rally may target an ENEMY stack, dealing 2x its morale as morale damage (it can still rally friends normally)."
-  },
-  {
-   "id": "delta1",
-   "area": "Units",
-   "text": "Delta T1: whenever ANY other stack loses creatures to physical damage and that stack's tier >= this tier, gain 1 creature (Melee I: gain floor(lost tier / this tier)). Magi: gain 1 creature per creature that dies anywhere."
-  },
-  {
-   "id": "beta2",
-   "area": "Units",
-   "text": "Beta T2 (Lion) \"additional morale damage equal to its current morale\": settled as a flat bonus added once per attack after all other calculations (not multiplied by stack size or by attack vs defence)."
-  },
-  {
-   "id": "alpha3regen",
-   "area": "Units",
-   "text": "Alpha T3 \"remove damage equal to number of units at start of turn\" removes PHYSICAL damage."
-  },
-  {
    "id": "secondup-choice",
    "area": "Units",
    "text": "Which 2nd upgrade (melee II or ranged II) each town offers per tier was chosen arbitrarily."
@@ -1859,11 +1794,6 @@
    "id": "upgrade2",
    "area": "Units",
    "text": "PLACEHOLDER ⚑: second upgrades (and the T4 normal upgrade) just add \"+1\" bonuses (attack 5+1, defence 5+1, morale +1). Needs real design."
-  },
-  {
-   "id": "rider-specials",
-   "area": "Units",
-   "text": "Riders: combined unit keeps the specials of both rider and mount; ranged/teleport come from the rider, cavalry/fly from the mount. Combined tier = rider + mounts. Cost = 1 rider + N mounts from your army."
   },
   {
    "id": "spellcosts",
@@ -1876,39 +1806,9 @@
    "text": "Only \"damage\" spells (Flame, Dread, Ward, Mend) scale with Power (+10%/pt). Everything else scales with creature numbers."
   },
   {
-   "id": "terrain-names",
-   "area": "Terrain",
-   "text": "Terrain names for the unnamed doc effects are invented (Ashlands, Haunted Moor, Steppe, Badlands, Escarpment, Bluffs, Tundra, Dreamwood, Standing Stones, Village, Watchfort, Crossroads, Sacred Grove, Old Arena, Ley Nexus). Card sizes/sight numbers are placeholders except mountain (+6 / seen from 9) and forest (-1)."
-  },
-  {
-   "id": "mountain-fx",
-   "area": "Terrain",
-   "text": "Mountain battles use \"defenders count as ranged\"; Tundra = \"all except archers gain one slow\"; Swamp = \"all units gain one slow\"."
-  },
-  {
-   "id": "dusk",
-   "area": "Terrain",
-   "text": "The unnamed attacker time effect \"+1 initiative to own units incl. commander\" is called Dusk."
-  },
-  {
-   "id": "skill-invented",
-   "area": "Skills",
-   "text": "Skill names are invented. Tier texts marked with no doc source: Pikemanship III, Tactics II & III, Spellthief has 2 tiers, Fieldcraft 2 tiers. The doc's logistics clause \"may only add an even number of troops...\" was unclear and is omitted."
-  },
-  {
-   "id": "skill-xp",
-   "area": "Skills",
-   "text": "Secondary XP sources beyond the doc: magic skills +1 per spell cast; craft skills +1 per upgrade and per battle won; logistics +1 per card entered."
-  },
-  {
    "id": "artifacts",
    "area": "Artifacts",
    "text": "The five doc artifacts are in (Banner of Equals, Stoic Standard, Horseshoe, Herald's Scroll, Heartstone). The stat trinkets and Road Boots are filler."
-  },
-  {
-   "id": "classes",
-   "area": "Heroes",
-   "text": "Class names & skilled sets are invented. Paragon = doc \"Beta hero specialty\"; Scholar = doc \"Hero specialty learning\". Paragon: the doc's \"don't lose XP when increasing a skill\" was dropped (with level-up bonus XP it made primaries snowball without limit); Paragons now pay 3 x the next level like a skilled primary and keep the leftover XP; every other hero's XP in that skill drops to 0 on a level-up."
   },
   {
    "id": "todo-captains",
@@ -1946,29 +1846,14 @@
    "text": "A computer-controlled rival hero on the overworld (hotseat only for now; neutral monsters are AI in battle)."
   },
   {
-   "id": "whole",
-   "area": "Combat",
-   "text": "All calculated values are rounded to whole numbers (half rounds up): attack, defence, morale per creature, every hit (morale share rounded, health gets the rest), spells, rally, terrain damage. Base stats from the doc that are halves (7.5 attack, 2.5 / 1.5 / 3.5 damage, ranged minimum halved) are kept as written and only rounded after they are scaled."
-  },
-  {
    "id": "sight",
    "area": "Overworld",
    "text": "Sight is measured in tiles and cards are revealed tile by tile: a tile is seen if its walking distance in tiles from the hero (diagonals allowed inside a card) is within that card's visibility + your standing bonus + Scouting; the 8 tiles around you are always seen. Mountains still hide the cards just behind them. Towns see 2 whole cards around, watchtowers reveal 5 whole cards around. Scouting XP: 1 per 10 tiles revealed. Hidden treasures are still only found right next to the hero."
   },
   {
-   "id": "primary-category",
-   "area": "Heroes",
-   "text": "\"Randomly add experience to a skill in the same category\" read as: same category = the hero's skilled group or unskilled group."
-  },
-  {
    "id": "music",
    "area": "Audio",
    "text": "Music by setting (your tracks; each setting is a playlist that moves on to another track when one ends): open land & roads = The Path Winds True, Untitled; forest, dreamwood, sacred grove, tundra = The Woods Weep; swamp & haunted moor = Water Familiar Song, Driving Underwater; ashlands, badlands, box canyon, chasm = Sad Ages; mountains, escarpment, bluffs = Sad Ages (second version); towns = We Stand, Pachelbel's Canon. Battles play the battlefield's playlist plus In Hebrew con Epic (sieges: the town playlist plus it). Menus play The Path Winds True and Pachelbel's Canon."
-  },
-  {
-   "id": "sites",
-   "area": "Overworld",
-   "text": "Map sites are from the doc's discovery list (troves, artifacts, spells, hermits, academies, watchtowers, fairy rings, mercenaries with random mounted combos, lost knights, forest of forgetting, the Grail). Their exact rewards are invented."
   },
   {
    "id": "mines",
@@ -1979,11 +1864,6 @@
    "id": "buildings",
    "area": "Towns",
    "text": "Building list and costs are placeholders. One building per town per day. Magi upgrades need an Arcane Sanctum or an Arcane Font on the map; Magi replaces the first upgrade (base → Magi)."
-  },
-  {
-   "id": "invest",
-   "area": "Economy",
-   "text": "Treasury: \"3 gold now for 1 gold forever\" implemented as: invest 300 gold for +100 gold every week, forever (repeatable)."
   },
   {
    "id": "casualties",
@@ -1999,11 +1879,6 @@
    "id": "herodeath",
    "area": "Overworld",
    "text": "A defeated hero is removed; the winner takes their spell book (doc) and artifacts (assumed). If a commander dies with its tier-4 stack but its army wins, the survivors walk to the nearest own town garrison."
-  },
-  {
-   "id": "encounters",
-   "text": "Map encounters (monsters, site guards, neutral towns, the Grail): strength = 2 x 1.15^(cards from the nearest starting town) x the usual site multiplier; the distance band still picks the tiers. Neutral armies grow 25% at the end of every week (fractions carry over).",
-   "area": "Overworld"
   }
  ],
  "UNIT_VALUES": {
