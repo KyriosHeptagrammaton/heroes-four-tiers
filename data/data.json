@@ -34,6 +34,7 @@
   "sightDefault": 3,
   "sightScale": 1,
   "scoutTilesPerXP": 10,
+  "towerTiles": 10,
   "priceEscalation": [
    1,
    2,
@@ -1468,7 +1469,7 @@
    "name": "Academy",
    "glyph": "⌂",
    "color": "#9ad0ff",
-   "desc": "Secondary skill experience."
+   "desc": "Secondary skill experience in one of the four skills this academy teaches."
   },
   "tower": {
    "name": "Watchtower",
@@ -1879,7 +1880,7 @@
   {
    "id": "sight",
    "area": "Overworld",
-   "text": "Sight is measured in tiles and cards are revealed tile by tile: a tile is seen if its walking distance in tiles from the hero (diagonals allowed inside a card) is within that card's visibility + your standing bonus + Scouting; the 8 tiles around you are always seen. Mountains still hide the cards just behind them. Towns see 2 whole cards around, watchtowers reveal 5 whole cards around. Scouting XP: 1 per 10 tiles revealed. Hidden treasures are still only found right next to the hero."
+   "text": "Sight is measured in tiles and cards are revealed tile by tile: a tile is seen if its walking distance in tiles from the hero (diagonals allowed inside a card) is within that card's visibility + your standing bonus + Scouting; the 8 tiles around you are always seen. Mountains still hide the cards just behind them. Towns see 2 whole cards around; a watchtower reveals every tile within 10 steps. Explored tiles stay fully shown (no greyed 'remembered' layer); only enemy heroes and parked trains need to be in current sight. Scouting XP: 1 per 10 tiles revealed. Hidden treasures are still only found right next to the hero."
   },
   {
    "id": "music",

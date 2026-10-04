@@ -358,18 +358,19 @@ func site(hero: Dictionary, o: Dictionary) -> void:
 		"academy":
 			if hero.visited.get(o.id, false):
 				UI.toast("You have studied here already"); return
+			if not o.has("skills"): o.skills = WorldGen.academy_skills(rng)   # saves from before academies had their own set
 			var opts := []
-			for k in D.SKILLS:
+			for k in o.skills:
 				opts.append({"label": D.SKILLS[k].name, "tip": "\n".join(D.SKILLS[k].tiers)})
-			var i := await UI.choose("⌂ Academy", "Study one secondary skill (+%d experience):" % (o.amount * 2), opts)
-			var k: String = D.SKILLS.keys()[i]
+			var i := await UI.choose("⌂ Academy", "This academy teaches four skills. Study one (+%d experience):" % (o.amount * 2), opts)
+			var k: String = o.skills[maxi(0, i)]
 			hero.visited[o.id] = true
 			hero.skillXp[k] += o.amount * 2
 			done.call()
 			check_skill_choices()
 			return
 		"tower":
-			var n := World.reveal_radius(hero.owner, hero.pos.c, U.jr(5 * D.CFG.sightScale))
+			var n := World.reveal_tiles(hero.owner, hero.pos, int(D.CFG.get("towerTiles", 10)))
 			World.scout_xp(hero, n)
 			UI.toast("From the tower you survey the land.")
 			done.call(); return

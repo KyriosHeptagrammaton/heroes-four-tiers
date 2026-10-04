@@ -357,6 +357,19 @@ func reveal_all(p: int) -> void:
 		P.tmask[c] = full_mask(c); P.seen[c] = 1
 	compute_visible(p)
 
+## reveal every tile within R steps (tile distance, as sight counts it) of pos
+func reveal_tiles(p: int, pos: Dictionary, R: int) -> int:
+	var P := player(p)
+	var n := 0
+	for nd in sight_bfs({"pos": pos}, R):
+		var t: Dictionary = nd[0]
+		var b := tile_bit(t.c, t.x, t.y)
+		if (int(P.tmask[t.c]) & b) == 0:
+			P.tmask[t.c] = int(P.tmask[t.c]) | b
+			n += 1
+		P.seen[t.c] = 1
+	return n
+
 func reveal_radius(p: int, c: int, R: int) -> int:
 	var P := player(p)
 	var n := 0

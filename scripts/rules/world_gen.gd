@@ -437,6 +437,14 @@ func _monster_stack(r: Rng, f: String, level: int, scale: float, strength: float
 			key = combo
 	return {"key": key, "count": count}
 
+## the 4 secondary skills an Academy teaches (each academy its own set)
+func academy_skills(r: Rng) -> Array:
+	var ks: Array = D.SKILLS.keys().duplicate()
+	for i in range(ks.size() - 1, 0, -1):
+		var j := r.rint(0, i)
+		var t = ks[i]; ks[i] = ks[j]; ks[j] = t
+	return ks.slice(0, 4)
+
 func fill_site(o: Dictionary, r: Rng) -> void:
 	match o.type:
 		"chest":
@@ -451,6 +459,7 @@ func fill_site(o: Dictionary, r: Rng) -> void:
 			o.stat = r.pick(D.PRIMARY); o.amount = r.rint(3, 6)
 		"academy":
 			o.amount = r.rint(3, 6)
+			o.skills = academy_skills(r)
 		"fairy":
 			var f: String = r.pick(D.FACTION_IDS)
 			var t := r.rint(1, 2)

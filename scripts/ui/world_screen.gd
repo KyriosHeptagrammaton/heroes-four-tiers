@@ -355,7 +355,6 @@ func _draw_fog() -> void:
 	var z: float = cam.z
 	var P: Dictionary = S.players[S.cur]
 	var sky := Color.WHITE
-	var dim := Color(0.031, 0.035, 0.047, 0.45)
 	# space around the map
 	var mx: float = -cam.x
 	var my: float = -cam.y
@@ -367,7 +366,6 @@ func _draw_fog() -> void:
 	if mx > 0: fog.draw_rect(Rect2(0, my, mx, mh), sky)
 	if mx + mw < sz.x: fog.draw_rect(Rect2(mx + mw, my, sz.x - mx - mw, mh), sky)
 	var vr := _visible_range()
-	var vm: Dictionary = World.vmask[S.cur]
 	for cy in range(vr[1], vr[3] + 1):
 		for cx in range(vr[0], vr[2] + 1):
 			var c: int = cy * W + cx
@@ -376,22 +374,17 @@ func _draw_fog() -> void:
 			if not P.seen[c]:
 				fog.draw_rect(Rect2(X - 0.5, Y - 0.5, z + 1, z + 1), sky)
 				continue
+			# a tile is either explored (shown plainly) or unexplored (stars) — no greyed "remembered" layer
 			var s: int = S.map.cards[c].size
 			var full := World.full_mask(c)
 			var seen_m: int = int(P.tmask[c]) & full
-			var vis_m: int = int(vm.get(c, 0)) & full
-			if seen_m == full and vis_m == full: continue
-			if seen_m == full and vis_m == 0:
-				fog.draw_rect(Rect2(X, Y, z, z), dim)
-				continue
+			if seen_m == full: continue
 			var ts := z / s
 			for ty in s:
 				for tx in s:
 					var bit := 1 << (ty * s + tx)
 					if not (seen_m & bit):
 						fog.draw_rect(Rect2(X + tx * ts - 0.5, Y + ty * ts - 0.5, ts + 1, ts + 1), sky)
-					elif not (vis_m & bit):
-						fog.draw_rect(Rect2(X + tx * ts, Y + ty * ts, ts, ts), dim)
 
 func _draw_top() -> void:
 	var S = Game.state
@@ -815,7 +808,7 @@ const HELP := """[font_size=18][color=#f0d68e][b]Overworld[/b][/color][/font_siz
 
 [b]Supply train.[/b] While your train is with you, you may only walk on roads. Park it to go off-road (your troops get −1 morale and suffer attrition until you return to it). Wounded ride in the train and rejoin in town.
 
-[b]Sight.[/b] Sight is counted in tiles and cards are uncovered tile by tile: you see a tile if it is within the card's visibility of your hero, counting every square in between, so a 4×4 swamp in the way blocks more than a 1×1 prairie. Most cards are seen from 3 tiles, hills from 5, mountains from 9. Starry tiles are unexplored; dim tiles are remembered but not currently in view. Standing on high ground helps, forests and swamps hurt. Mountains hide the cards just behind them. Small hidden things inside a card are only found by walking near them.
+[b]Sight.[/b] Sight is counted in tiles and cards are uncovered tile by tile: you see a tile if it is within the card's visibility of your hero, counting every square in between, so a 4×4 swamp in the way blocks more than a 1×1 prairie. Most cards are seen from 3 tiles, hills from 5, mountains from 9. Starry tiles are unexplored; everything you have explored stays in full view (enemy heroes still only show while in your sight). Standing on high ground helps, forests and swamps hurt. Mountains hide the cards just behind them. Small hidden things inside a card are only found by walking near them.
 
 [b]Transcendent cards (✧).[/b] Each player has secret cards. Entering one lifts a distant part of the map beside you: the next edge you cross takes you there, and a glowing line records your route. Walk back along the line to return; step off it and you are in that far place for real. Your opponent just sees you vanish and reappear.
 

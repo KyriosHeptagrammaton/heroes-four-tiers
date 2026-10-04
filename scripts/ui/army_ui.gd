@@ -174,9 +174,11 @@ func hero_screen(h_id: String) -> void:
 			pt.add_child(UI.label("%s / %d" % [U.fmt(hero.xp[k]), Heroes.primary_cost(hero, k)]))
 			pt.add_child(UI.label(how[k], "muted", 12))
 		box.add_child(pt)
+		# secondary skills (shown below the spells)
+		var sec := UI.vbox([], 8)
 		if not D.CLASSES[hero.cls].get("noSecondary", false):
-			box.add_child(UI.h3("Secondary skills"))
-			box.add_child(UI.rich(UI.col("All skills gather XP by use. When two or more are ready you choose one; the other loses XP equal to its cost. Every skill you know makes the others cost more.", "muted"), 12))
+			sec.add_child(UI.h3("Secondary skills"))
+			sec.add_child(UI.rich(UI.col("All skills gather XP by use. When two or more are ready you choose one; the other loses XP equal to its cost. Every skill you know makes the others cost more.", "muted"), 12))
 			var st := GridContainer.new()
 			st.columns = 4
 			st.add_theme_constant_override("h_separation", 16)
@@ -197,9 +199,9 @@ func hero_screen(h_id: String) -> void:
 				nx.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				nx.custom_minimum_size.x = 260
 				st.add_child(nx)
-			box.add_child(st)
+			sec.add_child(st)
 			if hero.pendingSkillChoice != null:
-				box.add_child(UI.button("★ Choose a new skill", func():
+				sec.add_child(UI.button("★ Choose a new skill", func():
 					await skill_choice(hero.id)
 					draw[0].call(), "Primary"))
 		# spells
@@ -230,6 +232,7 @@ func hero_screen(h_id: String) -> void:
 			book.add_child(bt)
 		sp.add_child(book)
 		box.add_child(UI.panel(sp))
+		box.add_child(sec)
 		if hero.artifacts.size():
 			var ar := UI.vbox([UI.h3("Artifacts")], 4)
 			for a in hero.artifacts:
