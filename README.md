@@ -48,6 +48,11 @@ produces exactly the same battles as the JS prototype (300/300 identical), and
 Unit portraits and weapon marks: hand-drawn for the game (source sheets cut up by
 `tools/extract_icons.py` into `art/`).
 
+Music: The Path Winds True, The Woods Weep, Water Familiar Song, Sad Ages (two
+versions), We Stand, Pachelbel's Canon, Driving Underwater, In Hebrew con Epic and
+Untitled are the game author's own tracks. Each map setting plays a playlist
+(`data/data.json` → `MUSIC.THEMES`).
+
 Button sound effects are built from Kenney's [Impact Sounds](https://kenney.nl/assets/impact-sounds) and
 [RPG Audio](https://kenney.nl/assets/rpg-audio) packs (CC0, see `sfx/KENNEY_LICENSE.txt`).
 
