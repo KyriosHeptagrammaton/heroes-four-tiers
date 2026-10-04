@@ -72,12 +72,12 @@ func menu() -> void:
 func flags() -> void:
 	var areas := []
 	for f in D.FLAGS:
-		if not areas.has(f.area): areas.append(f.area)
+		if not areas.has(f.get("area", "Other")): areas.append(f.get("area", "Other"))
 	var box := UI.vbox([UI.h2("Design flags"), UI.rich(UI.col("Everything below was assumed, invented or interpreted because the design doc left it open. Items marked ⚑ in-game are placeholders to revisit.", "muted"))], 6)
 	for a in areas:
 		box.add_child(UI.h3(a))
 		for f in D.FLAGS:
-			if f.area == a:
+			if f.get("area", "Other") == a:
 				var r := UI.rich(U.esc(f.text), 13)
 				var st := UI.stone("plate").margins(10, 6)
 				st.accent_w = 3

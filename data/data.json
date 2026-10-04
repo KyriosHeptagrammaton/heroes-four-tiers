@@ -1689,7 +1689,53 @@
    "town": {
     "file": "music/we-stand.mp3",
     "name": "We Stand"
+   },
+   "canon": {
+    "file": "music/pachelbels-canon.mp3",
+    "name": "Pachelbel's Canon"
+   },
+   "driving": {
+    "file": "music/driving-underwater.mp3",
+    "name": "Driving Underwater"
+   },
+   "epic": {
+    "file": "music/in-hebrew-con-epic.mp3",
+    "name": "In Hebrew con Epic"
+   },
+   "untitled": {
+    "file": "music/untitled.mp3",
+    "name": "Untitled"
    }
+  },
+  "THEMES": {
+   "path": [
+    "path",
+    "untitled"
+   ],
+   "woods": [
+    "woods"
+   ],
+   "water": [
+    "water",
+    "driving"
+   ],
+   "sad": [
+    "sad"
+   ],
+   "sad2": [
+    "sad2"
+   ],
+   "town": [
+    "town",
+    "canon"
+   ],
+   "battle": [
+    "epic"
+   ],
+   "menu": [
+    "path",
+    "canon"
+   ]
   },
   "TERRAIN": {
    "plains": "path",
@@ -1741,7 +1787,8 @@
   },
   {
    "id": "metals",
-   "text": "Three metals (new-game option, on by default): gold is renamed copper and buys tier 1 creatures and everything else (buildings, heroes, trains, treasury, mine surveys, mercenaries); tier 2 creatures cost silver and tiers 3 and 4 cost gold, at the old gold prices. Upgrading creatures costs the metal of their tier. Towns produce only copper. Start: 1250 copper, 750 silver, no gold. Silver Veins (+15 silver/day, survey 450 copper, 4 on the map, a normal mine's guard), Silver Mines (+40 silver/day, survey 750 copper, 4 on the map, 3x a normal mine's guard), Gold Veins (+20 gold/day, survey 900 copper, 2 on the map, 3x guard) and Gold Mines (+60 gold/day, survey 1500 copper, 2 on the map, 9x guard). The single-currency Gold Vein reads Copper Vein. Tier 4 paying gold, upgrade fees in the tier's metal, mine incomes, survey costs and counts are assumptions. Tier 4 lairs cost 400 gold. Tier 4 creatures (and their upgrades) cost gems: 1 gem per 100 of value (Titan 8, upgrade 4), found only in Jewel hoards (3 per map, 6/8/10 gems each, 6x a normal mine's guard) — counts, sizes and the 100:1 rate are assumptions."
+   "text": "Three metals (new-game option, on by default): gold is renamed copper and buys tier 1 creatures and everything else (buildings, heroes, trains, treasury, mine surveys, mercenaries); tier 2 creatures cost silver and tiers 3 and 4 cost gold, at the old gold prices. Upgrading creatures costs the metal of their tier. Towns produce only copper. Start: 1250 copper, 750 silver, no gold. Silver Veins (+15 silver/day, survey 450 copper, 4 on the map, a normal mine's guard), Silver Mines (+40 silver/day, survey 750 copper, 4 on the map, 3x a normal mine's guard), Gold Veins (+20 gold/day, survey 900 copper, 2 on the map, 3x guard) and Gold Mines (+60 gold/day, survey 1500 copper, 2 on the map, 9x guard). The single-currency Gold Vein reads Copper Vein. Tier 4 paying gold, upgrade fees in the tier's metal, mine incomes, survey costs and counts are assumptions. Tier 4 lairs cost 400 gold. Tier 4 creatures (and their upgrades) cost gems: 1 gem per 100 of value (Titan 8, upgrade 4), found only in Jewel hoards (3 per map, 6/8/10 gems each, 6x a normal mine's guard) — counts, sizes and the 100:1 rate are assumptions.",
+   "area": "Economy"
   },
   {
    "id": "trainrules",
@@ -1916,7 +1963,7 @@
   {
    "id": "music",
    "area": "Audio",
-   "text": "Music by terrain (your tracks): open land & roads = The Path Winds True; forest, dreamwood, sacred grove, tundra = The Woods Weep; swamp & haunted moor = Water Familiar Song; ashlands, badlands, box canyon, chasm = Sad Ages; mountains, escarpment, bluffs = Sad Ages (second version); towns = We Stand. Battles play the battlefield terrain's track (sieges play We Stand). Menus play The Path Winds True."
+   "text": "Music by setting (your tracks; each setting is a playlist that moves on to another track when one ends): open land & roads = The Path Winds True, Untitled; forest, dreamwood, sacred grove, tundra = The Woods Weep; swamp & haunted moor = Water Familiar Song, Driving Underwater; ashlands, badlands, box canyon, chasm = Sad Ages; mountains, escarpment, bluffs = Sad Ages (second version); towns = We Stand, Pachelbel's Canon. Battles play the battlefield's playlist plus In Hebrew con Epic (sieges: the town playlist plus it). Menus play The Path Winds True and Pachelbel's Canon."
   },
   {
    "id": "sites",
@@ -1955,7 +2002,8 @@
   },
   {
    "id": "encounters",
-   "text": "Map encounters (monsters, site guards, neutral towns, the Grail): strength = 2 x 1.15^(cards from the nearest starting town) x the usual site multiplier; the distance band still picks the tiers. Neutral armies grow 25% at the end of every week (fractions carry over)."
+   "text": "Map encounters (monsters, site guards, neutral towns, the Grail): strength = 2 x 1.15^(cards from the nearest starting town) x the usual site multiplier; the distance band still picks the tiers. Neutral armies grow 25% at the end of every week (fractions carry over).",
+   "area": "Overworld"
   }
  ],
  "UNIT_VALUES": {

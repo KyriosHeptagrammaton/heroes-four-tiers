@@ -122,6 +122,23 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 		if best != null and bd >= 2 and bd < 5:
 			road(cards, W, H, i, best, r)
 			cards[i].spur = true
+	# twice the roads: keep adding short branch roads from random cards to the
+	# network (3-7 cards away) until the number of road links has doubled
+	var base_links := road_links(cards)
+	var road_tries := 0
+	while road_links(cards) < base_links * 2 and road_tries < 400:
+		road_tries += 1
+		var i: int = r.rint(0, cards.size() - 1)
+		if cards[i].t == "chasm":
+			continue
+		var cands := []
+		for j in cards.size():
+			if j != i and _has_road(cards[j]):
+				var dd: int = absi(j % W - i % W) + absi(j / W - i / W)
+				if dd >= 3 and dd <= 7: cands.append(j)
+		if cands.is_empty():
+			continue
+		road(cards, W, H, i, r.pick(cands), r)
 	join_touching_roads(cards, W, H)
 	var map :={"W": W, "H": H, "cards": cards}
 	# ---- objects -------------------------------------------------------------
@@ -305,6 +322,14 @@ func generate(seed_v: int, opts: Dictionary) -> Dictionary:
 			out.append(c)
 		trans.append(out)
 	return {"map": map, "towns": towns, "starts": starts.map(func(s): return s[1] * W + s[0]), "trans": trans, "center": center}
+
+## number of card-to-card road links on the map (each shared edge once)
+func road_links(cards: Array) -> int:
+	var n := 0
+	for c in cards:
+		for e in 4:
+			if c.road[e]: n += 1
+	return n / 2
 
 func _has_road(card: Dictionary) -> bool:
 	return card.road[0] or card.road[1] or card.road[2] or card.road[3]
