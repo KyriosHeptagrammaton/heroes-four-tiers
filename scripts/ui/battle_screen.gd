@@ -452,7 +452,6 @@ func render() -> void:
 		var done_q: bool = i < b.qi and not b.pre_combat
 		var p := UI.panel(box, UI.sb(Color("#3a3120") if curq else (ACTED_BG if done_q else Color(0, 0, 0, 0)), UI.C.gold if curq else Color(0, 0, 0, 0), 6, 1, 4, 2))
 		p.custom_minimum_size.x = 38
-		if done_q: p.modulate = ACTED_TINT     # already acted this round: dark purple, not faded
 		if done_q: lbl += " (has acted)"
 		UI.tip(p, "%s — initiative %s (%s)" % [U.esc(lbl), iv, "defender" if e.side else "attacker"])
 		_queue.add_child(p)
@@ -711,8 +710,8 @@ func _badge(text: String, fg: Color, border: Color, tp: String) -> Control:
 	UI.tip(p, tp)
 	return p
 
-const ACTED_TINT := Color(0.66, 0.52, 0.86)   # stacks (and queue slots) that already acted this round
-const ACTED_BG := Color("#2a1d3d")
+const ACTED_FILL := Color("#3a2557")   # card background of a stack that already acted this round
+const ACTED_BG := Color("#3a2557")     # its slot in the turn order
 
 ## has this stack taken its turn this round (and has no later turn still to come)?
 func has_acted(s) -> bool:
@@ -746,7 +745,7 @@ func stack_card(s) -> Control:
 	if state == "valid": border = UI.C.good
 	if active: border = UI.C.gold
 	var st := UI.stone("panel").margins(8, 7)
-	st.fill = Color("#26211b")
+	st.fill = ACTED_FILL if (s.count > 0 and not active and has_acted(s)) else Color("#26211b")   # done this round: dark purple card
 	st.trim = Color(0, 0, 0, 0)
 	var band := Color("#9a4a34") if s.side == 0 else Color("#3f6a9a")
 	if s.side == 0: st.accent_bottom = band
@@ -808,7 +807,6 @@ func stack_card(s) -> Control:
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if s.count > 0 else Control.CURSOR_ARROW
 	if s.count <= 0: card.modulate = Color(0.8, 0.8, 0.8, 0.75) if state == "valid" else Color(0.6, 0.6, 0.6, 0.3)
 	else:
-		if has_acted(s) and not active: card.modulate = ACTED_TINT   # done for this round: dark purple
 		if state == "invalid" and not active: card.modulate.a = 0.45
 		elif s.fallen_back: card.modulate.a = 0.7
 	# tooltip
