@@ -805,10 +805,8 @@ func stack_card(s) -> Control:
 	var card := UI.panel(body, st)
 	card.custom_minimum_size.x = STACK_W
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if s.count > 0 else Control.CURSOR_ARROW
+	# only a wiped-out stack fades; the acting stack is marked yellow and valid targets green
 	if s.count <= 0: card.modulate = Color(0.8, 0.8, 0.8, 0.75) if state == "valid" else Color(0.6, 0.6, 0.6, 0.3)
-	else:
-		if state == "invalid" and not active: card.modulate.a = 0.45
-		elif s.fallen_back: card.modulate.a = 0.7
 	# tooltip
 	var tp := UI.unit_tip(s.def, live_tip(s), b.eff_stats(s))
 	if reason != null and reason != "first target":
